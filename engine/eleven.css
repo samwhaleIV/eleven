@@ -1,0 +1,30 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: black;
+}
+body:not(.loaded)::after {
+    content: "";
+    color: white;
+    position: fixed;
+    margin: 10px;
+    font-size: 22px;
+    font-family: sans-serif;
+    user-select: none;
+    animation-name: loading;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+@keyframes loading {
+    0% {content:   "Loading.";}
+    25% {content:  "Loading.";}
+    50% {content:  "Loading..";}
+    75% {content:  "Loading...";}
+    100% {content: "Loading...";}
+}
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
