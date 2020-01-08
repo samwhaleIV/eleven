@@ -1,11 +1,5 @@
 import Constants from "./constants.js";
-
-const Modules = Object.freeze({
-    Install: InstallModules,
-    GetSet: GetModuleSet
-});
-
-export default Modules;
+export default InstallModules;
 
 /*
   Modules have three instantiation modes.
@@ -80,5 +74,12 @@ function GetModuleSet(modules) {
 }
 
 function InstallModules({target,modules,name}) {
-    Object.defineProperty(target,name,{value:GetModuleSet(modules)});
+    const moduleSet = GetModuleSet(modules)
+    Object.defineProperty(target,name,{
+        value: moduleSet,
+        writable: false,
+        configurable: false,
+        enumerable: true
+    });
+    return moduleSet;
 }

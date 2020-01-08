@@ -1,17 +1,11 @@
-import Singleton from "../../helper/singleton.js";
-import Resource from "./resource.js";
-import ResourceTypes from "./resource-types.js";
-import GetFallbackImage from "./fallback-image.js";
-import audioContext from "../../helper/audio.js";
-import DecodeImageResponse from "./image-decode.js";
+import Resource from "./resource-manager/resource.js";
+import ResourceTypes from "./resource-manager/resource-types.js";
+import GetFallbackImage from "./resource-manager/fallback-image.js";
+import DecodeImageResponse from "./resource-manager/image-decode.js";
 
-const RESOURCE_BIND_DATA = [
-    ["JSON",ResourceTypes.JSON],
-    ["Text",ResourceTypes.Text],
-    ["Image",ResourceTypes.Image],
-    ["Audio",ResourceTypes.Audio],
-    ["Octet",ResourceTypes.Octet]
-];
+import audioContext from "../internal/audio.js";
+
+const RESOURCE_BIND_DATA = Object.entries(ResourceTypes);
 
 const FAILED_RESOURCE = Symbol("FailedResource");
 
@@ -86,10 +80,8 @@ const ResourceLoaders = Object.freeze({
 function LoadResource(resourceLink) {
     return new Promise(async resolve => {
         const resourceLoader = ResourceLoaders[resourceLink.type];
-        let responseOk = false;
         fetch(resourceLink.name).then(response => {
-            responseOk = response.ok;
-            if(!responseOk) {
+            if(!response.ok) {
                 throw response.statusText;
             }
             return response;
@@ -102,9 +94,7 @@ function LoadResource(resourceLink) {
             resolve();
         }).catch(error => {
             SetEntry(resourceLink.lookupName,FAILED_RESOURCE,resourceLink.type);
-            if(responseOk) {
-                console.error(`Resource manager: ${error} '${resourceLink.name}'`);
-            }
+            console.error(`Resource manager: ${error} '${resourceLink.name}'`);
             resolve();
         });
     });
@@ -148,5 +138,5 @@ function ResourceManager() {
 export default Singleton({
     module: ResourceManager,
     autoInstantiate: true,
-    deferInstallation: false
+    deferInstallation: true
 });

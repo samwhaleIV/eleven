@@ -1,21 +1,15 @@
-import Constants from "./helper/constants.js";
-import Modules from "./helper/modules.js";
+import InstallGlobalNamespace from "./internal/namespace.js";
+import Constants from "./internal/constants.js";
 
 import CanvasManager from "./modules/canvas-manager.js";
-import ResourceManager from "./modules/resources/resource-manager.js";
-
-function GetConstant(name) {
-    return Constants[name];
-}
+import ResourceManager from "./modules/resource-manager.js";
 
 const modules = [
     CanvasManager,
-    ResourceManager,
-    GetConstant
+    ResourceManager
 ];
 
-Modules.Install({
-    target: globalThis,
+InstallGlobalNamespace({
     name: Constants.globalModuleName,
     modules: modules
 });

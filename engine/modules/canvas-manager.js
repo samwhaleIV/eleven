@@ -1,5 +1,3 @@
-import Singleton from "../helper/singleton.js";
-
 function CanvasManager() {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d",{
@@ -86,5 +84,5 @@ function CanvasManager() {
 export default Singleton({
     module: CanvasManager,
     autoInstantiate: true,
-    deferInstallation: false
+    deferInstallation: true
 });

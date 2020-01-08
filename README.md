@@ -1,2 +1,5 @@
 # eleven
- The second iteration elven game engine
+
+The second iteration elven game engine.
+
+[Documentation starts here.](./docs/eleven.md)
