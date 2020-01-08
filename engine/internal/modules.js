@@ -1,4 +1,4 @@
-import Constants from "./constants.js";
+import Symbols from "./symbols.js";
 export default InstallModules;
 
 /*
@@ -16,13 +16,13 @@ export default InstallModules;
 */
 
 function isSingleton(module) {
-    return module.isSingleton === Constants.isSingleton;
+    return module.isSingleton === Symbols.isSingleton;
 }
 function manualSingleton(module) {
-    return module.manualSingleton === Constants.manualSingleton;
+    return module.manualSingleton === Symbols.manualSingleton;
 }
 function deferredSingleton(module) {
-    return module.deferredSingleton === Constants.deferredSingleton;
+    return module.deferredSingleton === Symbols.deferredSingleton;
 }
 
 function getDefaultModuleTarget() {

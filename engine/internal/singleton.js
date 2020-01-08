@@ -1,4 +1,4 @@
-import Constants from "./constants.js";
+import Symbols from "./symbols.js";
 
 /*
     There are 3 singleton modes.
@@ -32,17 +32,17 @@ function Singleton({
             value: module.name
         },
         isSingleton: {
-            value: Constants.isSingleton
+            value: Symbols.isSingleton
         }
     };
     if(!autoInstantiate) {
         singletonData.manualSingleton = {
-            value: Constants.manualSingleton
+            value: Symbols.manualSingleton
         };
     }
     if(deferInstallation) {
         singletonData.deferredSingleton = {
-            value: Constants.deferredSingleton
+            value: Symbols.deferredSingleton
         }
     }
     return (function(){

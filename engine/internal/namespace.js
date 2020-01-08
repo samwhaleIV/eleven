@@ -11,7 +11,7 @@ const MISSING_NAMESPACE = name => {
     throw Error(`Namespace '${name}' not found`);
 };
 const INVALID_MASTER_NAMESPACE_INVOCATION = () => {
-    throw Error("Master namespace already registered! InstallGlobalNamespace for internal engine use only.");
+    throw Error("Master namespace already registered! InstallGlobalNamespace is only for internal use.");
 };
 
 const NamespaceTable = new Object();

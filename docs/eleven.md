@@ -35,7 +35,7 @@ To register the engine with your project you must include the [master export fil
     <script src="../engine/eleven.js" type="module"></script>
 </head>
 ```
-When using your own `script.js` file be sure to specify the `type` attribute with `module` or you will not be able to access any of the modules of the master export namespace (`Eleven` or `globalThis.Eleven`).
+When using your own `script.js` file be sure to specify the `type` attribute with `module` or you will not be able to access any modules of the master export namespace (`Eleven` or `globalThis.Eleven`).
 
 ```html
 <body>

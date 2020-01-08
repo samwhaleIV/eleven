@@ -1,4 +1,4 @@
-import Constants from "../../internal/constants.js";
+import Constants from "../constants.js";
 
 const BITMAP_DECODE_FAILURE = () => {
     throw "Failure decoding image to bitmap";
