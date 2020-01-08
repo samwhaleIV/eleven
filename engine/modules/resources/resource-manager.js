@@ -126,10 +126,7 @@ function ResourceManager() {
         this[`has${resourceTypeName}`] = name => EntryExists(name,resourceType);
         this[`queue${resourceTypeName}`] = (...files) => {
             this.queue(...files.map(fileName => LinkResource(fileName,resourceType)
-        ));};
-
-        //set is unsafe because it can install invalid/mismatched value types
-        this[`set${resourceTypeName}`] = (name,value) => SetEntry(name,value,resourceType);
+        ))};
     });
 
     this.loadResource = LoadResource;
