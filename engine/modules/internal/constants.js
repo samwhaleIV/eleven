@@ -1,5 +1,4 @@
 const Constants = Object.freeze({
-    globalModuleName: "Eleven",
     bitmapSettings: Object.freeze({
         imageOrientation: "none",
         premultiplyAlpha: "premultiply",

@@ -2,7 +2,7 @@ import Resource from "./resource-manager/resource.js";
 import ResourceTypes from "./resource-manager/resource-types.js";
 import GetFallbackImage from "./resource-manager/fallback-image.js";
 import DecodeImageResponse from "./resource-manager/image-decode.js";
-import audioContext from "./audio.js";
+import audioContext from "./internal/audio.js";
 
 const RESOURCE_BIND_DATA = Object.entries(ResourceTypes);
 
