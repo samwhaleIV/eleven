@@ -4,6 +4,12 @@ import CanvasManager from "./modules/canvas-manager/main.js";
 import ResourceManager from "./modules/resource-manager/main.js";
 
 export default Install([
-    CanvasManager,
-    ResourceManager
+    Singleton({
+        module: CanvasManager,
+        deferInstantiation: true
+    }),
+    Singleton({
+        module: ResourceManager,
+        deferInstantiation: true
+    })
 ]);

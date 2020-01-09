@@ -81,7 +81,4 @@ function CanvasManager() {
     updateSize();
 }
 
-export default Singleton({
-    module: CanvasManager,
-    deferInstantiation: true
-});
+export default CanvasManager;

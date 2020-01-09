@@ -140,7 +140,4 @@ function ResourceManager() {
     Object.freeze(this);
 }
 
-export default Singleton({
-    module: ResourceManager,
-    deferInstantiation: true
-});
+export default ResourceManager;
