@@ -34,15 +34,13 @@ const INVALID_SINGLETON_NAME = name => {
 };
 
 function Singleton({
-    module,
-    name,
+    module,name,parameters,
     autoInstantiate=true,
     deferInstantiation=false,
-    suppressReinstantiationWarning=false,
-    parameters
+    suppressReinstantiationWarning=false
 }) {
     if(!module) {
-        MISSING_MODULE();
+        MISSING_MODULE(module);
     }
     if(!name) {
         name = module.name;
