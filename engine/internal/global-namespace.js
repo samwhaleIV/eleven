@@ -3,13 +3,10 @@ import Constants from "./constants.js";
 
 function InstallGlobalNamespace(modules) {
     const engineNamespace = Constants.engineNamespace;
-    Object.defineProperty(globalThis,engineNamespace,{
-        value: namespace.create({
-            name: engineNamespace,
-            modules: modules
-        }),
-        writable: false,
-        configurable: false
-    }); 
+    namespace.create({
+        name: engineNamespace,
+        modules: modules
+    });
+    namespace.makeGlobal(engineNamespace);
 }
 export default InstallGlobalNamespace;

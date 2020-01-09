@@ -15,7 +15,7 @@ function FixedSquare() {
     this.y = 0;
     Object.freeze(this);
 }
-Namespace.create({
+const shapes = Namespace.create({
     name: "shapes",
     modules: [
         Square,
@@ -26,3 +26,4 @@ Namespace.create({
         })
     ]
 });
+export default shapes;

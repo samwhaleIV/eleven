@@ -10,6 +10,12 @@ const NAMESPACE_COLLISION = name => {
 const MISSING_NAMESPACE = name => {
     throw Error(`Namespace '${name}' not found`);
 };
+const GLOBAL_NAME_CONFLICT = name => {
+    throw Error(`Name '${name}' already exists in global scope`);
+};
+const NAMESPACE_ALREADY_UPGRADED = name => {
+    throw Error(`Namespace '${name}' has already been upgraded for global scope use`);
+}
 
 const NamespaceTable = new Object();
 
@@ -42,11 +48,26 @@ function GetNamespace(name) {
 function ListNamespaces() {
     return Object.keys(NamespaceTable);
 }
-
+function MakeGlobal(name) {
+    const namespace = GetNamespace(name);
+    if(name in globalThis) {
+        if(globalThis[name] === namespace) {
+            NAMESPACE_ALREADY_UPGRADED(name);
+        } else {
+            GLOBAL_NAME_CONFLICT(name);
+        }
+    }
+    Object.defineProperty(globalThis,name,{
+        value: namespace,
+        writable: false,
+        configurable: false
+    });
+}
 function Namespace() {
     this.get = GetNamespace;
     this.create = CreateNamespace;
     this.list = ListNamespaces;
+    this.makeGlobal = MakeGlobal;
     Object.freeze(this);
 }
 const namespace = new Namespace();

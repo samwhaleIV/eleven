@@ -82,7 +82,8 @@ function InstallModules({target,modules,name}) {
     Object.defineProperty(target,name,{
         value: moduleSet,
         writable: false,
-        configurable: false
+        configurable: false,
+        enumerable: true
     });
     return moduleSet;
 }

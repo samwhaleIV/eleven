@@ -1,3 +1,5 @@
+import "../namespace-test/shapes.js";
+
 const canvasManager = Eleven.CanvasManager;
 const resourceManager = Eleven.ResourceManager;
 const context = canvasManager.context;
