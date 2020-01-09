@@ -1,5 +1,7 @@
+import engine from "../engine/eleven.js";
 import shapes from "../namespace-test/shapes.js";
 Namespace.makeGlobal(shapes);
+Namespace.makeGlobal(engine);
 
 const canvasManager = Eleven.CanvasManager;
 const resourceManager = Eleven.ResourceManager;

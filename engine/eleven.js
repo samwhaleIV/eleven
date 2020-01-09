@@ -1,9 +1,9 @@
-import InstallGlobalNamespace from "./internal/global-namespace.js";
+import MakeEngineNamespace from "./internal/engine-namespace.js";
 
 import CanvasManager from "./modules/canvas-manager.js";
 import ResourceManager from "./modules/resource-manager.js";
 
-InstallGlobalNamespace([
+export default MakeEngineNamespace([
     CanvasManager,
     ResourceManager
 ]);

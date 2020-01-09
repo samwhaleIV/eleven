@@ -78,6 +78,7 @@ function MakeGlobal(value) {
         writable: false,
         configurable: false
     });
+    return namespace;
 }
 function Namespace() {
     this.get = GetNamespace;
@@ -103,5 +104,3 @@ function InstallNamespaceDependencies() {
     });
 }
 InstallNamespaceDependencies();
-
-export default namespace;

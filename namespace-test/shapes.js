@@ -1,3 +1,5 @@
+const NAMESPACE_NAME = "Shapes";
+
 function Square(x=0,y=0,size=0) {
     this.x = x;
     this.y = y;
@@ -16,7 +18,7 @@ function FixedSquare() {
     Object.freeze(this);
 }
 const shapes = Namespace.create({
-    name: "shapes",
+    name: NAMESPACE_NAME,
     modules: [
         Square,
         Circle,
