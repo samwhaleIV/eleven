@@ -136,7 +136,6 @@ function ResourceManager() {
     };
 
     Object.freeze(this);
-    console.log(`${LOG_NAME} loaded!`);
 }
 
 export default Singleton({
