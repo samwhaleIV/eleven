@@ -2,11 +2,12 @@ import Resource from "./resource-manager/resource.js";
 import ResourceTypes from "./resource-manager/resource-types.js";
 import GetFallbackImage from "./resource-manager/fallback-image.js";
 import DecodeImageResponse from "./resource-manager/image-decode.js";
-import audioContext from "./internal/audio.js";
+import audioContext from "../internal/audio-context.js";
 
 const RESOURCE_BIND_DATA = Object.entries(ResourceTypes);
 
 const FAILED_RESOURCE = Symbol("FailedResource");
+const LOG_NAME = "Resource manager";
 
 const FALLBACK_TEXT = "Missing resource!";
 const FALLBACK_IMAGE = GetFallbackImage(FALLBACK_TEXT);
@@ -14,6 +15,10 @@ const GET_FALLBACK_JSON_OBJECT = () => {return{
     message: FALLBACK_TEXT
 }};
 const FALLBACK_OCTET = TextToOctet(FALLBACK_TEXT);
+
+const INVALID_RESOURCE_DATA = () => {
+    throw "Invalid resource data";
+};
 
 const FALLBACK_AUDIO = audioContext.createBuffer(
     audioContext.destination.channelCount,
@@ -86,14 +91,14 @@ function LoadResource(resourceLink) {
             return response;
         }).then(resourceLoader).then(data => {
             if(!data) {
-                throw "Invalid resource data";
+                INVALID_RESOURCE_DATA();
             }
             SetEntry(resourceLink.lookupName,data,resourceLink.type);
-            console.log(`Resource manager: Loaded '${resourceLink.name}'`);
+            console.log(`${LOG_NAME}: Loaded '${resourceLink.name}'`);
             resolve();
         }).catch(error => {
             SetEntry(resourceLink.lookupName,FAILED_RESOURCE,resourceLink.type);
-            console.error(`Resource manager: ${error} '${resourceLink.name}'`);
+            console.error(`${LOG_NAME}: ${error} '${resourceLink.name}'`);
             resolve();
         });
     });
@@ -131,7 +136,7 @@ function ResourceManager() {
     };
 
     Object.freeze(this);
-    console.log("Resource manager loaded!");
+    console.log(`${LOG_NAME} loaded!`);
 }
 
 export default Singleton({

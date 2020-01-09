@@ -10,9 +10,6 @@ const NAMESPACE_COLLISION = name => {
 const MISSING_NAMESPACE = name => {
     throw Error(`Namespace '${name}' not found`);
 };
-const INVALID_MASTER_NAMESPACE_INVOCATION = () => {
-    throw Error("Master namespace already registered! InstallGlobalNamespace is only for internal use.");
-};
 
 const NamespaceTable = new Object();
 
@@ -70,24 +67,4 @@ function InstallNamespaceDependencies() {
 }
 InstallNamespaceDependencies();
 
-const InstallGlobalNamespace = (function(){
-    let installed = false;
-    return function({name,modules}) {
-        if(installed) {
-            INVALID_MASTER_NAMESPACE_INVOCATION();
-        }
-        installed = true;
-        const globalNamespace = namespace.create({
-            name: name,
-            modules: modules
-        });
-        
-        Object.defineProperty(globalThis,name,{
-            value: globalNamespace,
-            writable: false,
-            configurable: false
-        });
-    }
-})();
-
-export default InstallGlobalNamespace;
+export default namespace;

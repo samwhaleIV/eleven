@@ -41,13 +41,14 @@ function parseAutomaticSingleton(moduleSet,module) {
         propertyData = {
             //Do not provide deferred singletons with parameters
             get: bindDefaultTarget(module), //Instantiated when module is first accessed
-            configurable: false
-        }
+            enumerable: true
+        };
     } else {
         propertyData = {
             //Do not provide automatic singletons with parameters
-            value: callDefaultTarget(module) //Instantiated when module is imported
-        }
+            value: callDefaultTarget(module), //Instantiated when module is imported
+            enumerable: true
+        };
     }
     Object.defineProperty(moduleSet,module.name,propertyData);
 }
@@ -56,7 +57,10 @@ function parseManualModule(moduleSet,module,isSingleton) {
     if(isSingleton) {
         module = bindDefaultTarget(module);
     }
-    moduleSet[module.name] = module; //Instantiated manually
+    Object.defineProperty(moduleSet,module.name,{
+        value: module, //Instantiated manually
+        enumerable: true
+    });
 }
 
 function GetModuleSet(modules) {
@@ -78,8 +82,7 @@ function InstallModules({target,modules,name}) {
     Object.defineProperty(target,name,{
         value: moduleSet,
         writable: false,
-        configurable: false,
-        enumerable: true
+        configurable: false
     });
     return moduleSet;
 }

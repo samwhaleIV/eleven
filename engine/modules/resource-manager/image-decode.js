@@ -1,22 +1,22 @@
-import Constants from "../internal/constants.js";
+const BTIMAP_SETTINGS = Object.freeze({
+    imageOrientation: "none",
+    premultiplyAlpha: "premultiply",
+    colorSpaceConversion: "default"
+});
 
 const BITMAP_DECODE_FAILURE = () => {
     throw "Failure decoding image to bitmap";
 };
 
 function getBitmap(image) {
-    const settings = Object.assign({
-        resizeWidth: image.width,
-        resizeHeight: image.height
-    },Constants.bitmapSettings)
     return createImageBitmap(
-        image,0,0,image.width,image.height,settings
+        image,0,0,image.width,image.height,BTIMAP_SETTINGS
     );
 }
 
 function imageLoadResolver(urlObject) {
-    const image = new Image();
     return new Promise(resolve => {
+        const image = new Image();
         image.onload = () => {
             resolve(image);
         };
@@ -24,7 +24,7 @@ function imageLoadResolver(urlObject) {
             resolve(null);
         };
         image.src = urlObject;
-    })
+    });
 }
 
 function DecodeImageResponse(response) {
