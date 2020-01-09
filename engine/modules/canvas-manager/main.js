@@ -83,6 +83,5 @@ function CanvasManager() {
 
 export default Singleton({
     module: CanvasManager,
-    autoInstantiate: true,
-    deferInstallation: true
+    deferInstantiation: true
 });

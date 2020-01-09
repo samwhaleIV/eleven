@@ -21,14 +21,17 @@ const MODULE_IS_NOT_A_FUNCTION = module => {
 
 const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
 
+function symbolMatch(module,symbol) {
+    return symbol in module && module[symbol] === true;
+}
 function isSingleton(module) {
-    return module.isSingleton === Symbols.isSingleton;
+    return symbolMatch(module,Symbols.isSingleton);
 }
 function manualSingleton(module) {
-    return module.manualSingleton === Symbols.manualSingleton;
+    return symbolMatch(module,Symbols.manualSingleton);
 }
 function deferredSingleton(module) {
-    return module.deferredSingleton === Symbols.deferredSingleton;
+    return symbolMatch(module,Symbols.deferredSingleton);
 }
 
 function getDefaultModuleTarget() {
@@ -58,10 +61,12 @@ function parseAutomaticSingleton(moduleSet,module) {
     Object.defineProperty(moduleSet,module.name,propertyData);
 }
 function parseManualModule(moduleSet,module,isSingleton) {
+    const name = module.name;
     if(isSingleton) {
         module = bindDefaultTarget(module);
+        Object.defineProperty(module,"name",{value:name});
     }
-    Object.defineProperty(moduleSet,module.name,{
+    Object.defineProperty(moduleSet,name,{
         value: module, //Instantiated manually
         enumerable: true
     });
@@ -88,7 +93,7 @@ function addNamespaceIdentifier(target,name) {
 }
 function getModuleSet(modules,name) {
     const moduleSet = new Object();
-    addNamespaceIdentifier(target,name);
+    addNamespaceIdentifier(moduleSet,name);
 
     const moduleParser = parseModule.bind(moduleSet);
     modules.forEach(moduleParser);

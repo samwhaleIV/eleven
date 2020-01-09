@@ -142,6 +142,5 @@ function ResourceManager() {
 
 export default Singleton({
     module: ResourceManager,
-    autoInstantiate: true,
-    deferInstallation: true
+    deferInstantiation: true
 });

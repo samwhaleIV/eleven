@@ -12,9 +12,9 @@ function Circle(x=0,y=0,radius=0) {
     this.radius = radius;
     Object.seal(this);
 }
-function FixedSquare() {
-    this.x = 0;
-    this.y = 0;
+function FixedSquare(x,y) {
+    this.x = x;
+    this.y = y;
     Object.freeze(this);
 }
 const shapes = Namespace.create({
@@ -24,8 +24,14 @@ const shapes = Namespace.create({
         Circle,
         Singleton({
             module: FixedSquare,
-            deferInstallation: false
-        })
+            deferInstantiation: true,
+            parameters: [69,420]
+        }),
+        Singleton({
+            name: "FixedSquareDank",
+            module: FixedSquare,
+            parameters: ["ayy","lmao"]
+        }),
     ]
 });
 export default shapes;
