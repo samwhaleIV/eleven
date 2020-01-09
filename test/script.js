@@ -1,4 +1,5 @@
-import "../namespace-test/shapes.js";
+import shapes from "../namespace-test/shapes.js";
+Namespace.makeGlobal(shapes);
 
 const canvasManager = Eleven.CanvasManager;
 const resourceManager = Eleven.ResourceManager;

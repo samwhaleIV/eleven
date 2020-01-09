@@ -15,6 +15,8 @@ export default InstallModules;
 
 */
 
+const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
+
 function isSingleton(module) {
     return module.isSingleton === Symbols.isSingleton;
 }
@@ -63,8 +65,14 @@ function parseManualModule(moduleSet,module,isSingleton) {
     });
 }
 
-function GetModuleSet(modules) {
+function GetModuleSet(modules,name) {
     const moduleSet = new Object();
+    Object.defineProperty(moduleSet,NAMESPACE_IDENTIFIER,{
+        value: name,
+        writable: false,
+        configurable: false,
+        enumerable: false
+    });
     modules.forEach(module => {
         const singletonMode = isSingleton(module);
         if(singletonMode && !manualSingleton(module)) {
@@ -78,7 +86,7 @@ function GetModuleSet(modules) {
 }
 
 function InstallModules({target,modules,name}) {
-    const moduleSet = GetModuleSet(modules)
+    const moduleSet = GetModuleSet(modules,name);
     Object.defineProperty(target,name,{
         value: moduleSet,
         writable: false,

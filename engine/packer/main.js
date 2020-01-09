@@ -1,5 +1,8 @@
 import InstallModules from "./modules.js";
 import Singleton from "./singleton.js";
+import Symbols from "./symbols.js";
+
+const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
 
 const INVALID_NAMESPACE = name => {
     throw Error(`Invalid namespace name '${name}'`);
@@ -15,7 +18,10 @@ const GLOBAL_NAME_CONFLICT = name => {
 };
 const NAMESPACE_ALREADY_UPGRADED = name => {
     throw Error(`Namespace '${name}' has already been upgraded for global scope use`);
-}
+};
+const INVALID_GLOBAL_TYPE = value => {
+    throw Error(`Expected namespace or namespace name, got '${value}'`);
+};
 
 const NamespaceTable = new Object();
 
@@ -48,8 +54,18 @@ function GetNamespace(name) {
 function ListNamespaces() {
     return Object.keys(NamespaceTable);
 }
-function MakeGlobal(name) {
-    const namespace = GetNamespace(name);
+function MakeGlobal(value) {
+    let namespace, name;
+    if(typeof value === "object" && NAMESPACE_IDENTIFIER in value) {
+        name = value[NAMESPACE_IDENTIFIER];
+        ValidateNamespaceName(name);
+        namespace = value;
+    } else if(typeof value === "string") {
+        name = value;
+        namespace = GetNamespace(name);
+    } else {
+        INVALID_GLOBAL_TYPE(value);
+    }
     if(name in globalThis) {
         if(globalThis[name] === namespace) {
             NAMESPACE_ALREADY_UPGRADED(name);

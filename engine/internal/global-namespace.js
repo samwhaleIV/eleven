@@ -1,12 +1,12 @@
 import namespace from "../packer/main.js";
 import Constants from "./constants.js";
 
+const ENGINE_NAMESPACE = Constants.engineNamespace;
+
 function InstallGlobalNamespace(modules) {
-    const engineNamespace = Constants.engineNamespace;
-    namespace.create({
-        name: engineNamespace,
+    namespace.makeGlobal(namespace.create({
+        name: ENGINE_NAMESPACE,
         modules: modules
-    });
-    namespace.makeGlobal(engineNamespace);
+    }));
 }
 export default InstallGlobalNamespace;
