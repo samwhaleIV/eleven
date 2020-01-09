@@ -18,6 +18,9 @@ export default InstallModules;
 const MODULE_IS_NOT_A_FUNCTION = module => {
     throw Error(`Module '${module}' is not of type function`);
 };
+const MODULE_COLLISION = module => {
+    throw Error(`Module set collision with module ${module.name}`);
+};
 
 const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
 
@@ -75,6 +78,9 @@ function parseManualModule(moduleSet,module,isSingleton) {
 function parseModule(module) {
     if(typeof module !== "function") {
         MODULE_IS_NOT_A_FUNCTION(module);
+    }
+    if(module.name in this) {
+        MODULE_COLLISION(module);
     }
     const singletonMode = isSingleton(module);
     if(singletonMode && !manualSingleton(module)) {

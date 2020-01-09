@@ -23,6 +23,13 @@ const shapes = Namespace.create({
         Square,
         Circle,
         Singleton({
+            name: "BrokenSquare",
+            module: FixedSquare,
+            autoInstantiation: false,
+            deferInstantiation: true,
+            parameters: [69,420]
+        }),
+        Singleton({
             module: FixedSquare,
             deferInstantiation: true,
             parameters: [69,420]
