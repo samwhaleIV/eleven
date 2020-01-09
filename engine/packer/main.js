@@ -104,3 +104,5 @@ function InstallNamespaceDependencies() {
     });
 }
 InstallNamespaceDependencies();
+
+export default namespace;
