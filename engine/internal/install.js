@@ -11,7 +11,6 @@ import namespace from "../packer/main.js";
   2. globalThis.Namespace
 */
 
-
 import Constants from "./constants.js";
 
 const NAMESPACE_NAME = Constants.engineNamespace;

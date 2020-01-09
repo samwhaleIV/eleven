@@ -1,8 +1,8 @@
-import Resource from "./resource-manager/resource.js";
-import ResourceTypes from "./resource-manager/resource-types.js";
-import GetFallbackImage from "./resource-manager/fallback-image.js";
-import DecodeImageResponse from "./resource-manager/image-decode.js";
-import audioContext from "../internal/audio-context.js";
+import Resource from "./resource.js";
+import ResourceTypes from "./resource-types.js";
+import GetFallbackImage from "./fallback-image.js";
+import DecodeImageResponse from "./image-decode.js";
+import audioContext from "../../internal/audio-context.js";
 
 const RESOURCE_BIND_DATA = Object.entries(ResourceTypes);
 
@@ -119,6 +119,7 @@ function ResourceManager() {
         this[`get${resourceTypeName}`] = name => GetEntry(name,resourceType);
         this[`has${resourceTypeName}`] = name => EntryExists(name,resourceType);
         this[`queue${resourceTypeName}`] = (...files) => {
+            files = files.flat();
             this.queue(...files.map(fileName => LinkResource(fileName,resourceType)
         ))};
     });
@@ -128,6 +129,7 @@ function ResourceManager() {
 
     const resourceQueue = [];
     this.queue = (...resourceLinks) => {
+        resourceLinks = resourceLinks.flat();
         resourceQueue.push(...resourceLinks);
     };
     this.loadQueue = () => {

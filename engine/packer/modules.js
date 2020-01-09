@@ -15,6 +15,10 @@ export default InstallModules;
 
 */
 
+const MODULE_IS_NOT_A_FUNCTION = module => {
+    throw Error(`Module '${module}' is not of type function`);
+};
+
 const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
 
 function isSingleton(module) {
@@ -36,7 +40,6 @@ function bindDefaultTarget(module) {
 function callDefaultTarget(module) {
     return module.call(getDefaultModuleTarget());
 }
-
 function parseAutomaticSingleton(moduleSet,module) {
     let propertyData;
     if(deferredSingleton(module)) {
@@ -54,7 +57,6 @@ function parseAutomaticSingleton(moduleSet,module) {
     }
     Object.defineProperty(moduleSet,module.name,propertyData);
 }
-
 function parseManualModule(moduleSet,module,isSingleton) {
     if(isSingleton) {
         module = bindDefaultTarget(module);
@@ -65,28 +67,38 @@ function parseManualModule(moduleSet,module,isSingleton) {
     });
 }
 
-function GetModuleSet(modules,name) {
-    const moduleSet = new Object();
-    Object.defineProperty(moduleSet,NAMESPACE_IDENTIFIER,{
+function parseModule(module) {
+    if(typeof module !== "function") {
+        MODULE_IS_NOT_A_FUNCTION(module);
+    }
+    const singletonMode = isSingleton(module);
+    if(singletonMode && !manualSingleton(module)) {
+        parseAutomaticSingleton(this,module);
+    } else {
+        parseManualModule(this,module,singletonMode);
+    }
+}
+function addNamespaceIdentifier(target,name) {
+    Object.defineProperty(target,NAMESPACE_IDENTIFIER,{
         value: name,
         writable: false,
         configurable: false,
         enumerable: false
     });
-    modules.forEach(module => {
-        const singletonMode = isSingleton(module);
-        if(singletonMode && !manualSingleton(module)) {
-            parseAutomaticSingleton(moduleSet,module);
-        } else {
-            parseManualModule(moduleSet,module,singletonMode);
-        }
-    });
+}
+function getModuleSet(modules,name) {
+    const moduleSet = new Object();
+    addNamespaceIdentifier(target,name);
+
+    const moduleParser = parseModule.bind(moduleSet);
+    modules.forEach(moduleParser);
+
     Object.freeze(moduleSet);
     return moduleSet;
 }
 
 function InstallModules({target,modules,name}) {
-    const moduleSet = GetModuleSet(modules,name);
+    const moduleSet = getModuleSet(modules,name);
     Object.defineProperty(target,name,{
         value: moduleSet,
         writable: false,
