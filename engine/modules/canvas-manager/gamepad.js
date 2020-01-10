@@ -11,11 +11,13 @@ function Gamepad() {
     this.poll = () => {
         let gamepad = null;
         const gamepads = navigator.getGamepads();
-        for(let i = 0;i < gamepads.length;i++) {
+        let i = 0;
+        while(i < gamepads.length) {
             gamepad = gamepads[i];
             if(isValidGamepad(gamepad)) {
                 return getGamepadData(gamepad);
             }
+            i++;
         }
         return null;
     };
