@@ -135,22 +135,3 @@ function Input(canvasManager,modules) {
     Object.freeze(this);
 }
 export default Input;
-
-
-//Managed and unmanaged:
-    //altClickDown
-    //altClickUp
-    //pointerMove
-
-    //clickDown
-    //clickUp
-
-//Managed:
-    //keyDown (includes gamepad mappings)
-    //keyUp   (includes gamepad mappings)
-
-    //flag: disableJoysticks
-
-//Unmanaged:
-    //input (table of keys down and up)
-    //inputGamepad (table of gamepad data)

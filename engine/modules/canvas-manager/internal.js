@@ -13,7 +13,7 @@ function Internal(canvasManager) {
         document.body.classList.add("loaded");
     };
     canvasManager.markLoading = () => {
-        document.body.classList.add("unloaded");
+        document.body.classList.remove("loaded");
     };
     Object.freeze(this);
 }
