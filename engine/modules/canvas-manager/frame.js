@@ -2,15 +2,8 @@
 
 const FrameHelper = Object.freeze({
     GetDeepestFrame: function(frame) {
-        if(!frame) {
-            return null;
-        }
         let child = frame.child;
         while(child) {
-            stack.push(frame);
-            if(frame.opaque) {
-                stack.splice(0);
-            }
             frame = child;
             child = frame.child;
         }

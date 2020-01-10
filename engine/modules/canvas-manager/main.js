@@ -2,9 +2,11 @@ import Resize from "./resize.js";
 import Render from "./render.js";
 import Internal from "./internal.js";
 import Input from "./input.js";
+import Gamepad from "./gamepad.js";
+import Mouse from "./mouse.js";
 
 const MODULES_LIST = [
-    Internal,Resize,Input,Render
+    Internal,Resize,Gamepad,Input,Render,Mouse
 ];
 
 function GetModules(canvasManager) {

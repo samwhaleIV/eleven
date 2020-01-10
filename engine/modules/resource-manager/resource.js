@@ -1,14 +1,16 @@
 import ResourceTypes from "./resource-types.js";
 import Constants from "../../internal/constants.js";
 
-const DEFAULT_IMAGE_TYPE = Constants.defaultImageType;
-const DEFAULT_JSON_TYPE = Constants.defaultJSONType;
-const DEFAULT_TEXT_TYPE = Constants.defaultTextType;
-const DEFAULT_AUDIO_TYPE = Constants.defaultAudioType;
+const constants = Constants.resource;
 
-const DataPrefix = Constants.dataFolder;
-const ImagePrefix = Constants.imageFolder;
-const AudioPrefix = Constants.audioFolder;
+const DEFAULT_IMAGE_TYPE = constants.defaultImageType;
+const DEFAULT_JSON_TYPE = constants.defaultJSONType;
+const DEFAULT_TEXT_TYPE = constants.defaultTextType;
+const DEFAULT_AUDIO_TYPE = constants.defaultAudioType;
+
+const DataPrefix = constants.dataFolder;
+const ImagePrefix = constants.imageFolder;
+const AudioPrefix = constants.audioFolder;
 
 const TypeLookup = Object.freeze({
     "audio": ResourceTypes.Audio,

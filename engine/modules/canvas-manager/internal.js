@@ -2,7 +2,7 @@ function Internal(canvasManager) {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d",{
         alpha: false,
-        desynchronized: false
+        desynchronized: true
     });
     this.canvas = canvas;
     this.context = context;

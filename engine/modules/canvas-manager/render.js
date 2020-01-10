@@ -3,7 +3,7 @@ import FrameHelper from "./frame.js";
 const LOG_PREFIX = "Canvas manager";
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
-    throw Error("Render loop already started");
+    throw Error("Render loop already paused");
 };
 const RENDER_LOOP_ALREADY_STARTED = () => {
     throw Error("Render loop already paused");
@@ -37,16 +37,19 @@ function Render(canvasManager,modules) {
         internalFrame = frame;
         renderFrame = FrameHelper.RenderFrame.bind(internalFrame);
     }
-    function GetFrame(frame) {
+    function GetFrame() {
         return internalFrame;
     }
 
     (function(context,size,pollInput){
         let animationFrame;
         function render(timestamp) {
+            pollInput();
+            if(paused) {
+                return;
+            }
             renderFrame(context,size,timestamp);
             animationFrame = requestAnimationFrame(render);
-            pollInput();
         }
         canvasManager.start = () => {
             if(!internalFrame) {
