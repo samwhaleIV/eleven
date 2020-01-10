@@ -141,7 +141,9 @@ function Mouse(canvasManager,modules) {
             stopPropagation(event);
             return;
         }
+        //This is the most iffy part of the pointer processing
         if(event.buttons === 1 || event.buttons === 2) {
+            //This too
             pointerUp(rewritePointerEvent(
                 event,event.buttons === 1 ? 0 : 2
             ));
