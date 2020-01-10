@@ -81,14 +81,14 @@ function Singleton({
     return (function(instanceParameters){
         let moduleInstance = null;
         return Object.freeze(Object.defineProperties(function(...parameters) {
-            if(autoInstantiation) {
-                parameters = instanceParameters;
-            }
             if(moduleInstance) {
                 if(!suppressReinstantiationWarning && parameters.length) {
                     ALREADY_INSTANTIATED(module);
                 }
                 return moduleInstance;
+            }
+            if(autoInstantiation) {
+                parameters = instanceParameters;
             }
             moduleInstance = this;
             module.apply(moduleInstance,parameters);
