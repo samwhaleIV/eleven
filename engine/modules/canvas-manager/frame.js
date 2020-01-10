@@ -3,7 +3,7 @@
 const FrameHelper = Object.freeze({
     GetDeepestFrame: function(frame) {
         if(!frame) {
-            return;
+            return null;
         }
         let child = frame.child;
         while(child) {
