@@ -14,6 +14,31 @@ const POINTER_MOVE = constants.pointerMove;
 const DEFAULT_CODE = 0;
 const ALT_CODE = 2;
 
+function PointerStatus(canSendEvent,sendDown,sendUp) {
+    let isDown = false;
+    this.send = (location,down) => {
+        if(down) {
+            if(isDown) return;
+            isDown = true;
+        } else {
+            if(!isDown) return;
+            isDown = false;
+        }
+        if(!canSendEvent()) return;
+        if(down) {
+            sendDown(location);
+        } else {
+            sendUp(location);
+        }
+    };
+    Object.defineProperty(this,"isDown",{
+        get: function() {
+            return isDown
+        }
+    });
+    Object.freeze(this);
+}
+
 function Mouse(canvasManager,modules) {
     const canvas = modules.internal.canvas;
 
@@ -68,34 +93,12 @@ function Mouse(canvasManager,modules) {
     const sendPointerDownAlt = getTargetBind(ALT_CLICK_DOWN);
     const sendPointerMove = getTargetBind(POINTER_MOVE);
 
-    const PointerStatus = function(sendDown,sendUp) {
-        let isDown = false;
-        const canSendEventTarget = canSendEvent;
-        this.send = (location,down) => {
-            if(down) {
-                if(isDown) return;
-                isDown = true;
-            } else {
-                if(!isDown) return;
-                isDown = false;
-            }
-            if(!canSendEventTarget()) return;
-            if(down) {
-                sendDown(location);
-            } else {
-                sendUp(location);
-            }
-        };
-        Object.defineProperty(this,"isDown",{
-            get: function() {
-                return isDown
-            }
-        });
-        Object.freeze(this);
-    }
-
-    const pointerStatus = new PointerStatus(sendPointerDown,sendPointerUp);
-    const altPointerStatus = new PointerStatus(sendPointerDownAlt,sendPointerUpAlt);
+    const pointerStatus = new PointerStatus(
+        canSendEvent,sendPointerDown,sendPointerUp
+    );
+    const altPointerStatus = new PointerStatus(
+        canSendEvent,sendPointerDownAlt,sendPointerUpAlt
+    );
 
     const getChangeTarget = event => {
         let target = null;
