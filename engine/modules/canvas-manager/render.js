@@ -48,7 +48,7 @@ function Render(canvasManager,modules) {
             if(paused) {
                 return;
             }
-            renderFrame(context,size,timestamp);
+            renderFrame(context,timestamp,size);
             animationFrame = requestAnimationFrame(render);
         }
         canvasManager.start = () => {

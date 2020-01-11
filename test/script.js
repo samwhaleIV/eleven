@@ -10,43 +10,68 @@ async function loadResources() {
 
 const canvasManager = Eleven.CanvasManager;
 
-let lastX = -Infinity;
-let lastY = -Infinity;
-let pointerDown = false;
-let timedifference = 0;
-let lasttime = 0;
-canvasManager.frame = {
-    pointerMove: (x,y) => {
-        lastX = x;
-        lastY = y;
-    },
-    clickDown: function(x,y) {
-        pointerDown = true;
-        lastX = x;
-        lastY = y;
-    },
-    clickUp: function(x,y) {
-        pointerDown = false
-        lastX = x;
-        lastY = y;
-    },
-    render: function(context,size,timestamp) {
-        if(canvasManager.paused) {
-            //Purple is bad
-            context.fillStyle = "purple";
-            context.fillRect(10,10,size.width-20,size.height-20);
-            return;
+canvasManager.frame = new (function(){
+    this.noContextMenu = true;
+
+    let timedifference = 0;
+    let lasttime = 0;
+
+    const lastLocation = canvasManager.pointerPosition;
+
+    const pointerDown = () => {
+        return canvasManager.pointerDown;
+    };
+
+    let isAlt = false;
+    let isShift = false;
+
+    this.keyDown = console.log;
+
+    this.clickDown = ({
+        altKey,shiftKey
+    }) => {
+        if(altKey) {
+            isAlt = true;
         }
-        if(!pointerDown) {
+        if(shiftKey) {
+            isShift = true;
+        }
+    };
+    this.clickUp = () => {
+        isAlt = false;
+        isShift = false;
+    };
+
+    this.render = (context,timestamp) => {
+        if(!pointerDown() || isAlt) {
             timedifference += timestamp - lasttime;
             lasttime = timestamp;
-            return;
+            if(!isAlt) {
+                return;
+            }
         }
         lasttime = timestamp;
         timestamp = timestamp - timedifference;
-        context.fillStyle = `rgba(${(timestamp/1000)%1*255},${(timestamp/3000)%1*255},${(timestamp/10000)%1*255})`;
-        context.fillRect(lastX-25,lastY-25,50,50);
+        if(isAlt) {
+            if(isShift) {
+                context.fillStyle = "blue";
+            } else {
+                context.fillStyle = "red";
+            }
+        } else {
+            context.fillStyle = `rgba(${
+                (timestamp/1000)%1*255
+            },${
+                (timestamp/3000)%1*255
+            },${
+                (timestamp/10000)%1*255}
+            )`;
+        }
+
+        context.fillRect(
+            lastLocation.x-25,lastLocation.y-25,50,50
+        );
     }
-}
+})();
 canvasManager.start();
 canvasManager.markLoaded();

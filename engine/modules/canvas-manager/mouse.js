@@ -16,7 +16,7 @@ const ALT_CODE = 2;
 
 function PointerStatus(canSendEvent,sendDown,sendUp) {
     let isDown = false;
-    this.send = (location,down) => {
+    this.send = (sendData,down) => {
         if(down) {
             if(isDown) return;
             isDown = true;
@@ -26,9 +26,9 @@ function PointerStatus(canSendEvent,sendDown,sendUp) {
         }
         if(!canSendEvent()) return;
         if(down) {
-            sendDown(location);
+            sendDown(sendData);
         } else {
-            sendUp(location);
+            sendUp(sendData);
         }
     };
     Object.defineProperty(this,"isDown",{
@@ -46,10 +46,41 @@ function Mouse(canvasManager,modules) {
         return Math.floor(position / clientSize * size);
     };
 
-    const getLocation = event => {
+    const lastLocationContainer = Object.seal({
+        x: null,
+        y: null
+    });
+
+    const lastLocation = Object.freeze(Object.defineProperties(new Object,{
+        x: {
+            get: function() {return lastLocationContainer.x},
+            configurable: false,
+            enumerable: true
+        },
+        y: {
+            get: function() {return lastLocationContainer.y},
+            configurable: false,
+            enumerable: true
+        }
+    }));
+
+    const updateLocation = sendData => {
+        const container = lastLocationContainer;
+        container.x = sendData.x;
+        container.y = sendData.y;
+    };
+
+    const getSendData = event => {
         return {
-            x: translateLocation(event.layerX,canvas.clientWidth,canvas.width),
-            y: translateLocation(event.layerY,canvas.clientHeight,canvas.height)
+            x: translateLocation(
+                event.layerX,canvas.clientWidth,canvas.width
+            ),
+            y: translateLocation(
+                event.layerY,canvas.clientHeight,canvas.height
+            ),
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey
         }
     };
 
@@ -61,7 +92,7 @@ function Mouse(canvasManager,modules) {
         return !canvasManager.paused;
     };
     const hasAltEvents = frame => {
-        return frame.altClickDown || frame.altClickUp;
+        return frame.noContextMenu || frame.altClickDown || frame.altClickUp;
     };
     const canSendAltEvent = () => {
         if(canvasManager.paused) {
@@ -80,10 +111,10 @@ function Mouse(canvasManager,modules) {
         event.preventDefault();  
     };
 
-    const trySendTarget = function(targetName,location) {
+    const trySendTarget = function(targetName,data) {
         const target = getFrame()[targetName];
         if(!target) return;
-        target(location.x,location.y);
+        target(data);
     }
     const getTargetBind = targetName => trySendTarget.bind(null,targetName);
 
@@ -101,21 +132,24 @@ function Mouse(canvasManager,modules) {
     );
 
     const getChangeTarget = event => {
-        let target = null;
+        let changeTarget = null;
         if(event.button === DEFAULT_CODE) {
-            target = pointerStatus.send;
+            changeTarget = pointerStatus.send;
         } else if(event.button === ALT_CODE) {
-            target = altPointerStatus.send;
+            changeTarget = altPointerStatus.send;
         }
-        return target;
+        return changeTarget;
     };
 
     const pointerChange = function(down,event) {
         event.stopPropagation();
         if(!event.isPrimary) return;
-        const target = getChangeTarget(event);
-        if(!target) return;
-        target(getLocation(event),down);
+        const changeTarget = getChangeTarget(event);
+        if(!changeTarget) return;
+        const sendData = getSendData(event);
+        updateLocation(sendData);
+        if(down) sendPointerMove(sendData);
+        changeTarget(sendData,down);
     };
 
     const pointerUp = pointerChange.bind(null,false);
@@ -125,7 +159,9 @@ function Mouse(canvasManager,modules) {
         event.stopPropagation();
         if(!event.isPrimary) return;
         if(!canSendEvent()) return;
-        sendPointerMove(getLocation(event));
+        const sendData = getSendData(event);
+        updateLocation(sendData);
+        sendPointerMove(sendData);
     };
     const pointerLeave = event => {
         event.stopPropagation();
@@ -135,12 +171,12 @@ function Mouse(canvasManager,modules) {
         const altPointerIsDown = altPointerStatus.isDown;
     
         if(pointerIsDown || altPointerIsDown) {
-            const location = getLocation(event);
+            const sendData = getSendData(event);
             if(pointerIsDown) {
-                pointerStatus.send(location,false);
+                pointerStatus.send(sendData,false);
             }
             if(altPointerIsDown) {
-                altPointerStatus.send(location,false);
+                altPointerStatus.send(sendData,false);
             }
         }
     };
@@ -162,5 +198,37 @@ function Mouse(canvasManager,modules) {
         target.addEventListener("pointermove",pointerMove,captureOptions);
         target.addEventListener("pointerleave",pointerLeave,captureOptions);
     };
+
+    Object.defineProperties(canvasManager,{
+        pointerPosition: {
+            value: lastLocation,
+            writable: false,
+            configurable: false,
+            enumerable: false
+        },
+        altPointerDown: {
+            get: function() {
+                return altPointerStatus.isDown;
+            },
+            configurable: false,
+            enumerable: false
+        },
+        pointerDown: {
+            get: function() {
+                return pointerStatus.isDown;
+            },
+            configurable: false,
+            enumerable: false
+        },
+        pointerShift: {
+
+        },
+        pointerCtrl: {
+
+        },
+        pointerAlt: {
+
+        }
+    });
 }
 export default Mouse;
