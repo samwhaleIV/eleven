@@ -140,7 +140,8 @@ function Mouse(canvasManager,modules) {
         sendPointerMove(getLocation(event));
     };
     const pointerLeave = event => {
-        stopPropagation(event);  
+        stopPropagation(event);
+        if(!isPrimary(event)) return;
         if(pointerIsDown || altPointerIsDown) {
             const location = getLocation(event);
             if(pointerIsDown) {
