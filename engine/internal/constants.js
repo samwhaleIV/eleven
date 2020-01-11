@@ -23,7 +23,8 @@ const Constants = Object.freeze({
         keyUp: "keyUp",
         keyDown: "keyDown",
         input: "input",
-        inputGamepad: "inputGamepad"
+        inputGamepad: "inputGamepad",
+        modifierChanged: "modifierChanged"
     })
 });
 export default Constants;

@@ -7,6 +7,7 @@ const KEY_DOWN = constants.keyDown;
 const KEY_UP = constants.keyUp;
 const INPUT = constants.input;
 const INPUT_GAMEPAD = constants.inputGamepad;
+const MODIFIER_CHANGED = constants.modifierChanged;
 
 function tryStopPropagation(event) {
     if(event.stopPropagation) {
@@ -52,9 +53,9 @@ const hasKey = (downKeys,set) => {
 
 const getModifierData = downKeys => {
     return {
-        shift: hasKey(downKeys,SHIFT_KEYS),
-        alt: hasKey(downKeys,ALT_KEYS),
-        ctrl: hasKey(downKeys,CTRL_KEYS)
+        shiftKey: hasKey(downKeys,SHIFT_KEYS),
+        altKey: hasKey(downKeys,ALT_KEYS),
+        ctrlKey: hasKey(downKeys,CTRL_KEYS)
     };
 };
 
@@ -93,12 +94,15 @@ function Input(canvasManager,modules) {
             return;
         }
         tryPreventDefault(event);
-        const isModifier = event.keyCode in MODIFIER_CODES;
-        if(isModifier) {
-            return;
-        }
         const frame = getDeepestFrameSafe();
         if(!frame) return;
+        const isModifier = event.keyCode in MODIFIER_CODES;
+        if(isModifier) {
+            const modifierChanged = frame[MODIFIER_CHANGED];
+            if(!modifierChanged) return;
+            modifierChanged(getModifierData(downKeys));
+            return;
+        }
         const inputTarget = frame[this];
         if(!inputTarget) return;
         inputTarget(summariseKeyEvent(event));

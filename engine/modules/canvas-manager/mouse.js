@@ -52,17 +52,17 @@ function Mouse(canvasManager,modules) {
     const sendDataContainer = Object.seal({
         x: null,
         y: null,
-        altKey: null,
         shiftKey: null,
+        altKey: null,
         ctrlKey: null
     });
 
     const pointerData = Object.freeze(Object.defineProperties(new Object,{
         x: {get: function() {return sendDataContainer.x}},
         y: {get: function() {return sendDataContainer.y}},
-        ctrlKey: {get: function() {return sendDataContainer.ctrlKey}},
-        altKey: {get: function() {return sendDataContainer.altKey}},
         shiftKey: {get: function() {return sendDataContainer.shiftKey}},
+        altKey: {get: function() {return sendDataContainer.altKey}},
+        ctrlKey: {get: function() {return sendDataContainer.ctrlKey}},
         down: {get: function() {return pointerStatus.isDown}},
         altDown: {get: function() {return altPointerStatus.isDown}}
     }));
@@ -210,9 +210,7 @@ function Mouse(canvasManager,modules) {
     });
 
     this.updateModifiers = data => {
-        sendDataContainer.altKey = data.alt;
-        sendDataContainer.ctrlKey = data.ctrl;
-        sendDataContainer.shiftKey = data.shift;
+        Object.assign(sendDataContainer,data);
     };
 
     Object.freeze(this);
