@@ -86,8 +86,10 @@ function Mouse(canvasManager,modules) {
 
     const sendPointer = (location,down) => {
         if(down) {
+            if(pointerIsDown) return;
             pointerIsDown = true;
         } else {
+            if(!pointerIsDown) return;
             pointerIsDown = false;
         }
         if(!canSendEvent()) return;
@@ -99,8 +101,10 @@ function Mouse(canvasManager,modules) {
     };
     const sendPointerAlt = (location,down) => {
         if(down) {
+            if(altPointerIsDown) return;
             altPointerIsDown = true;
         } else {
+            if(!altPointerIsDown) return;
             altPointerIsDown = false;
         }
         if(!canSendEvent()) return;
@@ -136,7 +140,6 @@ function Mouse(canvasManager,modules) {
         stopPropagation(event);
         if(!isPrimary(event)) return;
         if(!canSendEvent()) return;
-
         sendPointerMove(getLocation(event));
     };
     const pointerLeave = event => {
