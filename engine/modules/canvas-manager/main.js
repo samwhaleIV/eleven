@@ -6,7 +6,7 @@ import Gamepad from "./gamepad.js";
 import Mouse from "./mouse.js";
 
 const MODULES_LIST = [
-    Internal,Resize,Gamepad,Input,Render,Mouse
+    Internal,Resize,Gamepad,Mouse,Input,Render
 ];
 
 function GetModules(canvasManager) {

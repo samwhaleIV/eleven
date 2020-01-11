@@ -16,40 +16,22 @@ canvasManager.frame = new (function(){
     let timedifference = 0;
     let lasttime = 0;
 
-    const lastLocation = canvasManager.pointerPosition;
-
-    const pointerDown = () => {
-        return canvasManager.pointerDown;
-    };
-
-    let isAlt = false;
-    let isShift = false;
-
-    this.keyDown = console.log;
-
-    this.clickDown = ({
-        altKey,shiftKey
-    }) => {
-        if(altKey) {
-            isAlt = true;
-        }
-        if(shiftKey) {
-            isShift = true;
-        }
-    };
-    this.clickUp = () => {
-        isAlt = false;
-        isShift = false;
-    };
+    const pointer = canvasManager.pointerData;
 
     this.render = (context,timestamp) => {
-        if(!pointerDown() || isAlt) {
+
+        const isAlt = pointer.altKey;
+
+        if(!pointer.down || isAlt) {
             timedifference += timestamp - lasttime;
             lasttime = timestamp;
-            if(!isAlt) {
+            if(!pointer.down) {
                 return;
             }
         }
+
+        const isShift = pointer.shiftKey;
+
         lasttime = timestamp;
         timestamp = timestamp - timedifference;
         if(isAlt) {
@@ -69,7 +51,7 @@ canvasManager.frame = new (function(){
         }
 
         context.fillRect(
-            lastLocation.x-25,lastLocation.y-25,50,50
+            pointer.x-25,pointer.y-25,50,50
         );
     }
 })();

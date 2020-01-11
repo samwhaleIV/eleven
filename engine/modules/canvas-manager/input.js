@@ -33,14 +33,41 @@ const SYSTEM_KEYS = MakeAssociative([
 ]);
 
 const ALT_CODE = 18;
-const CONTROL_CODE = 17;
+const CTRL_CODE = 17;
 const SHIFT_CODE = 16;
 const META_LEFT = 91;
 const META_RIGHT = 92;
 
 const MODIFIER_CODES = MakeAssociative([
-    SHIFT_CODE,CONTROL_CODE,ALT_CODE,META_LEFT,META_RIGHT
+    SHIFT_CODE,CTRL_CODE,ALT_CODE,META_LEFT,META_RIGHT
 ]);
+
+const ALT_KEYS = [
+    "AltLeft","AltRight"
+];
+const CTRL_KEYS = [
+    "AltLeft","AltRight"
+];
+const SHIFT_KEYS = [
+    "ShiftLeft","ShiftRight"
+];
+
+const hasKey = (downKeys,set) => {
+    for(let i = 0;i<set.length;i++) {
+        if(set[i] in downKeys) {
+            return true;
+        }
+    }
+    return false;
+};
+
+const getModifierData = downKeys => {
+    return {
+        shift: hasKey(downKeys,SHIFT_KEYS),
+        alt: hasKey(downKeys,ALT_KEYS),
+        ctrl: hasKey(downKeys,CTRL_KEYS)
+    };
+};
 
 function Input(canvasManager,modules) {
 
@@ -116,8 +143,11 @@ function Input(canvasManager,modules) {
         });
     };
 
-    (function(gamepadPoll){
-        this.poll = () => { 
+    (function({
+        gamepadPoll,getModifierData,updateModifiers
+    }){
+        this.poll = () => {
+            updateModifiers(getModifierData(downKeys));
             const frame = getDeepestFrame();
             if(frame[INPUT]) {
                 frame[INPUT](downKeys);
@@ -130,7 +160,11 @@ function Input(canvasManager,modules) {
                 frame[INPUT_GAMEPAD](gamepadData);
             }
         };
-    }).call(this,modules.gamepad.poll);
+    }).call(this,{
+        gamepadPoll: modules.gamepad.poll,
+        getModifierData: getModifierData,
+        updateModifiers: modules.mouse.updateModifiers
+    });
 
     Object.freeze(this);
 }

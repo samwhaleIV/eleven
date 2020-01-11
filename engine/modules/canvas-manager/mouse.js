@@ -46,26 +46,29 @@ function Mouse(canvasManager,modules) {
         return Math.floor(position / clientSize * size);
     };
 
-    const lastLocationContainer = Object.seal({
+    let pointerStatus = null;
+    let altPointerStatus = null;
+
+    const sendDataContainer = Object.seal({
         x: null,
-        y: null
+        y: null,
+        altKey: null,
+        shiftKey: null,
+        ctrlKey: null
     });
 
-    const lastLocation = Object.freeze(Object.defineProperties(new Object,{
-        x: {
-            get: function() {return lastLocationContainer.x},
-            configurable: false,
-            enumerable: true
-        },
-        y: {
-            get: function() {return lastLocationContainer.y},
-            configurable: false,
-            enumerable: true
-        }
+    const pointerData = Object.freeze(Object.defineProperties(new Object,{
+        x: {get: function() {return sendDataContainer.x}},
+        y: {get: function() {return sendDataContainer.y}},
+        ctrlKey: {get: function() {return sendDataContainer.ctrlKey}},
+        altKey: {get: function() {return sendDataContainer.altKey}},
+        shiftKey: {get: function() {return sendDataContainer.shiftKey}},
+        down: {get: function() {return pointerStatus.isDown}},
+        altDown: {get: function() {return altPointerIsDown.isDown}}
     }));
 
-    const updateLocation = sendData => {
-        const container = lastLocationContainer;
+    const updateLocationData = sendData => {
+        const container = sendDataContainer;
         container.x = sendData.x;
         container.y = sendData.y;
     };
@@ -124,10 +127,10 @@ function Mouse(canvasManager,modules) {
     const sendPointerDownAlt = getTargetBind(ALT_CLICK_DOWN);
     const sendPointerMove = getTargetBind(POINTER_MOVE);
 
-    const pointerStatus = new PointerStatus(
+    pointerStatus = new PointerStatus(
         canSendEvent,sendPointerDown,sendPointerUp
     );
-    const altPointerStatus = new PointerStatus(
+    altPointerStatus = new PointerStatus(
         canSendEvent,sendPointerDownAlt,sendPointerUpAlt
     );
 
@@ -147,7 +150,7 @@ function Mouse(canvasManager,modules) {
         const changeTarget = getChangeTarget(event);
         if(!changeTarget) return;
         const sendData = getSendData(event);
-        updateLocation(sendData);
+        updateLocationData(sendData);
         if(down) sendPointerMove(sendData);
         changeTarget(sendData,down);
     };
@@ -160,7 +163,7 @@ function Mouse(canvasManager,modules) {
         if(!event.isPrimary) return;
         if(!canSendEvent()) return;
         const sendData = getSendData(event);
-        updateLocation(sendData);
+        updateLocationData(sendData);
         sendPointerMove(sendData);
     };
     const pointerLeave = event => {
@@ -199,36 +202,19 @@ function Mouse(canvasManager,modules) {
         target.addEventListener("pointerleave",pointerLeave,captureOptions);
     };
 
-    Object.defineProperties(canvasManager,{
-        pointerPosition: {
-            value: lastLocation,
-            writable: false,
-            configurable: false,
-            enumerable: false
-        },
-        altPointerDown: {
-            get: function() {
-                return altPointerStatus.isDown;
-            },
-            configurable: false,
-            enumerable: false
-        },
-        pointerDown: {
-            get: function() {
-                return pointerStatus.isDown;
-            },
-            configurable: false,
-            enumerable: false
-        },
-        pointerShift: {
-
-        },
-        pointerCtrl: {
-
-        },
-        pointerAlt: {
-
-        }
+    Object.defineProperty(canvasManager,"pointerData",{
+        value: pointerData,
+        writable: false,
+        configurable: false,
+        enumerable: false
     });
+
+    this.updateModifiers = data => {
+        sendDataContainer.altKey = data.alt;
+        sendDataContainer.ctrlKey = data.ctrl;
+        sendDataContainer.shiftKey = data.shift;
+    };
+
+    Object.freeze(this);
 }
 export default Mouse;
