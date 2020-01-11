@@ -10,58 +10,42 @@ async function loadResources() {
 
 const canvasManager = Eleven.CanvasManager;
 
-canvasManager.frame = {
-    render: function(context,size) {
-        context.fillStyle = "green";
-        context.fillRect(0,0,size.width,size.height);
-    }
-};
 let lastX = -Infinity;
 let lastY = -Infinity;
-canvasManager.frame.child = {
+let pointerDown = false;
+let timedifference = 0;
+let lasttime = 0;
+canvasManager.frame = {
     pointerMove: (x,y) => {
         lastX = x;
         lastY = y;
     },
     clickDown: function(x,y) {
-        console.log("Click down:",{x,y});
+        pointerDown = true;
+        lastX = x;
+        lastY = y;
     },
     clickUp: function(x,y) {
-        console.log("Click up:",{x,y});
-    },
-    altClickDown: function(x,y) {
-        console.log("Alt click down:",{x,y});
-    },
-    altClickUp: function(x,y) {
-        console.log("Alt click up:",{x,y});
+        pointerDown = false
+        lastX = x;
+        lastY = y;
     },
     render: function(context,size,timestamp) {
         if(canvasManager.paused) {
+            //Purple is bad
             context.fillStyle = "purple";
             context.fillRect(10,10,size.width-20,size.height-20);
             return;
         }
-        context.fillStyle = "red";
-        context.fillRect(10,10,size.width-20,size.height-20);
-        context.fillStyle = "white";
-        context.textBaseline = "middle";
-        context.textAlign = "center";
-        context.font = "22px sans-serif";
-        context.fillText(timestamp.toFixed(4),size.halfWidth,size.halfHeight);
-        context.fillStyle = "blue";
-        context.fillRect(lastX-25,lastY-25,50,50);
-    },
-    keyDown: function(key) {
-        if(key.code === "KeyA") console.log("Key a down MANAGED");
-    },
-    input: keys => {
-        if(keys["KeyA"]) {
-            console.log("Key a down UNMANAGED");
-            return;canvasManager.pause();
+        if(!pointerDown) {
+            timedifference += timestamp - lasttime;
+            lasttime = timestamp;
+            return;
         }
-    },
-    resize: () => {
-        console.log("Resized")
+        lasttime = timestamp;
+        timestamp = timestamp - timedifference;
+        context.fillStyle = `rgba(${(timestamp/1000)%1*255},${(timestamp/3000)%1*255},${(timestamp/10000)%1*255})`;
+        context.fillRect(lastX-25,lastY-25,50,50);
     }
 }
 canvasManager.start();
