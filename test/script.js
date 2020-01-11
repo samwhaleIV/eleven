@@ -16,7 +16,7 @@ canvasManager.frame = new (function(){
     let timedifference = 0;
     let lasttime = 0;
 
-    const pointer = canvasManager.pointerData;
+    const pointer = canvasManager.pointer;
 
     this.render = (context,timestamp) => {
 

@@ -202,7 +202,7 @@ function Mouse(canvasManager,modules) {
         target.addEventListener("pointerleave",pointerLeave,captureOptions);
     };
 
-    Object.defineProperty(canvasManager,"pointerData",{
+    Object.defineProperty(canvasManager,"pointer",{
         value: pointerData,
         writable: false,
         configurable: false,
