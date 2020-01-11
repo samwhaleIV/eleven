@@ -11,19 +11,6 @@ const ALT_CLICK_DOWN = constants.altClickDown;
 
 const POINTER_MOVE = constants.pointerMove;
 
-function preventDefault(event) {
-    event.preventDefault();
-}
-function stopPropagation(event) {
-    event.stopPropagation();
-}
-function stopBubbling(event) {
-    preventDefault(event);
-    stopPropagation(event);
-}
-function isPrimary(event) {
-    return event.isPrimary;
-}
 const DEFAULT_CODE = 0;
 const ALT_CODE = 2;
 
@@ -63,9 +50,9 @@ function Mouse(canvasManager,modules) {
     };
 
     const tryPreventContextMenu = event => {
-        if(canSendAltEvent()) {
-            stopBubbling(event);
-        }
+        if(!canSendAltEvent()) return;
+        event.stopPropagation();
+        event.preventDefault();  
     };
 
     const trySendTarget = function(targetName,location) {
@@ -81,53 +68,48 @@ function Mouse(canvasManager,modules) {
     const sendPointerDownAlt = getTargetBind(ALT_CLICK_DOWN);
     const sendPointerMove = getTargetBind(POINTER_MOVE);
 
-    let pointerIsDown = false;
-    let altPointerIsDown = false;
+    const PointerStatus = function(sendDown,sendUp) {
+        let isDown = false;
+        const canSendEventTarget = canSendEvent;
+        this.send = (location,down) => {
+            if(down) {
+                if(isDown) return;
+                isDown = true;
+            } else {
+                if(!isDown) return;
+                isDown = false;
+            }
+            if(!canSendEventTarget()) return;
+            if(down) {
+                sendDown(location);
+            } else {
+                sendUp(location);
+            }
+        };
+        Object.defineProperty(this,"isDown",{
+            get: function() {
+                return isDown
+            }
+        });
+        Object.freeze(this);
+    }
 
-    const sendPointer = (location,down) => {
-        if(down) {
-            if(pointerIsDown) return;
-            pointerIsDown = true;
-        } else {
-            if(!pointerIsDown) return;
-            pointerIsDown = false;
-        }
-        if(!canSendEvent()) return;
-        if(down) {
-            sendPointerDown(location);
-        } else {
-            sendPointerUp(location);
-        }
-    };
-    const sendPointerAlt = (location,down) => {
-        if(down) {
-            if(altPointerIsDown) return;
-            altPointerIsDown = true;
-        } else {
-            if(!altPointerIsDown) return;
-            altPointerIsDown = false;
-        }
-        if(!canSendEvent()) return;
-        if(down) {
-            sendPointerDownAlt(location);
-        } else {
-            sendPointerUpAlt(location);
-        }
-    };
+    const pointerStatus = new PointerStatus(sendPointerDown,sendPointerUp);
+    const altPointerStatus = new PointerStatus(sendPointerDownAlt,sendPointerUpAlt);
 
     const getChangeTarget = event => {
         let target = null;
         if(event.button === DEFAULT_CODE) {
-            target = sendPointer;
+            target = pointerStatus.send;
         } else if(event.button === ALT_CODE) {
-            target = sendPointerAlt;
+            target = altPointerStatus.send;
         }
         return target;
     };
 
     const pointerChange = function(down,event) {
-        stopPropagation(event);
-        if(!isPrimary(event)) return;
+        event.stopPropagation();
+        if(!event.isPrimary) return;
         const target = getChangeTarget(event);
         if(!target) return;
         target(getLocation(event),down);
@@ -137,21 +119,25 @@ function Mouse(canvasManager,modules) {
     const pointerDown = pointerChange.bind(null,true);
 
     const pointerMove = event => {
-        stopPropagation(event);
-        if(!isPrimary(event)) return;
+        event.stopPropagation();
+        if(!event.isPrimary) return;
         if(!canSendEvent()) return;
         sendPointerMove(getLocation(event));
     };
     const pointerLeave = event => {
-        stopPropagation(event);
-        if(!isPrimary(event)) return;
+        event.stopPropagation();
+        if(!event.isPrimary) return;
+
+        const pointerIsDown = pointerStatus.isDown;
+        const altPointerIsDown = altPointerStatus.isDown;
+    
         if(pointerIsDown || altPointerIsDown) {
             const location = getLocation(event);
             if(pointerIsDown) {
-                sendPointer(location,false);
+                pointerStatus.send(location,false);
             }
             if(altPointerIsDown) {
-                sendPointerAlt(location,false);
+                altPointerStatus.send(location,false);
             }
         }
     };
