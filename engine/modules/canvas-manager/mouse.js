@@ -81,7 +81,15 @@ function Mouse(canvasManager,modules) {
     const sendPointerDownAlt = getTargetBind(ALT_CLICK_DOWN);
     const sendPointerMove = getTargetBind(POINTER_MOVE);
 
+    let pointerIsDown = false;
+    let altPointerIsDown = false;
+
     const sendPointer = (location,down) => {
+        if(down) {
+            pointerIsDown = true;
+        } else {
+            pointerIsDown = false;
+        }
         if(!canSendEvent()) return;
         if(down) {
             sendPointerDown(location);
@@ -90,6 +98,11 @@ function Mouse(canvasManager,modules) {
         }
     };
     const sendPointerAlt = (location,down) => {
+        if(down) {
+            altPointerIsDown = true;
+        } else {
+            altPointerIsDown = false;
+        }
         if(!canSendEvent()) return;
         if(down) {
             sendPointerDownAlt(location);
@@ -126,29 +139,16 @@ function Mouse(canvasManager,modules) {
 
         sendPointerMove(getLocation(event));
     };
-    const rewritePointerEvent = (event,button) => {
-        return {
-            button: button,
-            layerX: event.layerX,
-            layerY: event.layerY,
-            isPrimary: event.isPrimary,
-            stopPropagation: event.stopPropagation.bind(event),
-            preventDefault: event.preventDefault.bind(event)
-        }
-    };
     const pointerLeave = event => {
-        if(event.pressure === 0) {
-            stopPropagation(event);
-            return;
-        }
-        //This is the most iffy part of the pointer processing
-        if(event.buttons === 1 || event.buttons === 2) {
-            //This too
-            pointerUp(rewritePointerEvent(
-                event,event.buttons === 1 ? 0 : 2
-            ));
-        } else {
-            stopPropagation(event); 
+        stopPropagation(event);  
+        if(pointerIsDown || altPointerIsDown) {
+            const location = getLocation(event);
+            if(pointerIsDown) {
+                sendPointer(location,false);
+            }
+            if(altPointerIsDown) {
+                sendPointerAlt(location,false);
+            }
         }
     };
 

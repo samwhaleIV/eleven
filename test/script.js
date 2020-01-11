@@ -59,6 +59,9 @@ canvasManager.frame.child = {
             console.log("Key a down UNMANAGED");
             return;canvasManager.pause();
         }
+    },
+    resize: () => {
+        console.log("Resized")
     }
 }
 canvasManager.start();
