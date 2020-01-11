@@ -42,23 +42,12 @@ const MODIFIER_CODES = MakeAssociative([
     SHIFT_CODE,CTRL_CODE,ALT_CODE,META_LEFT,META_RIGHT
 ]);
 
-const ALT_KEYS = [
-    "AltLeft","AltRight"
-];
-const CTRL_KEYS = [
-    "AltLeft","AltRight"
-];
-const SHIFT_KEYS = [
-    "ShiftLeft","ShiftRight"
-];
+const ALT_KEYS = ["AltLeft","AltRight"];
+const CTRL_KEYS = ["AltLeft","AltRight"];
+const SHIFT_KEYS = ["ShiftLeft","ShiftRight"];
 
 const hasKey = (downKeys,set) => {
-    for(let i = 0;i<set.length;i++) {
-        if(set[i] in downKeys) {
-            return true;
-        }
-    }
-    return false;
+    return set[0] in downKeys || set[1] in downKeys;
 };
 
 const getModifierData = downKeys => {
