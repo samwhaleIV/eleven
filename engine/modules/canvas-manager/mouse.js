@@ -64,7 +64,7 @@ function Mouse(canvasManager,modules) {
         altKey: {get: function() {return sendDataContainer.altKey}},
         shiftKey: {get: function() {return sendDataContainer.shiftKey}},
         down: {get: function() {return pointerStatus.isDown}},
-        altDown: {get: function() {return altPointerIsDown.isDown}}
+        altDown: {get: function() {return altPointerStatus.isDown}}
     }));
 
     const updateLocationData = sendData => {
@@ -206,7 +206,7 @@ function Mouse(canvasManager,modules) {
         value: pointerData,
         writable: false,
         configurable: false,
-        enumerable: false
+        enumerable: true
     });
 
     this.updateModifiers = data => {
