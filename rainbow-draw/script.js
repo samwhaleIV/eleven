@@ -92,9 +92,9 @@ function DrawApp(canvasManager) {
         color = newColor;
     });
 
-    const circle = (x,y) => {
+    const circle = (x,y,size) => {
         bufferContext.beginPath();
-        bufferContext.arc(x,y,halfSize,0,Math.PI*2);
+        bufferContext.arc(x,y,size,0,Math.PI*2);
         bufferContext.fill();
     };
 
@@ -125,10 +125,12 @@ function DrawApp(canvasManager) {
             return;
         };
 
-        bufferContext.fillStyle = color;
+        bufferContext.fillStyle = !pointer.altKey ? color : "white";
+
+        const circleSize = pointer.altKey ? halfSize * 4 : halfSize;
 
         let lastPos = movementBuffer[0];
-        circle(lastPos.x,lastPos.y);
+        circle(lastPos.x,lastPos.y,circleSize);
 
         for(let i = 1;i<movementBuffer.length;i++) {
             const pos = movementBuffer[i];
@@ -141,11 +143,11 @@ function DrawApp(canvasManager) {
                 const t = (totalDistance - distance) / totalDistance;
                 const x = lerp(lastPos.x,pos.x,t);
                 const y = lerp(lastPos.y,pos.y,t);
-                circle(x,y);
+                circle(x,y,circleSize);
                 distance -= precision;
             }
 
-            circle(pos.x,pos.y);
+            circle(pos.x,pos.y,circleSize);
             lastPos = pos;
         }
         movementBuffer.splice(0,movementBuffer.length-1);
