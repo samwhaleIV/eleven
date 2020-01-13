@@ -9,6 +9,9 @@ function ColorPicker(colorChanged) {
         "yellow","red","blue","green","orange","brown","pink","purple"
     ];
 
+    const max = colors.length-1;
+    const min = 0;
+
     const picker = document.createElement("div");
     picker.classList.add("picker");
 
@@ -19,18 +22,18 @@ function ColorPicker(colorChanged) {
     let index = 0;
 
     const safeColor = index => {
-        if(index < 0) {
-            index = colors.length-1;
-        } else if(index > colors.length-1) {
-            index = 0;
+        if(index < min) {
+            index = max;
+        } else if(index > max) {
+            index = min;
         }
         return colors[index];
     }
 
     const setColors = () => {
-        let c1 = safeColor(index-1);
-        let c2 = safeColor(index);
-        let c3 = safeColor(index+1);
+        const c1 = safeColor(index-1);
+        const c2 = safeColor(index);
+        const c3 = safeColor(index+1);
         left.style.backgroundColor = c1;
         middle.style.backgroundColor = c2;
         right.style.backgroundColor = c3;
@@ -39,15 +42,15 @@ function ColorPicker(colorChanged) {
 
     const cycleLeft = () => {
         index -= 1;
-        if(index < 0) {
-            index = colors.length - 1;
+        if(index < min) {
+            index = max;
         }
         setColors();
     };
     const cycleRight = () => {
         index += 1;
-        if(index > colors.length - 1) {
-            index = 0;
+        if(index > max) {
+            index = min;
         }
         setColors();
     };
