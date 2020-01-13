@@ -1,0 +1,16 @@
+div.picker {
+width: auto;
+height: 50px;
+position: fixed;
+top: 5px;
+left: 5px;
+display: flex;
+border: 4px solid #000000;
+border-radius: 7px;
+}
+
+div.picker div {
+    width: 100px;
+    height: 100%;
+    display: block;
+}

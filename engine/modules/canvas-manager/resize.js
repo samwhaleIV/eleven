@@ -30,12 +30,6 @@ function Resize(canvasManager,modules) {
     const canvas = modules.internal.canvas;
     const context = modules.internal.context;
 
-    const buffer = new OffscreenCanvas(0,0);
-    const bufferContext = buffer.getContext("2d",{alpha:true});
-
-    const doubleBuffer = new OffscreenCanvas(0,0);
-    const doubleBufferContext = doubleBuffer.getContext("2d",{alpha:true});
-
     let deferred = false;
 
     const updateSize = () => {
@@ -43,8 +37,7 @@ function Resize(canvasManager,modules) {
     };
 
     const resize = (function(
-        window,buffer,bufferContext,
-        doubleBuffer,doubleBufferContext,sizeValues,
+        window,sizeValues,
         canvas,context,sizeValuesReadonly,
         canvasManager,resizeMethod
     ){
@@ -53,32 +46,6 @@ function Resize(canvasManager,modules) {
 
             const width = window.innerWidth;
             const height = window.innerHeight;
-    
-            if(frame.doubleResizeBuffer) {
-                if(!buffer.width || !buffer.height) {
-                    buffer.width = width;
-                    buffer.height = height;
-                }
-        
-                bufferContext.drawImage(canvas,0,0);
-        
-                if(width > buffer.width || height > buffer.height) {
-                    doubleBuffer.width = buffer.width;
-                    doubleBuffer.height = buffer.height;
-                    doubleBufferContext.drawImage(buffer,0,0);
-        
-                    buffer.width = width;
-                    buffer.height = height;
-        
-                    bufferContext.drawImage(doubleBuffer,0,0);
-                    doubleBuffer.width = 0;
-                    doubleBuffer.height = 0;
-                }
-            } else {
-                buffer.width = width;
-                buffer.height = height;
-                bufferContext.drawImage(canvas,0,0);
-            }
     
             canvas.width = width;
             canvas.height = height;
@@ -115,11 +82,10 @@ function Resize(canvasManager,modules) {
             sizeValues.equalDimensions = equalDimensions;
             sizeValueTypes.equalDimensions = !equalDimensions;
 
-            FrameHelper.NotifyAll(frame,resizeMethod,sizeValuesReadonly,context,buffer);
+            FrameHelper.NotifyAll(frame,resizeMethod,sizeValuesReadonly,context);
         };
     })(
-        window,buffer,bufferContext,
-        doubleBuffer,doubleBufferContext,sizeValues,
+        window,sizeValues,
         canvas,context,sizeValuesReadonly,
         canvasManager,RESIZE_METHOD
     );

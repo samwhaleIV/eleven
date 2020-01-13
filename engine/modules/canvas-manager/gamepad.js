@@ -21,5 +21,6 @@ function Gamepad() {
         }
         return null;
     };
+    Object.freeze(this);
 }
 export default Gamepad;

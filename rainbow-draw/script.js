@@ -3,6 +3,67 @@ Namespace.makeGlobal(engine);
 
 const canvasManager = engine.CanvasManager;
 
+function ColorPicker(colorChanged) {
+
+    const colors = [
+        "yellow","red","blue","green","orange","brown","pink","purple"
+    ];
+
+    const picker = document.createElement("div");
+    picker.classList.add("picker");
+
+    const left = document.createElement("div");
+    const middle = document.createElement("div");
+    const right = document.createElement("div");
+
+    let index = 0;
+
+    const safeColor = index => {
+        if(index < 0) {
+            index = colors.length-1;
+        } else if(index > colors.length-1) {
+            index = 0;
+        }
+        return colors[index];
+    }
+
+    const setColors = () => {
+        let c1 = safeColor(index-1);
+        let c2 = safeColor(index);
+        let c3 = safeColor(index+1);
+        left.style.backgroundColor = c1;
+        middle.style.backgroundColor = c2;
+        right.style.backgroundColor = c3;
+        colorChanged(c2);
+    };
+
+    const cycleLeft = () => {
+        index -= 1;
+        if(index < 0) {
+            index = colors.length - 1;
+        }
+        setColors();
+    };
+    const cycleRight = () => {
+        index += 1;
+        if(index > colors.length - 1) {
+            index = 0;
+        }
+        setColors();
+    };
+
+    left.onclick = cycleLeft;
+    right.onclick = cycleRight;
+
+    picker.appendChild(left);
+    picker.appendChild(middle);
+    picker.appendChild(right);
+
+    setColors();
+
+    document.body.appendChild(picker);
+}
+
 function DrawApp(canvasManager) {
     this.noContextMenu = false;
     this.doubleResizeBuffer = true;
@@ -18,31 +79,20 @@ function DrawApp(canvasManager) {
         return (1 - t) * v0 + t * v1;
     }
 
-    const buffer = new OffscreenCanvas(1,1);
+    const buffer = new OffscreenCanvas(
+        window.innerWidth,window.innerHeight
+    );
     const bufferContext = buffer.getContext("2d",{alpha:true});
-    
+
+    let color = "black";
+    const colorPicker = new ColorPicker(newColor => {
+        color = newColor;
+    });
+
     const circle = (x,y) => {
         bufferContext.beginPath();
         bufferContext.arc(x,y,halfSize,0,Math.PI*2);
         bufferContext.fill();
-    };
-    
-    const getColor = (isAlt,isShift,timestamp) => {
-        if(isAlt) {
-            if(isShift) {
-                return "blue";
-            } else {
-                return "red";
-            }
-        } else {
-            return `rgba(${
-                (timestamp/1000)%1*255
-            },${
-                (timestamp/3000)%1*255
-            },${
-                (timestamp/10000)%1*255}
-            )`;
-        }
     };
 
     const movementBuffer = [];
@@ -55,30 +105,24 @@ function DrawApp(canvasManager) {
         movementBuffer.splice(0);
     };
 
-    this.resize = (size,context,canvasBuffer) => {
-        context.fillStyle = "white";
-        context.fillRect(0,0,size.width,size.height);
-        context.drawImage(canvasBuffer,0,0);
-
-        buffer.width = size.width;
-        buffer.height = size.height;
+    this.resize = size => {
+        canvasManager.bufferResize({
+            canvas: buffer,
+            context: bufferContext
+        },size.width,size.height);
     };
 
-    let timeDifference = 0;
+    this.render = (context,_,size) => {
 
-    this.render = (context,{now,delta}) => {
+        context.fillStyle = "white";
+        context.fillRect(0,0,size.width,size.height);
 
         if(!movementBuffer.length) {
-            timeDifference += delta;
             context.drawImage(buffer,0,0);
             return;
         };
-        now -= timeDifference;
 
-        const isAlt = pointer.altKey;
-        const isShift = pointer.shiftKey;
-
-        bufferContext.fillStyle = getColor(isAlt,isShift,now);
+        bufferContext.fillStyle = color;
 
         let lastPos = movementBuffer[0];
         circle(lastPos.x,lastPos.y);
@@ -101,9 +145,8 @@ function DrawApp(canvasManager) {
             circle(pos.x,pos.y);
             lastPos = pos;
         }
-
         movementBuffer.splice(0,movementBuffer.length-1);
-
+    
         context.drawImage(buffer,0,0);
     };
 }
