@@ -41,8 +41,8 @@ function Render(canvasManager,modules) {
         return internalFrame;
     }
 
-    (function(context,size,pollInput){
-        let animationFrame;
+    (function({context,size,pollInput,tryUpdateSize}){
+        let animationFrame = null;
         const time = Object.seal({
             now: 0,
             delta: 0
@@ -51,16 +51,15 @@ function Render(canvasManager,modules) {
             now: {get: function() {return time.now}},
             delta: {get: function() {return time.delta}}
         }));
-        function render(timestamp) {
+        const render = timestamp => {
+            tryUpdateSize();
             pollInput();
-            if(paused) {
-                return;
-            }
+            if(paused) return;
             time.delta = timestamp - time.now;
             time.now = timestamp;
             renderFrame(context,readonlyTime,size);
             animationFrame = requestAnimationFrame(render);
-        }
+        };
         canvasManager.start = () => {
             if(!internalFrame) {
                 MISSING_FRAME();
@@ -69,7 +68,6 @@ function Render(canvasManager,modules) {
                 RENDER_LOOP_ALREADY_STARTED()
             }
             paused = false;
-            modules.resize.updateIfDeferred();
             animationFrame = requestAnimationFrame(render);
             LOG_LOOP_STARTED();
         };
@@ -84,7 +82,12 @@ function Render(canvasManager,modules) {
         };
         canvasManager.setFrame = SetFrame;
         canvasManager.getFrame = GetFrame;
-    })(modules.internal.context,canvasManager.size,modules.input.poll);
+    })({
+        context: modules.internal.context,
+        size: canvasManager.size,
+        pollInput: modules.input.poll,
+        tryUpdateSize: modules.resize.tryUpdateSize
+    });
 
     Object.defineProperties(canvasManager,{
         paused: {

@@ -1,5 +1,7 @@
 import FrameHelper from "./frame.js";
 
+const RESIZE_METHOD = "resize";
+
 function Resize(canvasManager,modules) {
     const sizeValues = new Object();
     const sizeValuesReadonly = new Object();
@@ -34,93 +36,99 @@ function Resize(canvasManager,modules) {
     const doubleBuffer = new OffscreenCanvas(0,0);
     const doubleBufferContext = doubleBuffer.getContext("2d",{alpha:true});
 
-    const NotifyFramesResize = () => {
-        const frame = canvasManager.frame;
-        const method = "resize";
-        const size = sizeValuesReadonly;
-        FrameHelper.NotifyAll(frame,method,size,context,buffer);
-    };
+    let deferred = false;
 
     const updateSize = () => {
-        const paused = canvasManager.paused;
-        if(paused || paused === undefined) {
-            deferred = true;
-            return;
-        }
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        if(canvasManager.frame.doubleResizeBuffer) {
-            if(!buffer.width || !buffer.height) {
-                buffer.width = width;
-                buffer.height = height;
-            }
-    
-            bufferContext.drawImage(canvas,0,0);
-    
-            if(width > buffer.width || height > buffer.height) {
-                doubleBuffer.width = buffer.width;
-                doubleBuffer.height = buffer.height;
-                doubleBufferContext.drawImage(buffer,0,0);
-    
-                buffer.width = width;
-                buffer.height = height;
-    
-                bufferContext.drawImage(doubleBuffer,0,0);
-                doubleBuffer.width = 0;
-                doubleBuffer.height = 0;
-            }
-        } else {
-            buffer.width = width;
-            buffer.height = height;
-            bufferContext.drawImage(canvas,0,0);
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        sizeValues.width = width;
-        sizeValues.height = height;
-
-        sizeValues.doubleWidth = width * 2;
-        sizeValues.doubleHeight = height * 2;
-
-        sizeValues.halfWidth = width / 2;
-        sizeValues.halfHeight = height / 2;
-
-        sizeValues.quarterWidth = width / 4;
-        sizeValues.quarterHeight = height / 4;
-
-        sizeValues.horizontalRatio = width / height;
-        sizeValues.verticalRatio = height / width;
-
-        if(width >= height) {
-            sizeValues.greaterHeight = false;
-            sizeValues.greaterWidth =  true;
-            sizeValues.largestDimension =  width;
-            sizeValues.smallestDimension = height;
-        } else {
-            sizeValues.greaterHeight = true;
-            sizeValues.greaterWidth =  false;
-            sizeValues.largestDimension =  height;
-            sizeValues.smallestDimension = width;
-        }
-
-        const equalDimensions = width === height;
-
-        sizeValues.equalDimensions = equalDimensions;
-        sizeValueTypes.equalDimensions = !equalDimensions;
-
-        NotifyFramesResize();
+        deferred = true;
     };
 
-    let deferred = false;
-    this.updateIfDeferred = () => {
-        if(deferred) {
-            updateSize();
-        }
+    const resize = (function(
+        window,buffer,bufferContext,
+        doubleBuffer,doubleBufferContext,sizeValues,
+        canvas,context,sizeValuesReadonly,
+        canvasManager,resizeMethod
+    ){
+        return () => {
+            const frame = canvasManager.frame;
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+    
+            if(frame.doubleResizeBuffer) {
+                if(!buffer.width || !buffer.height) {
+                    buffer.width = width;
+                    buffer.height = height;
+                }
+        
+                bufferContext.drawImage(canvas,0,0);
+        
+                if(width > buffer.width || height > buffer.height) {
+                    doubleBuffer.width = buffer.width;
+                    doubleBuffer.height = buffer.height;
+                    doubleBufferContext.drawImage(buffer,0,0);
+        
+                    buffer.width = width;
+                    buffer.height = height;
+        
+                    bufferContext.drawImage(doubleBuffer,0,0);
+                    doubleBuffer.width = 0;
+                    doubleBuffer.height = 0;
+                }
+            } else {
+                buffer.width = width;
+                buffer.height = height;
+                bufferContext.drawImage(canvas,0,0);
+            }
+    
+            canvas.width = width;
+            canvas.height = height;
+    
+            sizeValues.width = width;
+            sizeValues.height = height;
+    
+            sizeValues.doubleWidth = width * 2;
+            sizeValues.doubleHeight = height * 2;
+    
+            sizeValues.halfWidth = width / 2;
+            sizeValues.halfHeight = height / 2;
+    
+            sizeValues.quarterWidth = width / 4;
+            sizeValues.quarterHeight = height / 4;
+    
+            sizeValues.horizontalRatio = width / height;
+            sizeValues.verticalRatio = height / width;
+    
+            if(width >= height) {
+                sizeValues.greaterHeight = false;
+                sizeValues.greaterWidth =  true;
+                sizeValues.largestDimension =  width;
+                sizeValues.smallestDimension = height;
+            } else {
+                sizeValues.greaterHeight = true;
+                sizeValues.greaterWidth =  false;
+                sizeValues.largestDimension =  height;
+                sizeValues.smallestDimension = width;
+            }
+    
+            const equalDimensions = width === height;
+    
+            sizeValues.equalDimensions = equalDimensions;
+            sizeValueTypes.equalDimensions = !equalDimensions;
+
+            FrameHelper.NotifyAll(frame,resizeMethod,sizeValuesReadonly,context,buffer);
+        };
+    })(
+        window,buffer,bufferContext,
+        doubleBuffer,doubleBufferContext,sizeValues,
+        canvas,context,sizeValuesReadonly,
+        canvasManager,RESIZE_METHOD
+    );
+
+    this.tryUpdateSize = () => {
+        if(!deferred) return;
         deferred = false;
-    }
+        resize();
+    };
 
     this.installDOM = () => {
         window.addEventListener("resize",updateSize);
