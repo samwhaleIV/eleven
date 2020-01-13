@@ -95,7 +95,7 @@ function Mouse(canvasManager,modules) {
         return !canvasManager.paused;
     };
     const hasAltEvents = frame => {
-        return frame.noContextMenu || frame.altClickDown || frame.altClickUp;
+        return frame.settings.noContextMenu || frame.altClickDown || frame.altClickUp;
     };
     const canSendAltEvent = () => {
         if(canvasManager.paused) {

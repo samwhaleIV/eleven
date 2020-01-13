@@ -1,16 +1,0 @@
-div.picker {
-width: auto;
-height: 70px;
-display: flex;
-position: fixed;
-transform: translateX(-50%);
-left: 50%;
-box-shadow: #585858 0px 0px 7px 0px;
-top: 9px;
-}
-
-div.picker div {
-    width: 90px;
-    height: 100%;
-    display: block;
-}

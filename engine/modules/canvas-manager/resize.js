@@ -1,20 +1,17 @@
 import FrameHelper from "./frame.js";
 
 const RESIZE_METHOD = "resize";
+const FULL_SIZE_CLASS = "full";
 
 function Resize(canvasManager,modules) {
     const sizeValues = new Object();
     const sizeValuesReadonly = new Object();
 
     const sizeValueTypes = [
-        "width","height",
-        "halfWidth","halfHeight",
-        "doubleWidth","doubleHeight",
-        "quarterWidth","quarterHeight",
-        "horizontalRatio","verticalRatio",
-        "largestDimension","smallestDimension",
-        "greaterWidth","greaterHeight",
-        "equalDimensions","unequalDimensions"
+        "width","height","halfWidth","halfHeight",
+        "doubleWidth","doubleHeight","quarterWidth","quarterHeight",
+        "horizontalRatio","verticalRatio","largestDimension","smallestDimension",
+        "greaterWidth","greaterHeight","equalDimensions","unequalDimensions"
     ];
 
     sizeValueTypes.forEach(valueType => {
@@ -37,63 +34,64 @@ function Resize(canvasManager,modules) {
     };
 
     const resize = (function(
-        window,sizeValues,
-        canvas,context,sizeValuesReadonly,
+        sizeValues,canvas,context,sizeValuesReadonly,
         canvasManager,resizeMethod
     ){
-        return () => {
-            const frame = canvasManager.frame;
+        return (width,height) => {
+    
+            canvas.width = width; canvas.height = height;
+            sizeValues.width = width; sizeValues.height = height;
+            sizeValues.doubleWidth = width * 2; sizeValues.doubleHeight = height * 2;
+            sizeValues.halfWidth = width / 2; sizeValues.halfHeight = height / 2;
+            sizeValues.quarterWidth = width / 4; sizeValues.quarterHeight = height / 4;
+            sizeValues.horizontalRatio = width / height;sizeValues.verticalRatio = height / width;
 
-            const width = window.innerWidth;
-            const height = window.innerHeight;
+            const greaterWidth = width >= height;
+            sizeValues.greaterHeight = !greaterWidth;
+            sizeValues.greaterWidth = greaterWidth;
     
-            canvas.width = width;
-            canvas.height = height;
-    
-            sizeValues.width = width;
-            sizeValues.height = height;
-    
-            sizeValues.doubleWidth = width * 2;
-            sizeValues.doubleHeight = height * 2;
-    
-            sizeValues.halfWidth = width / 2;
-            sizeValues.halfHeight = height / 2;
-    
-            sizeValues.quarterWidth = width / 4;
-            sizeValues.quarterHeight = height / 4;
-    
-            sizeValues.horizontalRatio = width / height;
-            sizeValues.verticalRatio = height / width;
-    
-            if(width >= height) {
-                sizeValues.greaterHeight = false;
-                sizeValues.greaterWidth =  true;
-                sizeValues.largestDimension =  width;
+            if(greaterWidth) {
+                sizeValues.largestDimension = width;
                 sizeValues.smallestDimension = height;
             } else {
-                sizeValues.greaterHeight = true;
-                sizeValues.greaterWidth =  false;
-                sizeValues.largestDimension =  height;
+                sizeValues.largestDimension = height;
                 sizeValues.smallestDimension = width;
             }
     
             const equalDimensions = width === height;
-    
             sizeValues.equalDimensions = equalDimensions;
             sizeValueTypes.equalDimensions = !equalDimensions;
 
+            const frame = canvasManager.frame;
+            if(!frame) return;
             FrameHelper.NotifyAll(frame,resizeMethod,sizeValuesReadonly,context);
         };
     })(
-        window,sizeValues,
-        canvas,context,sizeValuesReadonly,
+        sizeValues,canvas,context,sizeValuesReadonly,
         canvasManager,RESIZE_METHOD
     );
 
+    let fixedSize = false;
+
     this.tryUpdateSize = () => {
+        if(fixedSize) return;
         if(!deferred) return;
         deferred = false;
-        resize();
+        resize(window.innerWidth,window.innerHeight);
+    };
+
+    this.setFixedSize = (width,height) => {
+        fixedSize = true;
+        resize(width,height);
+        canvas.classList.remove(FULL_SIZE_CLASS);
+    };
+
+    this.setFullSize = () => {
+        if(fixedSize) {
+            deferred = true;
+        }
+        fixedSize = false;
+        canvas.classList.add(FULL_SIZE_CLASS);
     };
 
     this.installDOM = () => {

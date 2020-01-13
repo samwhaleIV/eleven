@@ -1,4 +1,5 @@
 import FrameHelper from "./frame.js";
+import Constants from "../../internal/constants.js";
 
 const LOG_PREFIX = "Canvas manager";
 
@@ -24,20 +25,56 @@ const LOG_LOOP_PAUSED = () => {
     console.log(`${LOG_PREFIX}: Paused render loop`);
 };
 
+const getFrameSettings = () => {
+    return Object.assign(new Object(),Constants.defaultFrameSettings);
+};
+
+const MISSING_DIMENSION = (width,height) => {
+    throw Error(`Fixed sizing cannot be used. Width '${width}' cannot be paired with height '${height}'`);
+};
+
+const NON_EXTENSIBLE_FRAME_OBJECT = frame => {
+    throw Error(`Frame '${frame}' is not extensible, property access is required by the engine`);
+};
+
 function Render(canvasManager,modules) {
 
     let paused = true;
     let internalFrame = null;
     let renderFrame = null;
 
-    function SetFrame(frame) {
+    const configureFrameSize = frame => {
+        const settings = frame.settings;
+        if(!settings) return;
+        const size = frame.settings.size;
+        if(!size) {
+            modules.resize.setFullSize();
+            return;
+        }
+        const width = size.width;
+        const height = size.height;
+        if(!width || !height) {
+            MISSING_DIMENSION(width,height);
+        }
+        modules.resize.setFixedSize(width,height);
+    };
+
+    function setFrame(frame) {
         if(!frame) {
             INVALID_FRAME(frame);
         }
+        internalFrame = null;
+        if(!Object.isExtensible(frame)) {
+            NON_EXTENSIBLE_FRAME_OBJECT();
+        }
+        if(!frame.settings) {
+            frame.settings = getFrameSettings();
+        }
+        configureFrameSize(frame);
         internalFrame = frame;
         renderFrame = FrameHelper.RenderFrame.bind(internalFrame);
     }
-    function GetFrame() {
+    function getFrame() {
         return internalFrame;
     }
 
@@ -80,8 +117,8 @@ function Render(canvasManager,modules) {
             animationFrame = null;
             LOG_LOOP_PAUSED();
         };
-        canvasManager.setFrame = SetFrame;
-        canvasManager.getFrame = GetFrame;
+        canvasManager.setFrame = setFrame;
+        canvasManager.getFrame = getFrame;
     })({
         context: modules.internal.context,
         size: canvasManager.size,
@@ -96,8 +133,8 @@ function Render(canvasManager,modules) {
             }
         },
         frame: {
-            get: GetFrame,
-            set: SetFrame
+            get: getFrame,
+            set: setFrame
         }
     });
     

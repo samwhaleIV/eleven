@@ -12,6 +12,11 @@ const Constants = Object.freeze({
         audioFolder: "resources/audio/",
     }),
 
+    defaultFrameSettings: {
+        noContextMenu: false,
+        size: undefined
+    },
+
     inputRoutes: Object.freeze({
         clickDown: "clickDown",
         clickUp: "clickUp",
