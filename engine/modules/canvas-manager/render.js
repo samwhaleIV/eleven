@@ -43,12 +43,22 @@ function Render(canvasManager,modules) {
 
     (function(context,size,pollInput){
         let animationFrame;
+        const time = Object.seal({
+            now: 0,
+            delta: 0
+        });
+        const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
+            now: {get: function() {return time.now}},
+            delta: {get: function() {return time.delta}}
+        }));
         function render(timestamp) {
             pollInput();
             if(paused) {
                 return;
             }
-            renderFrame(context,timestamp,size);
+            time.delta = timestamp - time.now;
+            time.now = timestamp;
+            renderFrame(context,readonlyTime,size);
             animationFrame = requestAnimationFrame(render);
         }
         canvasManager.start = () => {

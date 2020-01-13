@@ -43,7 +43,7 @@ function Mouse(canvasManager,modules) {
     const canvas = modules.internal.canvas;
 
     const translateLocation = (position,clientSize,size) => {
-        return Math.floor(position / clientSize * size);
+        return position / clientSize * size;
     };
 
     let pointerStatus = null;
@@ -63,8 +63,8 @@ function Mouse(canvasManager,modules) {
         shiftKey: {get: function() {return sendDataContainer.shiftKey}},
         altKey: {get: function() {return sendDataContainer.altKey}},
         ctrlKey: {get: function() {return sendDataContainer.ctrlKey}},
-        down: {get: function() {return pointerStatus.isDown}},
-        altDown: {get: function() {return altPointerStatus.isDown}}
+        isDown: {get: function() {return pointerStatus.isDown}},
+        altIsDown: {get: function() {return altPointerStatus.isDown}}
     }));
 
     const updateLocationData = sendData => {
@@ -108,9 +108,9 @@ function Mouse(canvasManager,modules) {
         return hasAltEvents(frame);
     };
 
-    const tryPreventContextMenu = event => {
-        if(!canSendAltEvent()) return;
+    const stopContextMenu = event => {
         event.stopPropagation();
+        if(!canSendAltEvent()) return;
         event.preventDefault();  
     };
 
@@ -125,7 +125,13 @@ function Mouse(canvasManager,modules) {
     const sendPointerDown = getTargetBind(CLICK_DOWN);
     const sendPointerUpAlt = getTargetBind(ALT_CLICK_UP);
     const sendPointerDownAlt = getTargetBind(ALT_CLICK_DOWN);
-    const sendPointerMove = getTargetBind(POINTER_MOVE);
+    const sendPointerMove = (function(targetBind){
+        return function(sendData) {
+            sendData.isDown = pointerStatus.isDown;
+            sendData.altIsDown = altPointerStatus.isDown;
+            targetBind(sendData);
+        }
+    }(getTargetBind(POINTER_MOVE)));
 
     pointerStatus = new PointerStatus(
         canSendEvent,sendPointerDown,sendPointerUp
@@ -145,8 +151,6 @@ function Mouse(canvasManager,modules) {
     };
 
     const pointerChange = function(down,event) {
-        event.stopPropagation();
-        if(!event.isPrimary) return;
         const changeTarget = getChangeTarget(event);
         if(!changeTarget) return;
         const sendData = getSendData(event);
@@ -159,47 +163,41 @@ function Mouse(canvasManager,modules) {
     const pointerDown = pointerChange.bind(null,true);
 
     const pointerMove = event => {
-        event.stopPropagation();
-        if(!event.isPrimary) return;
         if(!canSendEvent()) return;
         const sendData = getSendData(event);
         updateLocationData(sendData);
         sendPointerMove(sendData);
     };
-    const pointerLeave = event => {
-        event.stopPropagation();
-        if(!event.isPrimary) return;
-
-        const pointerIsDown = pointerStatus.isDown;
-        const altPointerIsDown = altPointerStatus.isDown;
-    
-        if(pointerIsDown || altPointerIsDown) {
-            const sendData = getSendData(event);
-            if(pointerIsDown) {
-                pointerStatus.send(sendData,false);
-            }
-            if(altPointerIsDown) {
-                altPointerStatus.send(sendData,false);
-            }
-        }
-    };
 
     this.installDOM = () => {
-        const captureOptions = {
-            capture: true
-        };
-
-        document.body.addEventListener(
-            "contextmenu",tryPreventContextMenu,captureOptions
+        const captureOptions = {capture: true};
+        const target = canvas;
+        
+        target.addEventListener(
+            "contextmenu",stopContextMenu,captureOptions
         );
 
-        const target = canvas;
+        const preprocess = event => {
+            event.stopPropagation();
+            event.preventDefault();
+            return event.isPrimary;
+        };
 
-        target.addEventListener("pointerup",pointerUp,captureOptions);
-        target.addEventListener("pointerdown",pointerDown,captureOptions);
+        target.addEventListener("pointerup",function(event){
+            if(!preprocess(event)) return;
+            pointerUp(event);
+        },captureOptions);
 
-        target.addEventListener("pointermove",pointerMove,captureOptions);
-        target.addEventListener("pointerleave",pointerLeave,captureOptions);
+        target.addEventListener("pointerdown",function(event){
+            if(!preprocess(event)) return;
+            target.setPointerCapture(event.pointerId);
+            pointerDown(event);
+        },captureOptions);
+
+        target.addEventListener("pointermove",function(event){
+            if(!preprocess(event)) return;
+            pointerMove(event);
+        },captureOptions);
     };
 
     Object.defineProperty(canvasManager,"pointer",{

@@ -26,19 +26,55 @@ function Resize(canvasManager,modules) {
     Object.freeze(sizeValuesReadonly);
 
     const canvas = modules.internal.canvas;
+    const context = modules.internal.context;
+
+    const buffer = new OffscreenCanvas(0,0);
+    const bufferContext = buffer.getContext("2d",{alpha:true});
+
+    const doubleBuffer = new OffscreenCanvas(0,0);
+    const doubleBufferContext = doubleBuffer.getContext("2d",{alpha:true});
 
     const NotifyFramesResize = () => {
-        FrameHelper.NotifyAll(canvasManager.frame,"resize",sizeValuesReadonly);
+        const frame = canvasManager.frame;
+        const method = "resize";
+        const size = sizeValuesReadonly;
+        FrameHelper.NotifyAll(frame,method,size,context,buffer);
     };
 
     const updateSize = () => {
-        if(canvasManager.paused) {
+        const paused = canvasManager.paused;
+        if(paused || paused === undefined) {
             deferred = true;
             return;
         }
-
         const width = window.innerWidth;
         const height = window.innerHeight;
+
+        if(canvasManager.frame.doubleResizeBuffer) {
+            if(!buffer.width || !buffer.height) {
+                buffer.width = width;
+                buffer.height = height;
+            }
+    
+            bufferContext.drawImage(canvas,0,0);
+    
+            if(width > buffer.width || height > buffer.height) {
+                doubleBuffer.width = buffer.width;
+                doubleBuffer.height = buffer.height;
+                doubleBufferContext.drawImage(buffer,0,0);
+    
+                buffer.width = width;
+                buffer.height = height;
+    
+                bufferContext.drawImage(doubleBuffer,0,0);
+                doubleBuffer.width = 0;
+                doubleBuffer.height = 0;
+            }
+        } else {
+            buffer.width = width;
+            buffer.height = height;
+            bufferContext.drawImage(canvas,0,0);
+        }
 
         canvas.width = width;
         canvas.height = height;
