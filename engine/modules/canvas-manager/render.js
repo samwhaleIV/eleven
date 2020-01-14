@@ -89,9 +89,9 @@ function Render(canvasManager,modules) {
             delta: {get: function() {return time.delta}}
         }));
         const render = timestamp => {
+            if(paused) return;
             tryUpdateSize();
             pollInput();
-            if(paused) return;
             time.delta = timestamp - time.now;
             time.now = timestamp;
             renderFrame(context,readonlyTime,size);
