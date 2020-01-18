@@ -5,7 +5,7 @@ const canvasManager = engine.CanvasManager;
 
 function TrigRecursion() {
 
-    const MINIMUM_SIZE = 4000;
+    const MINIMUM_SIZE = 20000;
 
     const getTriangles = ({width,height}) => {
         const triangles = [];
@@ -37,6 +37,7 @@ function TrigRecursion() {
             });
         };
         roots.forEach(recurse);
+        console.log(triangles.length*3);
         return triangles;
     };
 
@@ -45,7 +46,7 @@ function TrigRecursion() {
         context.fillRect(0,0,size.width,size.height);
 
         context.strokeStyle = "white";
-        context.lineWidth = 1 / 3;
+        context.lineWidth = 1
 
         getTriangles(size).forEach(({a,b,c}) => {
             context.beginPath();
