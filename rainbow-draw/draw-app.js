@@ -5,7 +5,6 @@ function DrawApp(canvasManager) {
 
     const size = 10;
     const halfSize = size / 2;
-
     const precision = halfSize / 2;
 
     function lerp(v0,v1,t) {
@@ -61,11 +60,11 @@ function DrawApp(canvasManager) {
 
         for(let i = 1;i<movementBuffer.length;i++) {
             const pos = movementBuffer[i];
-
-            const xDistance = Math.abs(lastPos.x-pos.x);
-            const yDistance = Math.abs(lastPos.y-pos.y);
-            const totalDistance = xDistance + yDistance;
+            const totalDistance = Math.sqrt(
+                Math.pow(lastPos.x-pos.x,2) + Math.pow(lastPos.y-pos.y,2)
+            );
             let distance = totalDistance;
+
             while(distance > 0) {
                 const t = (totalDistance - distance) / totalDistance;
                 const x = lerp(lastPos.x,pos.x,t);
