@@ -27,11 +27,13 @@ function Resize(canvasManager,modules) {
     const context = modules.internal.context;
 
     let deferred = false;
-
     const setDeferred = () => {
         deferred = true;
     };
-
+    const setNotDeferred = () => {
+        deferred = false;
+    };
+    this.setDeferred = setDeferred;
     setDeferred();
 
     const resize = (function(
@@ -77,7 +79,7 @@ function Resize(canvasManager,modules) {
     this.tryUpdateSize = () => {
         if(fixedSize) return;
         if(!deferred) return;
-        deferred = false;
+        setNotDeferred();
         let parent = canvas.parentElement;
         if(!parent) {
             parent = {
@@ -95,7 +97,7 @@ function Resize(canvasManager,modules) {
 
     this.setFullSize = () => {
         if(fixedSize) {
-            deferred = true;
+            setDeferred();
         }
         fixedSize = false;
     };

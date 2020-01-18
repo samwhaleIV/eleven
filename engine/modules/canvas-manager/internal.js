@@ -31,7 +31,7 @@ function Internal(canvasManager,modules) {
                 canvas.parentElement.removeChild(canvas);
             }
             newParent.appendChild(canvas);
-            modules.resize.tryUpdateSize();
+            modules.resize.setDeferred();
         },
         configurable: false,
         enumerable: false
