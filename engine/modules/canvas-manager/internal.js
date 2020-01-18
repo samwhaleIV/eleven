@@ -1,4 +1,8 @@
-function Internal(canvasManager) {
+const INVALID_PARENT_ELEMENT = () => {
+    throw Error("Invalid parent element");
+};
+
+function Internal(canvasManager,modules) {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d",{
         alpha: false,
@@ -6,15 +10,32 @@ function Internal(canvasManager) {
     });
     this.canvas = canvas;
     this.context = context;
-    this.installDOM = () => {
-        document.body.appendChild(canvas);
-    };
+
+    const loadMarkTarget = document.body;
     canvasManager.markLoaded = () => {
-        document.body.classList.add("loaded");
+        loadMarkTarget.classList.add("loaded");
     };
     canvasManager.markLoading = () => {
-        document.body.classList.remove("loaded");
+        loadMarkTarget.classList.remove("loaded");
     };
+
+    Object.defineProperty(canvasManager,"target",{
+        get: function() {
+            return canvas.parentElement;
+        },
+        set: function(newParent) {
+            if(!newParent) {
+                INVALID_PARENT_ELEMENT();
+            }
+            if(canvas.parentElement) {
+                canvas.parentElement.removeChild(canvas);
+            }
+            newParent.appendChild(canvas);
+            modules.resize.tryUpdateSize();
+        },
+        configurable: false,
+        enumerable: false
+    });
     Object.freeze(this);
 }
 export default Internal;

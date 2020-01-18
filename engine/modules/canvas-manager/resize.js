@@ -1,7 +1,6 @@
 import FrameHelper from "./frame.js";
 
 const RESIZE_METHOD = "resize";
-const FULL_SIZE_CLASS = "full";
 
 function Resize(canvasManager,modules) {
     const sizeValues = new Object();
@@ -29,9 +28,11 @@ function Resize(canvasManager,modules) {
 
     let deferred = false;
 
-    const updateSize = () => {
+    const setDeferred = () => {
         deferred = true;
     };
+
+    setDeferred();
 
     const resize = (function(
         sizeValues,canvas,context,sizeValuesReadonly,
@@ -77,13 +78,19 @@ function Resize(canvasManager,modules) {
         if(fixedSize) return;
         if(!deferred) return;
         deferred = false;
-        resize(window.innerWidth,window.innerHeight);
+        let parent = canvas.parentElement;
+        if(!parent) {
+            parent = {
+                clientWidth: window.innerWidth,
+                clientHeight: window.innerHeight
+            };
+        }
+        resize(parent.clientWidth,parent.clientHeight);
     };
 
     this.setFixedSize = (width,height) => {
         fixedSize = true;
         resize(width,height);
-        canvas.classList.remove(FULL_SIZE_CLASS);
     };
 
     this.setFullSize = () => {
@@ -91,15 +98,13 @@ function Resize(canvasManager,modules) {
             deferred = true;
         }
         fixedSize = false;
-        canvas.classList.add(FULL_SIZE_CLASS);
     };
 
     this.installDOM = () => {
-        window.addEventListener("resize",updateSize);
+        window.addEventListener("resize",setDeferred);
     };
 
     Object.freeze(this);
-    updateSize();
 
     canvasManager.size = sizeValuesReadonly;
 }

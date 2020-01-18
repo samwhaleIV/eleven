@@ -3,6 +3,9 @@ import DrawApp from "./draw-app.js";
 
 Namespace.makeGlobal(engine);
 const canvasManager = engine.CanvasManager;
-canvasManager.frame = new DrawApp(canvasManager);
-canvasManager.start();
-canvasManager.markLoaded();
+
+canvasManager.start({
+    target: document.body,
+    frame: new DrawApp(canvasManager),
+    markLoaded: true
+});

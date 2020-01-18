@@ -7,6 +7,7 @@ div.color-picker {
     left: 50%;
     box-shadow: #585858 0px 0px 7px 0px;
     top: 9px;
+    z-index: 2;
 }
 div.color-picker div {
     width: 90px;

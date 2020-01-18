@@ -15,6 +15,9 @@ const MISSING_FRAME = () => {
 const INVALID_FRAME = frame => {
     throw Error(`Invalid frame '${frame}'`);
 };
+const CANVAS_NOT_IN_DOM = () => {
+    throw Error("Cannot start rendering, the canvas element is not attached to the DOM");
+};
 
 let firstTime = true;
 const LOG_LOOP_STARTED = () => {
@@ -97,16 +100,18 @@ function Render(canvasManager,modules) {
             renderFrame(context,readonlyTime,size);
             animationFrame = requestAnimationFrame(render);
         };
-        canvasManager.start = () => {
-            if(!internalFrame) {
-                MISSING_FRAME();
-            }
-            if(!paused) {
-                RENDER_LOOP_ALREADY_STARTED()
-            }
+        canvasManager.start = ({target,frame,markLoaded}) => {
+            if(!paused) RENDER_LOOP_ALREADY_STARTED();
+            if(target) canvasManager.target = target;
+            if(!document.body.contains(modules.internal.canvas)) CANVAS_NOT_IN_DOM();
+            if(frame) setFrame(frame);
+            if(!internalFrame) MISSING_FRAME();
             paused = false;
             animationFrame = requestAnimationFrame(render);
             LOG_LOOP_STARTED();
+            if(markLoaded) {
+                canvasManager.markLoaded();
+            }
         };
         canvasManager.pause = () => {
             if(paused) {

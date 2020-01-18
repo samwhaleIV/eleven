@@ -11,5 +11,3 @@ context.fillText(
     context.size.halfWidth,
     context.size.halfHeight
 );
-
-document.body.classList.add("loaded");
