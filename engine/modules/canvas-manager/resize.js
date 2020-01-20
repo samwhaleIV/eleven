@@ -1,3 +1,4 @@
+import ResizeALU from "./resize-alu.js";
 import FrameHelper from "./frame.js";
 
 const RESIZE_METHOD = "resize";
@@ -7,28 +8,9 @@ const INVALID_FIXED_SIZE = (width,height) => {
 };
 
 function Resize(canvasManager,modules) {
-    const sizeValues = new Object();
-    const sizeValuesReadonly = new Object();
-
-    const sizeValueTypes = [
-        "width","height","halfWidth","halfHeight",
-        "doubleWidth","doubleHeight","quarterWidth","quarterHeight",
-        "horizontalRatio","verticalRatio","largestDimension","smallestDimension",
-        "greaterWidth","greaterHeight","equalDimensions","unequalDimensions"
-    ];
-
-    sizeValueTypes.forEach(valueType => {
-        sizeValues[valueType] = null;
-        Object.defineProperty(sizeValuesReadonly,valueType,{
-            get: function(){return sizeValues[valueType]}
-        });
-    });
-
-    Object.seal(sizeValues);
-    Object.freeze(sizeValuesReadonly);
-
+    const {sizeValues, sizeValuesReadonly} = ResizeALU.GetContainers();
     const canvas = modules.internal.canvas;
-    const context = modules.internal.context;
+    const resize = ResizeALU.GetResizer(canvas,sizeValues);
 
     let deferred = false;
     const setDeferred = () => {
@@ -40,68 +22,46 @@ function Resize(canvasManager,modules) {
     this.setDeferred = setDeferred;
     setDeferred();
 
-    const resize = (function(
-        sizeValues,canvas,context,sizeValuesReadonly,
-        canvasManager,resizeMethod
-    ){
-        return (width,height) => {
-    
-            canvas.width = width; canvas.height = height;
-            sizeValues.width = width; sizeValues.height = height;
-            sizeValues.doubleWidth = width * 2; sizeValues.doubleHeight = height * 2;
-            sizeValues.halfWidth = width / 2; sizeValues.halfHeight = height / 2;
-            sizeValues.quarterWidth = width / 4; sizeValues.quarterHeight = height / 4;
-            sizeValues.horizontalRatio = width / height;sizeValues.verticalRatio = height / width;
+    const makeSize = (width,height) => {
+        return {width,height};
+    };
+    const makeSizeClient = source => {
+        return makeSize(
+            source.clientWidth,source.clientHeight
+        );
+    };
+    const makeSizeInner = source => {
+        return makeSize(
+            source.innerWidth,source.innerHeight
+        );
+    };
 
-            const greaterWidth = width >= height;
-            sizeValues.greaterHeight = !greaterWidth;
-            sizeValues.greaterWidth = greaterWidth;
-    
-            if(greaterWidth) {
-                sizeValues.largestDimension = width;
-                sizeValues.smallestDimension = height;
-            } else {
-                sizeValues.largestDimension = height;
-                sizeValues.smallestDimension = width;
-            }
-    
-            const equalDimensions = width === height;
-            sizeValues.equalDimensions = equalDimensions;
-            sizeValueTypes.equalDimensions = !equalDimensions;
-
-            const frame = canvasManager.frame;
-            if(!frame) return;
-            FrameHelper.NotifyAll(frame,resizeMethod,sizeValuesReadonly,context);
-        };
-    })(
-        sizeValues,canvas,context,sizeValuesReadonly,
-        canvasManager,RESIZE_METHOD
-    );
+    const context = modules.internal.context;
+    const notifySizeUpdate = () => {
+        const frame = canvasManager.frame;
+        if(!frame) return;
+        FrameHelper.NotifyAll(frame,RESIZE_METHOD,[
+            sizeValuesReadonly,context
+        ]);
+    };
 
     let fixedSize = null;
-
     this.tryUpdateSize = () => {
         if(!deferred) return;
         setNotDeferred();
 
         let size = fixedSize;
-
         if(!size) {
             const parent = canvas.parentElement;
             if(parent) {
-                size = {
-                    width: parent.clientWidth,
-                    height: parent.clientHeight
-                };
+                size = makeSizeClient(parent);
             } else {
-                size = {
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                };
+                size = makeSizeInner(window);
             }
         }
 
         resize(size.width,size.height);
+        notifySizeUpdate();
     };
 
     const validateFixedDimension = size => {
@@ -114,7 +74,7 @@ function Resize(canvasManager,modules) {
         if(!validWidth || !validHeight) {
             INVALID_FIXED_SIZE(width,height);
         }
-        fixedSize = {width,height};
+        fixedSize = makeSize(width,height);
         setDeferred();
     };
 
@@ -128,9 +88,9 @@ function Resize(canvasManager,modules) {
     this.installDOM = () => {
         window.addEventListener("resize",setDeferred);
     };
+    
+    canvasManager.size = sizeValuesReadonly;
 
     Object.freeze(this);
-
-    canvasManager.size = sizeValuesReadonly;
 }
 export default Resize;

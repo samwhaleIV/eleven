@@ -32,7 +32,7 @@ const FrameHelper = Object.freeze({
             i++;
         }
     },
-    NotifyAll: function(frame,actionName,...parameters) {
+    NotifyAll: function(frame,actionName,parameters) {
         if(!frame) return;
         let child = frame.child;
 
