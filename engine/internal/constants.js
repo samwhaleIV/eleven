@@ -1,5 +1,6 @@
 const Constants = Object.freeze({
     engineNamespace: "Eleven",
+    cssLoadedClass: "loaded",
 
     resource: Object.freeze({
         defaultImageType: ".png",

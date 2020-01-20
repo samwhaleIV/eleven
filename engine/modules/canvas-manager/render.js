@@ -91,11 +91,25 @@ function Render(canvasManager,modules) {
             animationFrame = requestAnimationFrame(render);
         };
         canvasManager.start = ({target,frame,markLoaded}) => {
-            if(!paused) RENDER_LOOP_ALREADY_STARTED();
-            if(target) canvasManager.target = target;
-            if(!document.body.contains(modules.internal.canvas)) CANVAS_NOT_IN_DOM();
-            if(frame) setFrame(frame);
-            if(!internalFrame) MISSING_FRAME();
+            if(!paused) {
+                RENDER_LOOP_ALREADY_STARTED();
+            }
+
+            if(target) {
+                canvasManager.target = target;
+            }
+            modules.internal.trySetDefaultTarget();
+            if(!modules.internal.canvasInDOM()) {
+                CANVAS_NOT_IN_DOM();
+            }
+
+            if(frame) {
+                setFrame(frame);
+            }
+            if(!internalFrame) {
+                MISSING_FRAME();
+            }
+
             paused = false;
             animationFrame = requestAnimationFrame(render);
             LOG_LOOP_STARTED();

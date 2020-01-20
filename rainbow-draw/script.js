@@ -5,7 +5,6 @@ Namespace.makeGlobal(engine);
 const canvasManager = engine.CanvasManager;
 
 canvasManager.start({
-    target: document.body,
     frame: new DrawApp(canvasManager),
     markLoaded: true
 });

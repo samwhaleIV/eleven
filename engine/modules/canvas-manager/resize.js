@@ -11,9 +11,6 @@ const INVALID_FIXED_SIZE = (width,height) => {
 const INVALID_SIZE_SCALE = scale => {
     throw Error(`Invalid size scale '${scale}'`);
 };
-const SIZE_ALREADY_RESET = () => {
-    console.warn("Canvas size is still default or it has already been reset");
-};
 
 function Resize(canvasManager,modules) {
 
@@ -55,19 +52,75 @@ function Resize(canvasManager,modules) {
     };
 
     let fixedSize = null;
+    let boxFill = false;
+    let fixFill = false;
+    
+    const getParentSize = () => {
+        let parentSize;
+        const parent = canvas.parentElement;
+        if(parent) {
+            parentSize = makeSizeClient(parent);
+        } else {
+            parentSize = makeSizeInner(window);
+        }
+        return parentSize;
+    };
+
+    const removeFill = () => {
+        canvas.style.top = "";
+        canvas.style.left = "";
+        canvas.style.width = "";
+        canvas.style.height = "";
+    };
+    const setFill = (x,y,width,height) => {
+        canvas.style.top = x + "px";
+        canvas.style.left = y + "px";
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+    };
+
+    const updateFixFill = parentSize => {
+        setFill(0,0,parentSize.width,parentSize.height);
+    };
+
+    const updateBoxFill = parentSize => {
+        const horizontalRatio = parentSize.width / parentSize.height;
+        if(horizontalRatio > sizeValues.horizontalRatio) {
+            const height = parentSize.height;
+            const width = sizeValues.horizontalRatio * height;
+            setFill(0,(parentSize.width/2) - (width/2),width,height);
+        } else {
+            const width = parentSize.width;
+            const height = sizeValues.verticalRatio * width;
+            setFill((parentSize.height/2) - (height/2),0,width,height);
+        }
+    };
+
+    const updateFill = parentSize => {
+        if(!fixedSize) {
+            removeFill();
+            return;
+        }
+        if(!parentSize) {
+            parentSize = getParentSize();
+        }
+        if(fixFill) {
+            updateFixFill(parentSize);
+        } else {
+            updateBoxFill(parentSize);
+        }
+    };
+
     let sizeScale = DEFAULT_SIZE_SCALE;
     this.tryUpdateSize = () => {
         if(!deferred) return;
         setNotDeferred();
 
         let size = fixedSize;
+        let parentSize;
         if(!size) {
-            const parent = canvas.parentElement;
-            if(parent) {
-                size = makeSizeClient(parent);
-            } else {
-                size = makeSizeInner(window);
-            }
+            parentSize = getParentSize();
+            size = parentSize;
         }
 
         const width = size.width * sizeScale;
@@ -75,6 +128,9 @@ function Resize(canvasManager,modules) {
 
         resize(width,height);
         notifySizeUpdate();
+        if(boxFill || fixFill) {
+            updateFill(parentSize);
+        }
     };
 
     const validateFixedDimension = size => {
@@ -119,10 +175,7 @@ function Resize(canvasManager,modules) {
 
     let lastSize = null;
     canvasManager.resetSize = function() {
-        if(!lastSize) {
-            SIZE_ALREADY_RESET();
-            return;
-        }
+        if(!lastSize) return;
         lastSize = null;
         setFullSize(DEFAULT_SIZE_SCALE);
     };
@@ -147,6 +200,24 @@ function Resize(canvasManager,modules) {
         } else {
             setFullSize(scale);
         }
+    };
+    canvasManager.enableBoxFill = function() {
+        if(boxFill) return;
+        boxFill = true;
+        fixFill = false;
+        updateFill();
+    };
+    canvasManager.enableFixFill = function() {
+        if(fixFill) return;
+        fixFill = true;
+        boxFill = false;
+        updateFill();
+    };
+    canvasManager.disableFill = function() {
+        if(!fixFill && !boxFill) return;
+        fixFill = false;
+        boxFill = false;
+        removeFill();
     };
 
     this.installDOM = () => {
