@@ -49,7 +49,7 @@ function Render(canvasManager,modules) {
         if(!size) return;
         const width = size.width;
         const height = size.height;
-        modules.sizeControl.set(width,height);
+        canvasManager.setSize(width,height);
     };
 
     function setFrame(frame) {
