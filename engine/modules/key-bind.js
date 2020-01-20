@@ -1,12 +1,18 @@
-function InputTranslator() {
+function KeyBind() {
 
     const filters = {};
-    this.addFilter = ({keyCode,impulse}) => {
-        filters[keyCode] = impulse;
+    this.addFilter = ({code,impulse}) => {
+        filters[code] = impulse;
     };
     this.addFilters = newFilters => {
         newFilters.forEach(this.addFilter);
-    }
+    };
+    this.getFilters = () => {
+        return Object.assign(new Object(),filters);
+    };
+    this.getFilter = code => {
+        return filters[code];
+    };
     const clearFilters = () => {
         Object.keys(filters,Reflect.deleteProperty.bind(filters));
     };
@@ -37,7 +43,7 @@ function InputTranslator() {
     };
     const keyFilter = (target,keyEvent) => {
         const newEvent = Object.assign(new Object(),keyEvent);
-        const keyHash = keyEvent.keyCode;
+        const keyHash = keyEvent.code;
         if(keyHash in filters) {
             newEvent.impulse = filters[keyHash];
             return target(newEvent);
@@ -54,4 +60,4 @@ function InputTranslator() {
 
     Object.freeze(this);
 }
-export default InputTranslator;
+export default KeyBind;

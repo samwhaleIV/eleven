@@ -2,7 +2,7 @@ import Install from "./internal/install.js";
 
 import CanvasManager from "./modules/canvas-manager/main.js";
 import ResourceManager from "./modules/resource-manager/main.js";
-import InputTranslator from "./modules/input-translator.js";
+import KeyBind from "./modules/key-bind.js";
 import ManagedGamepad from "./modules/managed-gamepad.js";
 
 export default Install([
@@ -15,7 +15,7 @@ export default Install([
         deferInstantiation: true
     }),
     Singleton({
-        module: InputTranslator,
+        module: KeyBind,
         deferInstantiation: true
     }),
     Singleton({
