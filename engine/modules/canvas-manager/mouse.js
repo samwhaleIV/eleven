@@ -14,6 +14,9 @@ const POINTER_MOVE = constants.pointerMove;
 const DEFAULT_CODE = 0;
 const ALT_CODE = 2;
 
+const FORWARD_CODE = 3;
+const BACK_CODE = 4;
+
 function PointerStatus(canSendEvent,sendDown,sendUp) {
     let isDown = false;
     this.send = (sendData,down) => {
@@ -169,6 +172,10 @@ function Mouse(canvasManager,modules) {
         sendPointerMove(sendData);
     };
 
+    const isNavigationControl = event => {
+        return event.button === BACK_CODE || event.button === FORWARD_CODE;
+    };
+
     this.installDOM = () => {
         const captureOptions = {capture: true};
         const target = canvas;
@@ -179,7 +186,9 @@ function Mouse(canvasManager,modules) {
 
         const preprocess = event => {
             event.stopPropagation();
-            event.preventDefault();
+            if(!isNavigationControl(event)) {
+                event.preventDefault();
+            }
             return event.isPrimary;
         };
 

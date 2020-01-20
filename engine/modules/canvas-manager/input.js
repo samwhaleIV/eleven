@@ -84,7 +84,7 @@ function Input(canvasManager,modules) {
         }
     };
 
-    const sendKey = function(event) {
+    const sendKey = function(action,event) {
         if(canvasManager.paused) {
             return;
         }
@@ -103,13 +103,13 @@ function Input(canvasManager,modules) {
             modifierChanged(getModifierData(downKeys));
             return;
         }
-        const inputTarget = frame[this];
+        const inputTarget = frame[action];
         if(!inputTarget) return;
         inputTarget(summariseKeyEvent(event));
     };
 
-    const sendKeyUp = sendKey.bind(KEY_UP);
-    const sendKeyDown = sendKey.bind(KEY_DOWN);
+    const sendKeyUp = sendKey.bind(null,KEY_UP);
+    const sendKeyDown = sendKey.bind(null,KEY_DOWN);
 
     this.installDOM = () => {
         window.addEventListener("keydown",function(event){
