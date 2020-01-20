@@ -46,7 +46,7 @@ function TrigRecursion() {
         context.fillRect(0,0,size.width,size.height);
 
         context.strokeStyle = "white";
-        context.lineWidth = 1
+        context.lineWidth = 1;
 
         getTriangles(size).forEach(({a,b,c}) => {
             context.beginPath();

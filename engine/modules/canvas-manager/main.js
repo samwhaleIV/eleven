@@ -1,39 +1,23 @@
-import Resize from "./resize.js";
-import Render from "./render.js";
+import Submodule from "../../internal/submodule.js";
+
 import Internal from "./internal.js";
-import Input from "./input.js";
+import Resize from "./resize.js";
 import Gamepad from "./gamepad.js";
 import Mouse from "./mouse.js";
+import Input from "./input.js";
+import Render from "./render.js";
 import BufferResize from "./buffer-resize.js";
+import SizeControl from "./size-control.js";
 
 const MODULES_LIST = [
-    Internal,Resize,Gamepad,Mouse,Input,Render,BufferResize
+    Internal,Resize,Gamepad,SizeControl,Mouse,Input,Render,BufferResize
 ];
 
-function GetModules(canvasManager) {
-    const modules = new Object();
-
-    MODULES_LIST.forEach(module => {
-        const name = module.name.toLowerCase();
-        modules[name] = new module(canvasManager,modules);
-    });
-
-    Object.freeze(modules);
-    return modules;
-}
-function InstallModulesDOM(modules) {
-    Object.values(modules).forEach(module => {
-        if(!module.installDOM) {
-            return;
-        }
+function CanvasManager() {
+    Submodule.call(this,MODULES_LIST,module => {
+        if(!module.installDOM) return;
         module.installDOM();
     });
-}
-
-function CanvasManager() {
-    const modules = GetModules(this);
-    Object.freeze(this);
-    InstallModulesDOM(modules);
 }
 
 export default CanvasManager;

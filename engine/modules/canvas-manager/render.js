@@ -32,10 +32,6 @@ const getFrameSettings = () => {
     return Object.assign(new Object(),Constants.defaultFrameSettings);
 };
 
-const MISSING_DIMENSION = (width,height) => {
-    throw Error(`Fixed sizing cannot be used. Width '${width}' cannot be paired with height '${height}'`);
-};
-
 const NON_EXTENSIBLE_FRAME_OBJECT = frame => {
     throw Error(`Frame '${frame}' is not extensible, property access is required by the engine`);
 };
@@ -50,16 +46,10 @@ function Render(canvasManager,modules) {
         const settings = frame.settings;
         if(!settings) return;
         const size = frame.settings.size;
-        if(!size) {
-            modules.resize.setFullSize();
-            return;
-        }
+        if(!size) return;
         const width = size.width;
         const height = size.height;
-        if(!width || !height) {
-            MISSING_DIMENSION(width,height);
-        }
-        modules.resize.setFixedSize(width,height);
+        modules.sizeControl.set(width,height);
     };
 
     function setFrame(frame) {

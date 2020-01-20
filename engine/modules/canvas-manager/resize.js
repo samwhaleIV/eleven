@@ -2,6 +2,10 @@ import FrameHelper from "./frame.js";
 
 const RESIZE_METHOD = "resize";
 
+const INVALID_FIXED_SIZE = (width,height) => {
+    throw Error(`Invalid fixed size: '${width}' by '${height}'`);
+};
+
 function Resize(canvasManager,modules) {
     const sizeValues = new Object();
     const sizeValuesReadonly = new Object();
@@ -74,32 +78,51 @@ function Resize(canvasManager,modules) {
         canvasManager,RESIZE_METHOD
     );
 
-    let fixedSize = false;
+    let fixedSize = null;
 
     this.tryUpdateSize = () => {
-        if(fixedSize) return;
         if(!deferred) return;
         setNotDeferred();
-        let parent = canvas.parentElement;
-        if(!parent) {
-            parent = {
-                clientWidth: window.innerWidth,
-                clientHeight: window.innerHeight
-            };
+
+        let size = fixedSize;
+
+        if(!size) {
+            const parent = canvas.parentElement;
+            if(parent) {
+                size = {
+                    width: parent.clientWidth,
+                    height: parent.clientHeight
+                };
+            } else {
+                size = {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
+            }
         }
-        resize(parent.clientWidth,parent.clientHeight);
+
+        resize(size.width,size.height);
+    };
+
+    const validateFixedDimension = size => {
+        return size && !isNaN(size);
     };
 
     this.setFixedSize = (width,height) => {
-        fixedSize = true;
-        resize(width,height);
+        const validWidth = validateFixedDimension(width);
+        const validHeight = validateFixedDimension(height);
+        if(!validWidth || !validHeight) {
+            INVALID_FIXED_SIZE(width,height);
+        }
+        fixedSize = {width,height};
+        setDeferred();
     };
 
     this.setFullSize = () => {
         if(fixedSize) {
             setDeferred();
         }
-        fixedSize = false;
+        fixedSize = null;
     };
 
     this.installDOM = () => {
