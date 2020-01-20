@@ -8,9 +8,11 @@ const INVALID_FIXED_SIZE = (width,height) => {
 };
 
 function Resize(canvasManager,modules) {
+
     const {sizeValues, sizeValuesReadonly} = ResizeALU.GetContainers();
     const canvas = modules.internal.canvas;
     const resize = ResizeALU.GetResizer(canvas,sizeValues);
+    canvasManager.size = sizeValuesReadonly;
 
     let deferred = false;
     const setDeferred = () => {
@@ -88,8 +90,6 @@ function Resize(canvasManager,modules) {
     this.installDOM = () => {
         window.addEventListener("resize",setDeferred);
     };
-    
-    canvasManager.size = sizeValuesReadonly;
 
     Object.freeze(this);
 }
