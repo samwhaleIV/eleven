@@ -4,12 +4,7 @@ import ManagedGamepad from "../engine/modules/frame/managed-gamepad.js";
 Namespace.makeGlobal(engine);
 
 const canvasManager = engine.CanvasManager;
-const managedGamepad = new ManagedGamepad({
-    whitelist: false,
-    binds: {
-        Up: "ayyLmao"
-    }
-});
+const managedGamepad = new ManagedGamepad();
 
 function TestFrame() {
     this.inputGamepad = managedGamepad.getPollingFilter(this);
@@ -18,7 +13,6 @@ function TestFrame() {
     };
     this.keyUp = event => {
         return;
-        console.log("Key up:",event);
     };
     this.render = (context,size) => {
         context.fillStyle = "red";

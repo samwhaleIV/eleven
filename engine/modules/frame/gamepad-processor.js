@@ -64,6 +64,7 @@ function GamepadProcessor(settings) {
 
     const repeatTriggers = settings.repeatTriggers;
     const repeatAxes = settings.repeatAxes;
+    const repeatButtons = settings.repeatButtons;
 
     const manageLeftAxis = settings.manageLeftAxis;
     const manageRightAxis = settings.manageRightAxis;
@@ -172,7 +173,7 @@ function GamepadProcessor(settings) {
             const isTrigger = buttonState.key === TRIGGER_KEY;
             const isPressed = buttonIsPressed(button,isTrigger);
 
-            const doRepeat = !isTrigger || repeatTriggers;
+            const doRepeat = isTrigger ? repeatTriggers : repeatButtons;
 
             processButtonState(buttonState,isPressed,doRepeat,frame,timestamp);
 

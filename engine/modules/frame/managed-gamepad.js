@@ -24,8 +24,14 @@ const bufferAssign = (target,schema,values) => coldAssign(
 );
 
 function ManagedGamepad(settings) {
+    if(!settings) {
+        settings = new Object();
+    }
     const binds = new Object();
-    const settingBinds = settings.binds;
+    let settingBinds = null;
+    if(binds in settings) {
+        settingBinds = settings.binds;
+    }
     if(settingBinds) {
         delete settings.binds;
     }

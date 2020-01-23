@@ -14,15 +14,16 @@ const Constants = Object.freeze({
     }),
 
     ManagedGamepadSettings: Object.freeze({
-        whitelist: true,
-        repeatTriggers: false,
+        whitelist: false,
         triggerThreshold: 0.1,
+        repeatButtons: false,
+        repeatAxes: false,
+        repeatTriggers: false,
         repeatDelay: 200,
         repeatRate: 100,
         axisDeadzone: 0.1,
         manageLeftAxis: true,
-        manageRightAxis: false,
-        repeatAxes: false
+        manageRightAxis: false
     }),
 
     InputRoutes: Object.freeze({
