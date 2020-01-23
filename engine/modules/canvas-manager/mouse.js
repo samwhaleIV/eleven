@@ -1,7 +1,7 @@
 import FrameHelper from "./frame.js";
 import Constants from "../../internal/constants.js";
 
-const constants = Constants.inputRoutes;
+const constants = Constants.InputRoutes;
 
 const CLICK_UP = constants.clickUp;
 const CLICK_DOWN = constants.clickDown;
@@ -98,7 +98,7 @@ function Mouse(canvasManager,modules) {
         return !canvasManager.paused;
     };
     const hasAltEvents = frame => {
-        return frame.settings.noContextMenu || frame.altClickDown || frame.altClickUp;
+        return frame.altClickDown || frame.altClickUp;
     };
     const canSendAltEvent = () => {
         if(canvasManager.paused) {

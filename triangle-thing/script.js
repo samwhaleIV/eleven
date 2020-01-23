@@ -41,7 +41,7 @@ function TrigRecursion() {
         return triangles;
     };
 
-    this.render = (context,_,size) => {
+    this.render = (context,size) => {
         context.fillStyle = "black";
         context.fillRect(0,0,size.width,size.height);
 

@@ -1,8 +1,8 @@
 const Constants = Object.freeze({
-    engineNamespace: "Eleven",
-    cssLoadedClass: "loaded",
+    EngineNamespace: "Eleven",
+    CSSLoadedClass: "loaded",
 
-    resource: Object.freeze({
+    Resource: Object.freeze({
         defaultImageType: ".png",
         defaultJSONType: ".json",
         defaultTextType: ".txt",
@@ -13,12 +13,19 @@ const Constants = Object.freeze({
         audioFolder: "resources/audio/",
     }),
 
-    defaultFrameSettings: {
-        noContextMenu: false,
-        size: undefined
-    },
+    ManagedGamepadSettings: Object.freeze({
+        whitelist: true,
+        repeatTriggers: false,
+        triggerThreshold: 0.1,
+        repeatDelay: 200,
+        repeatRate: 100,
+        axisDeadzone: 0.1,
+        manageLeftAxis: true,
+        manageRightAxis: false,
+        repeatAxes: false
+    }),
 
-    inputRoutes: Object.freeze({
+    InputRoutes: Object.freeze({
         clickDown: "clickDown",
         clickUp: "clickUp",
         altClickDown: "altClickDown",

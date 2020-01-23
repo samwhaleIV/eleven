@@ -1,7 +1,6 @@
 import ResourceTypes from "./resource-types.js";
 import Constants from "../../internal/constants.js";
-
-const constants = Constants.resource;
+const constants = Constants.Resource;
 
 const DEFAULT_IMAGE_TYPE = constants.defaultImageType;
 const DEFAULT_JSON_TYPE = constants.defaultJSONType;

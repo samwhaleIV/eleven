@@ -1,7 +1,7 @@
 import FrameHelper from "./frame.js";
 import Constants from "../../internal/constants.js";
 
-const constants = Constants.inputRoutes;
+const constants = Constants.InputRoutes;
 
 const KEY_DOWN = constants.keyDown;
 const KEY_UP = constants.keyUp;
@@ -33,19 +33,14 @@ const SYSTEM_KEYS = MakeAssociative([
     "F12","F11","F5"
 ]);
 
-const ALT_CODE = 18;
-const CTRL_CODE = 17;
-const SHIFT_CODE = 16;
-const META_LEFT = 91;
-const META_RIGHT = 92;
-
-const MODIFIER_CODES = MakeAssociative([
-    SHIFT_CODE,CTRL_CODE,ALT_CODE,META_LEFT,META_RIGHT
-]);
 
 const ALT_KEYS = ["AltLeft","AltRight"];
-const CTRL_KEYS = ["AltLeft","AltRight"];
+const CTRL_KEYS = ["ControlLeft","ControlRight"];
 const SHIFT_KEYS = ["ShiftLeft","ShiftRight"];
+
+const MODIFIER_KEYS = MakeAssociative([
+    ALT_KEYS,CTRL_KEYS,SHIFT_KEYS
+].flat());
 
 const hasKey = (downKeys,set) => {
     return set[0] in downKeys || set[1] in downKeys;
@@ -75,7 +70,6 @@ function Input(canvasManager,modules) {
 
     const summariseKeyEvent = event => {
         return {
-            keyCode: event.keyCode,
             code: event.code,
             key: event.key,
             ctrlKey: event.ctrlKey,
@@ -96,7 +90,7 @@ function Input(canvasManager,modules) {
         tryPreventDefault(event);
         const frame = getDeepestFrameSafe();
         if(!frame) return;
-        const isModifier = event.keyCode in MODIFIER_CODES;
+        const isModifier = event.code in MODIFIER_KEYS;
         if(isModifier) {
             const modifierChanged = frame[MODIFIER_CHANGED];
             if(!modifierChanged) return;
@@ -139,7 +133,7 @@ function Input(canvasManager,modules) {
     (function({
         gamepadPoll,getModifierData,updateModifiers
     }){
-        this.poll = () => {
+        this.poll = time => {
             updateModifiers(getModifierData(downKeys));
             const frame = getDeepestFrame();
             if(frame[INPUT]) {
@@ -150,7 +144,7 @@ function Input(canvasManager,modules) {
                 return;
             }
             if(frame[INPUT_GAMEPAD]) {
-                frame[INPUT_GAMEPAD](gamepadData);
+                frame[INPUT_GAMEPAD](gamepadData,time);
             }
         };
     }).call(this,{

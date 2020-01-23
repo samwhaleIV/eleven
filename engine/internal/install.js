@@ -13,7 +13,7 @@ import namespace from "../packer/main.js";
 
 import Constants from "./constants.js";
 
-const NAMESPACE_NAME = Constants.engineNamespace;
+const NAMESPACE_NAME = Constants.EngineNamespace;
 
 function MakeEngineNamespace(modules) {
     return namespace.create({

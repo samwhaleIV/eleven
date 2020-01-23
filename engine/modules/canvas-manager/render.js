@@ -1,5 +1,4 @@
 import FrameHelper from "./frame.js";
-import Constants from "../../internal/constants.js";
 
 const LOG_PREFIX = "Canvas manager";
 
@@ -28,42 +27,16 @@ const LOG_LOOP_PAUSED = () => {
     console.log(`${LOG_PREFIX}: Paused render loop`);
 };
 
-const getFrameSettings = () => {
-    return Object.assign(new Object(),Constants.defaultFrameSettings);
-};
-
-const NON_EXTENSIBLE_FRAME_OBJECT = frame => {
-    throw Error(`Frame '${frame}' is not extensible, property access is required by the engine`);
-};
-
 function Render(canvasManager,modules) {
 
     let paused = true;
     let internalFrame = null;
     let renderFrame = null;
 
-    const configureFrameSize = frame => {
-        const settings = frame.settings;
-        if(!settings) return;
-        const size = frame.settings.size;
-        if(!size) return;
-        const width = size.width;
-        const height = size.height;
-        canvasManager.setSize(width,height);
-    };
-
     function setFrame(frame) {
         if(!frame) {
             INVALID_FRAME(frame);
         }
-        internalFrame = null;
-        if(!Object.isExtensible(frame)) {
-            NON_EXTENSIBLE_FRAME_OBJECT();
-        }
-        if(!frame.settings) {
-            frame.settings = getFrameSettings();
-        }
-        configureFrameSize(frame);
         internalFrame = frame;
         renderFrame = FrameHelper.RenderFrame.bind(internalFrame);
     }
@@ -84,10 +57,10 @@ function Render(canvasManager,modules) {
         const render = timestamp => {
             if(paused) return;
             tryUpdateSize();
-            pollInput();
+            pollInput(readonlyTime);
             time.delta = timestamp - time.now;
             time.now = timestamp;
-            renderFrame(context,readonlyTime,size);
+            renderFrame(context,size,readonlyTime);
             animationFrame = requestAnimationFrame(render);
         };
         canvasManager.start = ({target,frame,markLoaded}) => {

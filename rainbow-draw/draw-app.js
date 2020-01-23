@@ -41,7 +41,7 @@ function DrawApp(canvasManager) {
         },size.width,size.height);
     };
 
-    this.render = (context,_,size) => {
+    this.render = (context,size) => {
 
         context.fillStyle = "white";
         context.fillRect(0,0,size.width,size.height);
