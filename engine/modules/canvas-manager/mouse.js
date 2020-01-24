@@ -1,4 +1,3 @@
-import FrameHelper from "./frame.js";
 import Constants from "../../internal/constants.js";
 
 const constants = Constants.InputRoutes;
@@ -91,7 +90,7 @@ function Mouse(canvasManager,modules) {
     };
 
     const getFrame = () => {
-        return FrameHelper.GetDeepestFrame(canvasManager.frame);
+        return canvasManager.frame.getDeepest();
     };
 
     const canSendEvent = () => {

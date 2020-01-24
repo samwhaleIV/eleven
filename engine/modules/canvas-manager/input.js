@@ -1,4 +1,3 @@
-import FrameHelper from "./frame.js";
 import Constants from "../../internal/constants.js";
 
 const constants = Constants.InputRoutes;
@@ -58,14 +57,14 @@ function Input(canvasManager,modules) {
 
     const downKeys = {};
 
-    const getDeepestFrameSafe = () => {
+    const getFrameSafe = () => {
         let frame = canvasManager.frame;
         if(!frame) return null;
-        frame = FrameHelper.GetDeepestFrame(frame);
+        frame = frame.getDeepest();
         return frame;
     };
-    const getDeepestFrame = () => {
-        return FrameHelper.GetDeepestFrame(canvasManager.frame);
+    const getFrame = () => {
+        return canvasManager.frame.getDeepest();
     };
 
     const summariseKeyEvent = event => {
@@ -88,7 +87,7 @@ function Input(canvasManager,modules) {
             return;
         }
         tryPreventDefault(event);
-        const frame = getDeepestFrameSafe();
+        const frame = getFrameSafe();
         if(!frame) return;
         const isModifier = event.code in MODIFIER_KEYS;
         if(isModifier) {
@@ -135,7 +134,7 @@ function Input(canvasManager,modules) {
     }){
         this.poll = time => {
             updateModifiers(getModifierData(downKeys));
-            const frame = getDeepestFrame();
+            const frame = getFrame();
             if(frame[INPUT]) {
                 frame[INPUT](downKeys);
             }

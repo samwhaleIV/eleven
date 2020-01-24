@@ -5,6 +5,11 @@ Namespace.makeGlobal(engine);
 const canvasManager = engine.CanvasManager;
 
 canvasManager.start({
-    frame: new DrawApp(canvasManager),
+    frame: engine.GetFrame({
+        base: DrawApp,
+        parameters: [canvasManager],
+        managedGamepad: false,
+        keyBinds: true
+    }),
     markLoaded: true
 });

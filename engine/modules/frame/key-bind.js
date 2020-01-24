@@ -1,28 +1,8 @@
-function KeyBind() {
-
-    const filters = {};
-    this.addFilter = ({code,impulse}) => {
-        filters[code] = impulse;
-    };
-    this.addFilters = newFilters => {
-        newFilters.forEach(this.addFilter);
-    };
-    this.getFilters = () => {
-        return Object.assign(new Object(),filters);
-    };
-    this.getFilter = code => {
-        return filters[code];
-    };
-    const clearFilters = () => {
-        Object.keys(filters,Reflect.deleteProperty.bind(filters));
-    };
-    this.setFilter = filterSet => {
-        clearFilters();
-        Object.assign(filters,filterSet);
-    };
-    this.clearFilters = clearFilters;
-
-    const pollingFilter = (target,downKeys) => {
+function KeyBind(filters) {
+    const impulses = Object.freeze(
+        Object.assign(new Object(),filters)
+    );
+    this.pollingFilter = (target,downKeys) => {
         const downKeysList = Object.entries(downKeys);
         const keyData = new Object();
         for(let i = 0;i<downKeysList.length;i++) {
@@ -31,8 +11,8 @@ function KeyBind() {
             const downKeyHash = downKey[0];
             const downKeyData = downKey[1];
 
-            if(downKeyHash in filters) {
-                const impulse = filters[downKeyHash];
+            if(downKeyHash in impulses) {
+                const impulse = impulses[downKeyHash];
                 const newData = Object.assign(new Object(),downKeyData);
 
                 newData.impulse = impulse;
@@ -41,21 +21,13 @@ function KeyBind() {
         }
         return target(keyData);
     };
-    const keyFilter = (target,keyEvent) => {
+    this.keyFilter = (target,keyEvent) => {
         const newEvent = Object.assign(new Object(),keyEvent);
         const keyHash = keyEvent.code;
-        if(keyHash in filters) {
-            newEvent.impulse = filters[keyHash];
+        if(keyHash in impulses) {
+            newEvent.impulse = impulses[keyHash];
             return target(newEvent);
         }
-        return undefined;
-    };
-
-    this.getPollingFilter = target => {
-        return pollingFilter.bind(null,target);
-    };
-    this.getKeyFilter = target => {
-        return keyFilter.bind(null,target);
     };
 
     Object.freeze(this);

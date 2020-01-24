@@ -4,7 +4,6 @@ import Constants from "../../internal/constants.js";
 
 const GAMEPAD_CODES = GamepadBinds.Codes;
 const DEFAULT_SETTINGS = Constants.ManagedGamepadSettings;
-const PROCESS_TOKEN = GamepadBinds.ProcessToken;
 
 const validateBinds = binds => {
     Object.keys(binds).forEach(key => {
@@ -24,7 +23,7 @@ const bufferAssign = (target,schema,values) => coldAssign(
 );
 
 function ManagedGamepad(settings) {
-    if(!settings) {
+    if(typeof settings !== "object") {
         settings = new Object();
     }
     const binds = new Object();
@@ -48,10 +47,7 @@ function ManagedGamepad(settings) {
     Object.freeze(validateBinds(binds));
 
     const gamepadProcessor = new GamepadProcessor(safeSettings);
-    const process = gamepadProcessor[PROCESS_TOKEN];
-    this.getPollingFilter = frame => {
-        return process.bind(gamepadProcessor,frame);
-    };
+    this.pollingFilter = gamepadProcessor.process;
     Object.freeze(this);
 }
 export default ManagedGamepad;

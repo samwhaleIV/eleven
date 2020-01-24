@@ -1,5 +1,4 @@
 import ResizeALU from "./resize-alu.js";
-import FrameHelper from "./frame.js";
 
 const RESIZE_METHOD = "resize";
 const DEFAULT_SIZE_SCALE = 1;
@@ -46,9 +45,7 @@ function Resize(canvasManager,modules) {
     const notifySizeUpdate = () => {
         const frame = canvasManager.frame;
         if(!frame) return;
-        FrameHelper.NotifyAll(frame,RESIZE_METHOD,[
-            sizeValuesReadonly,context
-        ]);
+        frame.messageAll(RESIZE_METHOD,sizeValuesReadonly,context);
     };
 
     let fixedSize = null;

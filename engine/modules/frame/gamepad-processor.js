@@ -7,8 +7,6 @@ const inputRoutes = Constants.InputRoutes;
 const KEY_DOWN = inputRoutes.keyDown;
 const KEY_UP = inputRoutes.keyUp;
 
-const PROCESS_TOKEN = GamepadBinds.ProcessToken;
-
 const CODE_ORDER = GamepadBinds.CodeOrder;
 const KEYS = GamepadBinds.Keys;
 const INVERSE_CODES = GamepadBinds.CodesInverse;
@@ -89,8 +87,9 @@ function GamepadProcessor(settings) {
         if(code in binds) {
             impulse = binds[code];
         } else return;
-        if(target in frame) {
-            frame[target](getImpulseEvent(
+        const frameTarget = frame[target];
+        if(frameTarget) {
+            frameTarget(getImpulseEvent(
                 impulse,buttonState
             ));
         }
@@ -163,7 +162,7 @@ function GamepadProcessor(settings) {
     const buttonIsPressed = (button,isTrigger) => {
        return isTrigger ? button.value > triggerThreshold : button.pressed;
     };
-    function processGamepadData(frame,{buttons,axes},time) {
+    const process = (frame,{buttons,axes},time) => {
         const timestamp = time.now;
         let buttonIndex = 0;
         do {
@@ -179,8 +178,8 @@ function GamepadProcessor(settings) {
 
         } while(++buttonIndex < buttonCount);
         processGamepadAxes(axes,frame,timestamp);
-    }
-    this[PROCESS_TOKEN] = processGamepadData;
+    };
+    this.process = process;
     Object.freeze(this);
 };
 

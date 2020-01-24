@@ -1,5 +1,3 @@
-import FrameHelper from "./frame.js";
-
 const LOG_PREFIX = "Canvas manager";
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
@@ -38,29 +36,30 @@ function Render(canvasManager,modules) {
             INVALID_FRAME(frame);
         }
         internalFrame = frame;
-        renderFrame = FrameHelper.RenderFrame.bind(internalFrame);
+        renderFrame = internalFrame.deepRender;
     }
     function getFrame() {
         return internalFrame;
     }
 
-    (function({context,size,pollInput,tryUpdateSize}){
+    const time = Object.seal({
+        now: 0,
+        delta: 0
+    });
+    const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
+        now: {get: function() {return time.now}},
+        delta: {get: function() {return time.delta}}
+    }));
+
+    (function({renderData,pollInput,tryUpdateSize}){
         let animationFrame = null;
-        const time = Object.seal({
-            now: 0,
-            delta: 0
-        });
-        const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
-            now: {get: function() {return time.now}},
-            delta: {get: function() {return time.delta}}
-        }));
         const render = timestamp => {
             if(paused) return;
             tryUpdateSize();
             pollInput(readonlyTime);
             time.delta = timestamp - time.now;
             time.now = timestamp;
-            renderFrame(context,size,readonlyTime);
+            renderFrame(renderData);
             animationFrame = requestAnimationFrame(render);
         };
         canvasManager.start = ({target,frame,markLoaded}) => {
@@ -102,8 +101,11 @@ function Render(canvasManager,modules) {
         canvasManager.setFrame = setFrame;
         canvasManager.getFrame = getFrame;
     })({
-        context: modules.internal.context,
-        size: canvasManager.size,
+        renderData: [
+            modules.internal.context,
+            canvasManager.size,
+            readonlyTime
+        ],
         pollInput: modules.input.poll,
         tryUpdateSize: modules.resize.tryUpdateSize
     });
