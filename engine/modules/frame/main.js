@@ -49,7 +49,7 @@ function Frame({
     this.child = null;
     base.apply(this,parameters);
 
-    if(gamepadSettings) {
+    if(managedGamepad) {
         installManagedGamepad.call(this,managedGamepad);
     }
     if(keyBinds) {
