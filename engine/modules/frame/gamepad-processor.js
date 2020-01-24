@@ -99,10 +99,10 @@ function GamepadProcessor(settings) {
             right: CODES.LeftJoystickRight
         };
         const rightCodes = compositeRightAxis ? compositeAxisCodes : {
-            up: CODES.LeftJoystickUp,
-            down: CODES.LeftJoystickDown,
-            left: CODES.LeftJoystickLeft,
-            right: CODES.LeftJoystickRight
+            up: CODES.RightJoystickUp,
+            down: CODES.RightJoystickDown,
+            left: CODES.RightJoystickLeft,
+            right: CODES.RightJoystickRight
         };
         const leftAxisState = new AxisState(leftCodes);
         const rightAxisState = new AxisState(rightCodes);
