@@ -31,12 +31,16 @@ function Render(canvasManager,modules) {
     let internalFrame = null;
     let renderFrame = null;
 
+    const getDeepRenderer = () => {
+        return internalFrame.deepRender.bind(internalFrame);
+    };
+
     function setFrame(frame) {
         if(!frame) {
             INVALID_FRAME(frame);
         }
         internalFrame = frame;
-        renderFrame = internalFrame.deepRender;
+        renderFrame = getDeepRenderer();
     }
     function getFrame() {
         return internalFrame;

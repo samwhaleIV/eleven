@@ -25,7 +25,6 @@ function GetContainers() {
 
     return {sizeValues,sizeValuesReadonly};
 }
-
 function GetResizeALU(target,sizeValues) {
     return (width,height) => {
 
@@ -64,7 +63,10 @@ function GetResizeALU(target,sizeValues) {
         sizeValues.unequalDimensions = !equalDimensions;
     };
 }
-export default Object.freeze({
+
+const ResizeALU = Object.freeze({
     GetResizer: GetResizeALU,
     GetContainers: GetContainers
 });
+
+export default ResizeALU;

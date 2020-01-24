@@ -2,7 +2,7 @@ import Install from "./internal/install.js";
 
 import CanvasManager from "./modules/canvas-manager/main.js";
 import ResourceManager from "./modules/resource-manager/main.js";
-import Frame from "./modules/frame/main.js";
+import { GetFrame } from "./modules/frame/main.js";
 
 export default Install([
     Singleton({
@@ -13,8 +13,5 @@ export default Install([
         module: ResourceManager,
         deferInstantiation: true
     }),
-    Frame,
-    function GetFrame(settings) {
-        return new Frame(settings);
-    }
+    GetFrame
 ]);
