@@ -1,30 +1,26 @@
-import GamepadBinds from "./gamepad-binds.js";
-const codes = GamepadBinds.Codes;
-
 const threeQuarters = 3 / 4;
-
-function EncodeAxes(xAxis,yAxis) {
+function EncodeAxes(xAxis,yAxis,codes) {
     let code = null;
     if(xAxis < 0) {
         if(yAxis < -threeQuarters) {
-            code = codes.Up;
+            code = codes.up;
         } else if(yAxis > threeQuarters) {
-            code = codes.Down;
+            code = codes.down;
         } else {
-            code = codes.Left;
+            code = codes.left;
         }
     } else if(xAxis > 0) {
         if(yAxis < -threeQuarters) {
-            code = codes.Up;
+            code = codes.up;
         } else if(yAxis > threeQuarters) {
-            code = codes.Down;
+            code = codes.down;
         } else {
-            code = codes.Right;
+            code = codes.right;
         }
     } else if(yAxis < 0) {
-        code = codes.Up;
+        code = codes.up;
     } else if(yAxis > 0) {
-        code = codes.Down;
+        code = codes.down;
     }
     return code;
 };

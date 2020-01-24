@@ -21,9 +21,11 @@ const Constants = Object.freeze({
         repeatTriggers: false,
         repeatDelay: 200,
         repeatRate: 100,
-        axisDeadzone: 0.1,
+        axisDeadzone: 0.7,
         manageLeftAxis: true,
-        manageRightAxis: false
+        manageRightAxis: false,
+        compositeLeftAxis: true,
+        compositeRightAxis: false
     }),
 
     InputRoutes: Object.freeze({

@@ -10,9 +10,11 @@ const KEY_UP = inputRoutes.keyUp;
 const CODE_ORDER = GamepadBinds.CodeOrder;
 const KEYS = GamepadBinds.Keys;
 const INVERSE_CODES = GamepadBinds.CodesInverse;
+const CODES = GamepadBinds.Codes;
 
 const TRIGGER_KEY = GamepadBinds.TriggerKey;
-const DIRECTIONAL_KEY = GamepadBinds.DirectionalKey;
+const JOYSTICK_KEY = GamepadBinds.JoystickMove;
+const DIRECTION_KEY = GamepadBinds.DirectionKey;
 
 const LEFT_X_AXIS = 0;
 const LEFT_Y_AXIS = 1;
@@ -42,8 +44,9 @@ function ButtonState(code) {
     Object.seal(this);
 }
 
-function AxisState() {
-    this.key = DIRECTIONAL_KEY;
+function AxisState(codes) {
+    this.key = JOYSTICK_KEY;
+    this.codes = codes;
     this.code = null;
     Object.defineProperty(this,"inverseCode",{
         get: () => getInverseCode(this.code),
@@ -76,9 +79,41 @@ function GamepadProcessor(settings) {
     for(let i = 0;i<buttonCount;i++) {
         buttonStates[i] = new ButtonState(CODE_ORDER[i]);
     }
-    
-    const leftAxisState = new AxisState();
-    const rightAxisState = new AxisState();
+
+    const {leftAxisState, rightAxisState} = (function({
+        compositeLeftAxis, compositeRightAxis
+    }){
+        let compositeAxisCodes = null;
+        if(compositeLeftAxis || compositeRightAxis) {
+            compositeAxisCodes = {
+                up: CODES.Up,
+                down: CODES.Down,
+                left: CODES.Left,
+                right: CODES.Right
+            };
+        }
+        const leftCodes = compositeLeftAxis ? compositeAxisCodes : {
+            up: CODES.LeftJoystickUp,
+            down: CODES.LeftJoystickDown,
+            left: CODES.LeftJoystickLeft,
+            right: CODES.LeftJoystickRight
+        };
+        const rightCodes = compositeRightAxis ? compositeAxisCodes : {
+            up: CODES.LeftJoystickUp,
+            down: CODES.LeftJoystickDown,
+            left: CODES.LeftJoystickLeft,
+            right: CODES.LeftJoystickRight
+        };
+        const leftAxisState = new AxisState(leftCodes);
+        const rightAxisState = new AxisState(rightCodes);
+        if(compositeLeftAxis) {
+            leftAxisState.key = DIRECTION_KEY;
+        }
+        if(compositeRightAxis) {
+            rightAxisState.key = DIRECTION_KEY;
+        }
+        return {leftAxisState, rightAxisState};
+    })(settings);
 
     const sendKey = (frame,down,buttonState) => {
         const target = down ? KEY_DOWN : KEY_UP;
@@ -136,9 +171,12 @@ function GamepadProcessor(settings) {
         xAxis = DeadzoneScale(axisDeadzone,xAxis);
         yAxis = DeadzoneScale(axisDeadzone,yAxis);
         let isPressed = nonZeroAxes(xAxis,yAxis);
-        const newCode = EncodeAxes(xAxis,yAxis);
+        const newCode = EncodeAxes(xAxis,yAxis,axisState.codes);
         if(newCode !== null) {
             if(axisState.code !== newCode) {
+                if(axisState.pressed) {
+                    sendKey(frame,false,axisState);
+                }
                 axisState.pressed = false;
             }
             axisState.code = newCode;

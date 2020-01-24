@@ -28,7 +28,7 @@ function ManagedGamepad(settings) {
     }
     const binds = new Object();
     let settingBinds = null;
-    if(binds in settings) {
+    if(settings.binds) {
         settingBinds = settings.binds;
     }
     if(settingBinds) {

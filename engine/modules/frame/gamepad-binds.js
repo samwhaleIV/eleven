@@ -1,9 +1,8 @@
-const DIRECTIONAL_KEY = "Direction";
+const DIRECTION_KEY = "Direction";
 const BUMPER_KEY = "Bumper";
 const TRIGGER_KEY = "Trigger";
 const JOYSTICK_CLICK = "Joystick";
-
-const PROCESS_TOKEN = Symbol("GamepadProcessToken");
+const JOYSTICK_KEY = "JoystickDirection";
 
 const codes = Object.freeze({
     Up: "GamepadUp",
@@ -25,8 +24,18 @@ const codes = Object.freeze({
     Select: "GamepadSelect",
     Start: "GamepadStart",
 
-    JoystickLeft: "GamepadJoystickLeft",
-    JoystickRight: "GamepadJoystickRight"
+    LeftJoystick: "GamepadLeftJoystick",
+    RightJoystick: "GamepadRightJoystick",
+
+    LeftJoystickUp: "LeftJoystickUp",
+    LeftJoystickDown: "LeftJoystickDown",
+    LeftJoystickLeft: "LeftJoystickLeft",
+    LeftJoystickRight: "LeftJoystickRight",
+
+    RightJoystickUp: "RightJoystickUp",
+    RightJoystickDown: "RightJoystickDown",
+    RightJoystickLeft: "RightJoystickLeft",
+    RightJoystickRight: "RightJoystickRight",
 });
 
 const codesInverse = Object.freeze(Object.entries(codes).reduce((set,[value,key])=>{
@@ -44,8 +53,8 @@ const codeOrder = Object.freeze([
     codes.TriggerRight,
     codes.Select,
     codes.Start,
-    codes.JoystickLeft,
-    codes.JoystickRight,
+    codes.LeftJoystick,
+    codes.RightJoystick,
     codes.Up,
     codes.Down,
     codes.Left,
@@ -61,10 +70,10 @@ const keys = Object.freeze({
     GamepadSelect: "Select",
     GamepadStart: "Start",
 
-    GamepadUp: DIRECTIONAL_KEY,
-    GamepadRight: DIRECTIONAL_KEY,
-    GamepadLeft: DIRECTIONAL_KEY,
-    GamepadDown: DIRECTIONAL_KEY,
+    GamepadUp: DIRECTION_KEY,
+    GamepadRight: DIRECTION_KEY,
+    GamepadLeft: DIRECTION_KEY,
+    GamepadDown: DIRECTION_KEY,
 
     GamepadBumperLeft: BUMPER_KEY,
     GamepadBumperRight: BUMPER_KEY,
@@ -72,16 +81,26 @@ const keys = Object.freeze({
     GamepadTriggerLeft: TRIGGER_KEY,
     GamepadTriggerRight: TRIGGER_KEY,
 
-    GamepadJoystickLeft: JOYSTICK_CLICK,
-    GamepadJoystickRight: JOYSTICK_CLICK
+    GamepadLeftJoystick: JOYSTICK_CLICK,
+    GamepadRightJoystick: JOYSTICK_CLICK,
+
+    LeftJoystickUp: JOYSTICK_KEY,
+    LeftJoystickDown: JOYSTICK_KEY,
+    LeftJoystickLeft: JOYSTICK_KEY,
+    LeftJoystickRight: JOYSTICK_KEY,
+
+    RightJoystickUp: JOYSTICK_KEY,
+    RightJoystickDown: JOYSTICK_KEY,
+    RightJoystickLeft: JOYSTICK_KEY,
+    RightJoystickRight: JOYSTICK_KEY,
 });
 
 export default Object.freeze({
-    ProcessToken: PROCESS_TOKEN,
     Codes: codes,
     CodesInverse: codesInverse,
     CodeOrder: codeOrder,
     Keys: keys,
     TriggerKey: TRIGGER_KEY,
-    DirectionalKey: DIRECTIONAL_KEY
+    DirectionKey: DIRECTION_KEY,
+    JOYSTICK_KEY: JOYSTICK_KEY
 });
