@@ -35,7 +35,7 @@ function PointerStatus(canSendEvent,sendDown,sendUp) {
     };
     Object.defineProperty(this,"isDown",{
         get: function() {
-            return isDown
+            return isDown;
         }
     });
     Object.freeze(this);
@@ -128,9 +128,12 @@ function Mouse(canvasManager,modules) {
     const sendPointerUpAlt = getTargetBind(ALT_CLICK_UP);
     const sendPointerDownAlt = getTargetBind(ALT_CLICK_DOWN);
     const sendPointerMove = (function(targetBind){
-        return function(sendData) {
-            sendData.isDown = pointerStatus.isDown;
-            sendData.altIsDown = altPointerStatus.isDown;
+        return function(sendData,
+            isDown = pointerStatus.isDown,
+            altIsDown = altPointerStatus.isDown
+        ) {
+            sendData.isDown = isDown;
+            sendData.altIsDown = altIsDown;
             targetBind(sendData);
         }
     }(getTargetBind(POINTER_MOVE)));
@@ -144,20 +147,27 @@ function Mouse(canvasManager,modules) {
 
     const getChangeTarget = event => {
         let changeTarget = null;
-        if(event.button === DEFAULT_CODE) {
+        const isDefault = event.button === DEFAULT_CODE;
+        if(isDefault) {
             changeTarget = pointerStatus.send;
         } else if(event.button === ALT_CODE) {
             changeTarget = altPointerStatus.send;
         }
-        return changeTarget;
+        return {changeTarget, isDefault};
     };
 
     const pointerChange = function(down,event) {
-        const changeTarget = getChangeTarget(event);
+        const {changeTarget, isDefault} = getChangeTarget(event);
         if(!changeTarget) return;
         const sendData = getSendData(event);
         updateLocationData(sendData);
-        if(down) sendPointerMove(sendData);
+        if(down) {
+            if(isDefault) {
+                sendPointerMove(sendData,true,undefined);
+            } else {
+                sendPointerMove(sendData,undefined,true);
+            }
+        }
         changeTarget(sendData,down);
     };
 

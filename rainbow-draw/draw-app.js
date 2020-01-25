@@ -27,6 +27,7 @@ function DrawApp(canvasManager) {
     const movementBuffer = [];
 
     this.pointerMove = ({x,y,isDown}) => {
+        console.log(isDown);
         if(!isDown) return;
         movementBuffer.push({x,y});
     };
