@@ -19,9 +19,7 @@ function DefineProxy(target,propertyName,proxy) {
     if(propertyValue) {
         value = (...parameters) => proxy(propertyValue,...parameters);
     }
-    Object.defineProperty(target,propertyName,{
-        value: value, writable: false, configurable: false
-    });
+    Object.defineProperty(target,propertyName,{value:value});
 }
 
 function installManagedGamepad(gamepadSettings) {
@@ -30,8 +28,7 @@ function installManagedGamepad(gamepadSettings) {
         INPUT_GAMEPAD_ALREADY_EXISTS();
     }
     Object.defineProperty(this,INPUT_GAMEPAD,{
-        value: managedGamepad.pollingFilter.bind(null,this),
-        writable: false,configurable: false
+        value: managedGamepad.pollingFilter.bind(null,this)
     });
 }
 function installKeyBinds(keyBinds) {
@@ -54,6 +51,12 @@ function Frame({
     }
     if(keyBinds) {
         installKeyBinds.call(this,keyBinds);
+    }
+}
+function sendMessage(target,message,data) {
+    const endpoint = target[message];
+    if(endpoint) {
+        endpoint.apply(target,data);
     }
 }
 Frame.prototype.getDeepest = function() {
@@ -87,11 +90,6 @@ Frame.prototype.deepRender = function(data) {
         frame = stack[i];
         frame.render.apply(frame,data);
         i++;
-    }
-}
-function sendMessage(target,message,data) {
-    if(target[message]) {
-        target[message].apply(target,data);
     }
 }
 Frame.prototype.message = function(message,...data) {

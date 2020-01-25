@@ -60,13 +60,13 @@ function Mouse(canvasManager,modules) {
     });
 
     const pointerData = Object.freeze(Object.defineProperties(new Object,{
-        x: {get: function() {return sendDataContainer.x}},
-        y: {get: function() {return sendDataContainer.y}},
-        shiftKey: {get: function() {return sendDataContainer.shiftKey}},
-        altKey: {get: function() {return sendDataContainer.altKey}},
-        ctrlKey: {get: function() {return sendDataContainer.ctrlKey}},
-        isDown: {get: function() {return pointerStatus.isDown}},
-        altIsDown: {get: function() {return altPointerStatus.isDown}}
+        x: {get: function() {return sendDataContainer.x},enumerable:true},
+        y: {get: function() {return sendDataContainer.y},enumerable:true},
+        shiftKey: {get: function() {return sendDataContainer.shiftKey},enumerable:true},
+        altKey: {get: function() {return sendDataContainer.altKey},enumerable:true},
+        ctrlKey: {get: function() {return sendDataContainer.ctrlKey},enumerable:true},
+        isDown: {get: function() {return pointerStatus.isDown},enumerable:true},
+        altIsDown: {get: function() {return altPointerStatus.isDown},enumerable:true}
     }));
 
     const updateLocationData = sendData => {
@@ -208,12 +208,7 @@ function Mouse(canvasManager,modules) {
         },captureOptions);
     };
 
-    Object.defineProperty(canvasManager,"pointer",{
-        value: pointerData,
-        writable: false,
-        configurable: false,
-        enumerable: true
-    });
+    canvasManager.pointer = pointerData;
 
     this.updateModifiers = data => {
         Object.assign(sendDataContainer,data);

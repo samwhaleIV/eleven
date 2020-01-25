@@ -37,6 +37,7 @@ function Internal(canvasManager,modules) {
     };
 
     Object.defineProperty(canvasManager,TARGET_NAME,{
+        enumerable: true,
         get: function() {
             return canvas.parentElement;
         },
@@ -49,9 +50,7 @@ function Internal(canvasManager,modules) {
             }
             newParent.appendChild(canvas);
             modules.resize.setDeferred();
-        },
-        configurable: false,
-        enumerable: false
+        }
     });
     Object.freeze(this);
 }

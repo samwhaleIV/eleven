@@ -90,12 +90,7 @@ function parseModule(module) {
     }
 }
 function addNamespaceIdentifier(target,name) {
-    Object.defineProperty(target,NAMESPACE_IDENTIFIER,{
-        value: name,
-        writable: false,
-        configurable: false,
-        enumerable: false
-    });
+    Object.defineProperty(target,NAMESPACE_IDENTIFIER,{value:name});
 }
 function getModuleSet(modules,name) {
     const moduleSet = new Object();
@@ -112,8 +107,6 @@ function InstallModules({target,modules,name}) {
     const moduleSet = getModuleSet(modules,name);
     Object.defineProperty(target,name,{
         value: moduleSet,
-        writable: false,
-        configurable: false,
         enumerable: true
     });
     return moduleSet;

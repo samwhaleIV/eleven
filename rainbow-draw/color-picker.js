@@ -58,7 +58,7 @@ function ColorPicker(colors=[
     document.body.appendChild(picker);
 
     Object.defineProperty(this,"color",{
-        get: function() {return color}
+        get: () => color
     });
 
     Object.freeze(this);

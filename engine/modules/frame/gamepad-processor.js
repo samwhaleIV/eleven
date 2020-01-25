@@ -49,8 +49,7 @@ function AxisState(codes) {
     this.codes = codes;
     this.code = null;
     Object.defineProperty(this,"inverseCode",{
-        get: () => getInverseCode(this.code),
-        configurable: false
+        get: () => getInverseCode(this.code)
     });
     this.pressed = false;
     this.pressedTime = null;

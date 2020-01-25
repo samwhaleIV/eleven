@@ -116,11 +116,13 @@ function Render(canvasManager,modules) {
 
     Object.defineProperties(canvasManager,{
         paused: {
+            enumerable: true,
             get: function() {
                 return paused;
             }
         },
         frame: {
+            enumerable: true,
             get: getFrame,
             set: setFrame
         }

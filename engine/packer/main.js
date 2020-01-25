@@ -73,11 +73,7 @@ function MakeGlobal(value) {
             GLOBAL_NAME_CONFLICT(name);
         }
     }
-    Object.defineProperty(globalThis,name,{
-        value: namespace,
-        writable: false,
-        configurable: false
-    });
+    Object.defineProperty(globalThis,name,{value:namespace});
     return namespace;
 }
 function Namespace() {
@@ -91,16 +87,8 @@ const namespace = new Namespace();
 
 function InstallNamespaceDependencies() {
     Object.defineProperties(globalThis,{
-        Namespace: {
-            value: namespace,
-            writable: false,
-            configurable: false
-        },
-        Singleton: {
-            value: Singleton,
-            writable: false,
-            configurable: false
-        }
+        Namespace: {value: namespace},
+        Singleton: {value: Singleton}
     });
 }
 InstallNamespaceDependencies();
