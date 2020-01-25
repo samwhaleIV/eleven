@@ -19,7 +19,7 @@ function DefineProxy(target,propertyName,proxy) {
     if(propertyValue) {
         value = (...parameters) => proxy(propertyValue,...parameters);
     }
-    Object.defineProperty(target,propertyName,{value:value});
+    Object.defineProperty(target,propertyName,{value:value,enumerable:true});
 }
 
 function installManagedGamepad(gamepadSettings) {
