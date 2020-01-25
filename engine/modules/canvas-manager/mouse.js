@@ -18,7 +18,7 @@ const BACK_CODE = 4;
 
 function PointerStatus(canSendEvent,sendDown,sendUp) {
     let isDown = false;
-    this.send = (sendData,down) => {
+    this.send = (sendData,down,pointerUpdate) => {
         if(down) {
             if(isDown) return;
             isDown = true;
@@ -28,6 +28,7 @@ function PointerStatus(canSendEvent,sendDown,sendUp) {
         }
         if(!canSendEvent()) return;
         if(down) {
+            pointerUpdate(sendData);
             sendDown(sendData);
         } else {
             sendUp(sendData);
@@ -157,8 +158,7 @@ function Mouse(canvasManager,modules) {
         if(!changeTarget) return;
         const sendData = getSendData(event);
         updateLocationData(sendData);
-        if(down) sendPointerMove(sendData);
-        changeTarget(sendData,down);
+        changeTarget(sendData,down,sendPointerMove);
     };
 
     const pointerUp = pointerChange.bind(null,false);
