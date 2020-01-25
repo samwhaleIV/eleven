@@ -8,6 +8,11 @@ import Input from "./input.js";
 import Render from "./render.js";
 import BufferResize from "./buffer-resize.js";
 
+/*
+  Notice!
+  CanvasManager's use of Frame objects relies on the default Frame.prototype
+*/
+
 const MODULES_LIST = [
     Internal,Resize,Gamepad,Mouse,Input,Render,BufferResize
 ];

@@ -37,7 +37,6 @@ function installKeyBinds(keyBinds) {
     DefineProxy(this,KEY_UP,keyBind.keyFilter);
     DefineProxy(this,INPUT,keyBind.keyFilter);
 }
-
 function Frame({
     base,parameters,
     managedGamepad=true,
@@ -53,6 +52,7 @@ function Frame({
         installKeyBinds.call(this,keyBinds);
     }
 }
+
 function sendMessage(target,message,data) {
     const endpoint = target[message];
     if(endpoint) {
@@ -111,6 +111,7 @@ Frame.prototype.messageAll = function(message,...data) {
 
     sendMessage(frame,message,data);
 }
+
 function GetFrame(settings) {
     return new Frame(settings);
 }
