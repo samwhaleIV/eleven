@@ -41,8 +41,8 @@ const MODIFIER_KEYS = MakeAssociative([
     ALT_KEYS,CTRL_KEYS,SHIFT_KEYS
 ].flat());
 
-const hasKey = (downKeys,set) => {
-    return set[0] in downKeys || set[1] in downKeys;
+const hasKey = (downKeys,[left,right]) => {
+    return left in downKeys || right in downKeys;
 };
 
 const getModifierData = downKeys => {
@@ -58,13 +58,13 @@ function Input(canvasManager,modules) {
     const downKeys = {};
 
     const getFrameSafe = () => {
-        let frame = canvasManager.frame;
+        let frame = canvasManager.getFrame();
         if(!frame) return null;
         frame = frame.getDeepest();
         return frame;
     };
     const getFrame = () => {
-        return canvasManager.frame.getDeepest();
+        return canvasManager.getFrame().getDeepest();
     };
 
     const summariseKeyEvent = event => {
@@ -136,7 +136,7 @@ function Input(canvasManager,modules) {
             updateModifiers(getModifierData(downKeys));
             const frame = getFrame();
             if(frame[INPUT]) {
-                frame[INPUT](downKeys);
+                frame[INPUT](downKeys,time);
             }
             const gamepadData = gamepadPoll();
             if(!gamepadData) {

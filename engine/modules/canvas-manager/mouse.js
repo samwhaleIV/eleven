@@ -91,7 +91,7 @@ function Mouse(canvasManager,modules) {
     };
 
     const getFrame = () => {
-        return canvasManager.frame.getDeepest();
+        return canvasManager.getFrame().getDeepest();
     };
 
     const canSendEvent = () => {

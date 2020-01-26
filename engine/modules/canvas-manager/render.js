@@ -1,7 +1,7 @@
 import Constants from "../../internal/constants.js";
 import Frame from "../frame/main.js";
-const FRAME_SIGNATURE = Constants.FrameSignature;
 
+const FRAME_SIGNATURE = Constants.FrameSignature;
 const LOG_PREFIX = "Canvas manager";
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
@@ -21,7 +21,10 @@ const CANVAS_NOT_IN_DOM = () => {
 };
 const BAD_SIGNATURE = frame => {
     throw Error(`Frame '${frame}' has incorrect signature. Does frame inherit Eleven.Frame's prototype?`);
-}
+};
+const BAD_FRAME_LOADER = frameLoader => {
+    throw Error(`Frame loader '${frameLoader}' of type '${typeof frameLoader}' is not a valid load function`);
+};
 
 let firstTime = true;
 const LOG_LOOP_STARTED = () => {
@@ -34,6 +37,8 @@ const LOG_LOOP_PAUSED = () => {
 
 function Render(canvasManager,modules) {
 
+    const context = modules.internal.context;
+
     let paused = true;
     let internalFrame = null;
     let renderFrame = null;
@@ -42,7 +47,7 @@ function Render(canvasManager,modules) {
         return internalFrame.deepRender.bind(internalFrame);
     };
 
-    function setFrame(frame) {
+    async function setFrame(frame) {
         if(!frame) {
             INVALID_FRAME(frame);
         }
@@ -51,6 +56,13 @@ function Render(canvasManager,modules) {
         }
         if(frame.signature !== FRAME_SIGNATURE) {
             BAD_SIGNATURE(frame);
+        }
+        const frameLoader = frame.load;
+        if(frameLoader !== undefined) {
+            if(typeof frameLoader !== "function") {
+                BAD_FRAME_LOADER(frameLoader);
+            }
+            await frameLoader.call(frame);
         }
         internalFrame = frame;
         renderFrame = getDeepRenderer();
@@ -68,76 +80,67 @@ function Render(canvasManager,modules) {
         delta: {get: function() {return time.delta}}
     }));
 
-    (function({renderData,pollInput,tryUpdateSize}){
-        let animationFrame = null;
-        const render = timestamp => {
-            if(paused) return;
-            tryUpdateSize();
-            pollInput(readonlyTime);
-            time.delta = timestamp - time.now;
-            time.now = timestamp;
-            renderFrame(renderData);
-            animationFrame = requestAnimationFrame(render);
-        };
-        canvasManager.start = ({target,frame,markLoaded}) => {
-            if(!paused) {
-                RENDER_LOOP_ALREADY_STARTED();
-            }
+    const renderData = [
+        context,
+        canvasManager.size,
+        readonlyTime
+    ];
+    const pollInput = modules.input.poll;
+    const tryUpdateSize = modules.resize.tryUpdateSize;
 
-            if(target) {
-                canvasManager.target = target;
-            }
-            modules.internal.trySetDefaultTarget();
-            if(!modules.internal.canvasInDOM()) {
-                CANVAS_NOT_IN_DOM();
-            }
+    let animationFrame = null;
+    const render = timestamp => {
+        if(paused) return;
+        tryUpdateSize();
+        time.delta = timestamp - time.now;
+        time.now = timestamp;
+        pollInput(readonlyTime);
+        renderFrame(renderData);
+        animationFrame = requestAnimationFrame(render);
+    };
+    canvasManager.start = async ({target,frame,markLoaded}) => {
+        if(!paused) {
+            RENDER_LOOP_ALREADY_STARTED();
+        }
 
-            if(frame) {
-                setFrame(frame);
-            }
-            if(!internalFrame) {
-                MISSING_FRAME();
-            }
+        if(target) {
+            canvasManager.target = target;
+        }
+        modules.internal.trySetDefaultTarget();
+        if(!modules.internal.canvasInDOM()) {
+            CANVAS_NOT_IN_DOM();
+        }
 
-            paused = false;
-            animationFrame = requestAnimationFrame(render);
-            LOG_LOOP_STARTED();
-            if(markLoaded) {
-                canvasManager.markLoaded();
-            }
-        };
-        canvasManager.pause = () => {
-            if(paused) {
-                RENDER_LOOP_ALREADY_PAUSED();
-            }
-            paused = true;
-            cancelAnimationFrame(animationFrame);
-            animationFrame = null;
-            LOG_LOOP_PAUSED();
-        };
-        canvasManager.setFrame = setFrame;
-        canvasManager.getFrame = getFrame;
-    })({
-        renderData: [
-            modules.internal.context,
-            canvasManager.size,
-            readonlyTime
-        ],
-        pollInput: modules.input.poll,
-        tryUpdateSize: modules.resize.tryUpdateSize
-    });
+        if(frame) {
+            await setFrame(frame);
+        }
+        if(!internalFrame) {
+            MISSING_FRAME();
+        }
 
-    Object.defineProperties(canvasManager,{
-        paused: {
-            enumerable: true,
-            get: function() {
-                return paused;
-            }
-        },
-        frame: {
-            enumerable: true,
-            get: getFrame,
-            set: setFrame
+        paused = false;
+        animationFrame = requestAnimationFrame(render);
+        LOG_LOOP_STARTED();
+        if(markLoaded) {
+            canvasManager.markLoaded();
+        }
+    };
+    canvasManager.pause = () => {
+        if(paused) {
+            RENDER_LOOP_ALREADY_PAUSED();
+        }
+        paused = true;
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+        LOG_LOOP_PAUSED();
+    };
+    canvasManager.setFrame = setFrame;
+    canvasManager.getFrame = getFrame;
+
+    Object.defineProperty(canvasManager,"paused",{
+        enumerable: true,
+        get: function() {
+            return paused;
         }
     });
     

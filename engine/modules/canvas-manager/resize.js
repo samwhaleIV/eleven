@@ -43,7 +43,7 @@ function Resize(canvasManager,modules) {
 
     const context = modules.internal.context;
     const notifySizeUpdate = () => {
-        const frame = canvasManager.frame;
+        const frame = canvasManager.getFrame();
         if(!frame) return;
         frame.messageAll(RESIZE_METHOD,sizeValuesReadonly,context);
     };

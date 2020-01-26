@@ -2,7 +2,7 @@ import engine from "../engine/eleven.js";
 Namespace.makeGlobal(engine);
 
 const CanvasManager = engine.CanvasManager;
-const Frame = engine.frame;
+const Frame = engine.Frame;
 
 function TestFrame() {
     this.keyDown = event => {
@@ -11,8 +11,13 @@ function TestFrame() {
     this.keyUp = event => {
         //console.log("Key up  :",event);
     };
-    this.render = (context,size) => {
+    this.load = () => {
+        return new Promise(resolve=>setTimeout(resolve,2000));
+    };
+    this.resize = (size,context) => {
         context.fillStyle = "red";
+    };
+    this.render = (context,size) => {
         context.fillRect(0,0,size.width,size.height);
     }
 }

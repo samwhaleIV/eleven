@@ -11,9 +11,9 @@ const LOG_NAME = "Resource manager";
 
 const FALLBACK_TEXT = "Missing resource!";
 const FALLBACK_IMAGE = GetFallbackImage(FALLBACK_TEXT);
-const GET_FALLBACK_JSON_OBJECT = () => {return{
-    message: FALLBACK_TEXT
-}};
+const GET_FALLBACK_JSON_OBJECT = () => {
+    return {message: FALLBACK_TEXT};
+};
 const FALLBACK_OCTET = TextToOctet(FALLBACK_TEXT);
 
 const INVALID_RESOURCE_DATA = () => {
@@ -45,8 +45,8 @@ const DictionaryLookup = Object.freeze(Object.values(ResourceTypes).reduce((look
 function EntryExists(name,type) {
     return name in DictionaryLookup[type];
 }
-function SetEntry(name,value,type) {
-    return DictionaryLookup[type][name] = value;
+function SetEntry({type,lookupName},value) {
+    return DictionaryLookup[type][lookupName] = value;
 }
 function GetEntry(name,type) {
     let entry = DictionaryLookup[type][name];
@@ -81,10 +81,17 @@ const ResourceLoaders = Object.freeze({
     }
 });
 
-function LoadResource(resourceLink) {
+function LoadResource(resourceLink,overwrite) {
+    const {name, lookupName, type} = resourceLink;
+    if(!overwrite) {
+        const oldEntry = DictionaryLookup[type][lookupName];
+        if(oldEntry !== FAILED_RESOURCE) {
+            return;
+        }
+    }
     return new Promise(async resolve => {
-        const resourceLoader = ResourceLoaders[resourceLink.type];
-        fetch(resourceLink.name).then(response => {
+        const resourceLoader = ResourceLoaders[type];
+        fetch(name).then(response => {
             if(!response.ok) {
                 throw response.statusText;
             }
@@ -93,49 +100,58 @@ function LoadResource(resourceLink) {
             if(!data) {
                 INVALID_RESOURCE_DATA();
             }
-            SetEntry(resourceLink.lookupName,data,resourceLink.type);
-            console.log(`${LOG_NAME}: Loaded '${resourceLink.name}'`);
+            SetEntry(resourceLink,data);
+            console.log(`${LOG_NAME}: Loaded '${name}'`);
             resolve();
         }).catch(error => {
-            SetEntry(resourceLink.lookupName,FAILED_RESOURCE,resourceLink.type);
-            console.error(`${LOG_NAME}: ${error} '${resourceLink.name}'`);
+            SetEntry(resourceLink,FAILED_RESOURCE);
+            console.error(`${LOG_NAME}: ${error} '${name}'`);
             resolve();
         });
     });
 }
+function LoadResourceOverwrite(resourceLink) {
+    return LoadResource(resourceLink,true);
+}
 
-async function LoadResources(resourceLinks) {
-    await Promise.all(resourceLinks.map(LoadResource));
+async function LoadResources(resourceLinks,overwrite) {
+    const loadTarget = overwrite ? LoadResourceOverwrite : LoadResource;
+    await Promise.all(resourceLinks.map(loadTarget));
 }
 
 function ResourceManager() {
 
-    this.getLink = LinkResource;
-
-    RESOURCE_BIND_DATA.forEach(type=>{
-        const resourceTypeName = type[0];
-        const resourceType = type[1];
-        this[`get${resourceTypeName}Link`] = name => LinkResource(name,resourceType);
-        this[`get${resourceTypeName}`] = name => GetEntry(name,resourceType);
-        this[`has${resourceTypeName}`] = name => EntryExists(name,resourceType);
-        this[`queue${resourceTypeName}`] = (...files) => {
-            files = files.flat();
-            this.queue(...files.map(fileName => LinkResource(fileName,resourceType)
-        ))};
-    });
-
-    this.loadResource = LoadResource;
-    this.loadResources = LoadResources;
-
     const resourceQueue = [];
+    this.getLink = LinkResource;
     this.queue = (...resourceLinks) => {
         resourceLinks = resourceLinks.flat();
-        resourceQueue.push(...resourceLinks);
+        return resourceQueue.push(...resourceLinks);
     };
-    this.loadQueue = () => {
+    this.load = async (overwrite=false) => {
+        if(!resourceQueue.length) return;
         const resourceLinks = resourceQueue.splice(0);
-        return LoadResources(resourceLinks);
+        await LoadResources(resourceLinks,overwrite);
     };
+
+    RESOURCE_BIND_DATA.forEach(([
+        typeName,type
+    ]) => {
+        this[`get${typeName}Link`] = name => {
+            return LinkResource(name,type);
+        };
+        this[`get${typeName}`] = name => {
+            return GetEntry(name,type);
+        };
+        this[`has${typeName}`] = name => {
+            return EntryExists(name,type);
+        };
+        this[`queue${typeName}`] = (...files) => {
+            files = files.flat().map(fileName => {
+                return LinkResource(fileName,type);
+            });
+            return this.queue(...files);
+        };
+    });
 
     Object.freeze(this);
 }

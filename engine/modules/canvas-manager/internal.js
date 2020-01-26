@@ -36,8 +36,6 @@ function Internal(canvasManager,modules) {
         return document.body.contains(canvas);
     };
 
-    canvasManager.context = context;
-
     Object.defineProperty(canvasManager,TARGET_NAME,{
         enumerable: true,
         get: function() {
