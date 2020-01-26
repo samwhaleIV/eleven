@@ -1,7 +1,9 @@
 import ColorPicker from "./color-picker.js";
+import engine from "../engine/eleven.js";
+const CanvasManager = engine.CanvasManager;
 
-function DrawApp(canvasManager) {
-    const pointer = canvasManager.pointer;
+function DrawApp() {
+    const pointer = CanvasManager.pointer;
 
     const size = 10;
     const halfSize = size / 2;
@@ -35,7 +37,7 @@ function DrawApp(canvasManager) {
     };
 
     this.resize = size => {
-        canvasManager.bufferResize({
+        CanvasManager.bufferResize({
             canvas: buffer,
             context: bufferContext
         },size.width,size.height);

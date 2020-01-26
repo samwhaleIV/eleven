@@ -1,3 +1,7 @@
+import Constants from "../../internal/constants.js";
+import Frame from "../frame/main.js";
+const FRAME_SIGNATURE = Constants.FrameSignature;
+
 const LOG_PREFIX = "Canvas manager";
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
@@ -15,6 +19,9 @@ const INVALID_FRAME = frame => {
 const CANVAS_NOT_IN_DOM = () => {
     throw Error("Cannot start rendering, the canvas element is not attached to the DOM");
 };
+const BAD_SIGNATURE = frame => {
+    throw Error(`Frame '${frame}' has incorrect signature. Does frame inherit Eleven.Frame's prototype?`);
+}
 
 let firstTime = true;
 const LOG_LOOP_STARTED = () => {
@@ -38,6 +45,12 @@ function Render(canvasManager,modules) {
     function setFrame(frame) {
         if(!frame) {
             INVALID_FRAME(frame);
+        }
+        if(typeof frame === "function") {
+            frame = Frame.create(frame);
+        }
+        if(frame.signature !== FRAME_SIGNATURE) {
+            BAD_SIGNATURE(frame);
         }
         internalFrame = frame;
         renderFrame = getDeepRenderer();

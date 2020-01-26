@@ -1,7 +1,16 @@
 import engine from "../engine/eleven.js";
 
-Namespace.makeGlobal(engine);
-const canvasManager = engine.CanvasManager;
+const CanvasManager = engine.CanvasManager;
+
+const minMax = (value,min,max) => {
+    if(value < min) {
+        return min;
+    } else if(value > max) {
+        return max;
+    } else {
+        return value;
+    }
+};
 
 function TrigRecursion() {
 
@@ -10,9 +19,8 @@ function TrigRecursion() {
     const getTriangles = ({width,height}) => {
         const triangles = [];
 
-
-        const x = Math.min(Math.max(canvasManager.pointer.x,0),width);
-        const y = Math.min(Math.max(canvasManager.pointer.y,0),height);
+        const x = minMax(CanvasManager.pointer.x,0,width);
+        const y = minMax(CanvasManager.pointer.y,0,height);
 
         const a = point(0,0);
         const b = point(width,0);
@@ -56,11 +64,13 @@ function TrigRecursion() {
             context.lineTo(a.x,a.y);
             context.stroke();
         });
-    }
+    };
 }
 
-canvasManager.start({
-    target: document.getElementById("triangle-container"),
-    frame: new TrigRecursion(),
+const triangleContainer = document.getElementById("triangle-container");
+
+CanvasManager.start({
+    target: triangleContainer,
+    frame: TrigRecursion,
     markLoaded: true
 });

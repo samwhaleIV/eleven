@@ -5,6 +5,7 @@ const KEY_UP = inputRoutes.keyUp;
 const KEY_DOWN = inputRoutes.keyDown;
 const INPUT = inputRoutes.input;
 const INPUT_GAMEPAD = inputRoutes.inputGamepad;
+const FRAME_SIGNATURE = Constants.FrameSignature;
 
 const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
     throw Error("Gamepad input method already exists for base frame, cannot use managed gamepad");
@@ -39,14 +40,13 @@ function installKeyBinds(keyBinds) {
 }
 function Frame({
     base,parameters,
-    managedGamepad=true,
+    gamepad=true,
     keyBinds=null
 }) {
     this.child = null;
     base.apply(this,parameters);
-
-    if(managedGamepad) {
-        installManagedGamepad.call(this,managedGamepad);
+    if(gamepad) {
+        installManagedGamepad.call(this,gamepad);
     }
     if(keyBinds) {
         installKeyBinds.call(this,keyBinds);
@@ -111,9 +111,17 @@ Frame.prototype.messageAll = function(message,...data) {
 
     sendMessage(frame,message,data);
 }
+Frame.prototype.signature = FRAME_SIGNATURE;
+Object.freeze(Frame.prototype);
 
-function GetFrame(settings) {
+Frame.create = function(settings) {
+    if(typeof settings === "function") {
+        settings = {
+            base: settings
+        };
+    }
     return new Frame(settings);
-}
+};
+Object.freeze(Frame);
+
 export default Frame;
-export { Frame, GetFrame };

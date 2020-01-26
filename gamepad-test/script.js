@@ -1,9 +1,8 @@
 import engine from "../engine/eleven.js";
-import ManagedGamepad from "../engine/modules/frame/managed-gamepad.js";
-
 Namespace.makeGlobal(engine);
 
-const canvasManager = engine.CanvasManager;
+const CanvasManager = engine.CanvasManager;
+const Frame = engine.frame;
 
 function TestFrame() {
     this.keyDown = event => {
@@ -18,10 +17,10 @@ function TestFrame() {
     }
 }
 
-canvasManager.start({
-    frame: engine.GetFrame({
+CanvasManager.start({
+    frame: Frame.create({
         base: TestFrame,
-        managedGamepad: {
+        gamepad: {
             binds: {
                 Up: "TestUp",
                 Down: "TestDown",

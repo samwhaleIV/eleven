@@ -1,6 +1,7 @@
 const Constants = Object.freeze({
     EngineNamespace: "Eleven",
     CSSLoadedClass: "loaded",
+    FrameSignature: Symbol("FrameSignature"),
 
     Resource: Object.freeze({
         defaultImageType: ".png",
