@@ -114,9 +114,9 @@ function LoadResourceOverwrite(resourceLink) {
     return LoadResource(resourceLink,true);
 }
 
-async function LoadResources(resourceLinks,overwrite) {
+function LoadResources(resourceLinks,overwrite) {
     const loadTarget = overwrite ? LoadResourceOverwrite : LoadResource;
-    await Promise.all(resourceLinks.map(loadTarget));
+    return Promise.all(resourceLinks.map(loadTarget));
 }
 
 function ResourceManager() {
@@ -127,10 +127,10 @@ function ResourceManager() {
         resourceLinks = resourceLinks.flat();
         return resourceQueue.push(...resourceLinks);
     };
-    this.load = async (overwrite=false) => {
+    this.load = (overwrite=false) => {
         if(!resourceQueue.length) return;
         const resourceLinks = resourceQueue.splice(0);
-        await LoadResources(resourceLinks,overwrite);
+        return LoadResources(resourceLinks,overwrite);
     };
 
     RESOURCE_BIND_DATA.forEach(([
