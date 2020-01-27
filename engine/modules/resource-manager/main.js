@@ -81,14 +81,8 @@ const ResourceLoaders = Object.freeze({
     }
 });
 
-function LoadResource(resourceLink,overwrite) {
-    const {name, lookupName, type} = resourceLink;
-    if(!overwrite) {
-        const oldEntry = DictionaryLookup[type][lookupName];
-        if(oldEntry !== FAILED_RESOURCE) {
-            return;
-        }
-    }
+function LoadResource(resourceLink) {
+    const {name, type} = resourceLink;
     return new Promise(async resolve => {
         const resourceLoader = ResourceLoaders[type];
         fetch(name).then(response => {
@@ -110,13 +104,35 @@ function LoadResource(resourceLink,overwrite) {
         });
     });
 }
-function LoadResourceOverwrite(resourceLink) {
-    return LoadResource(resourceLink,true);
-}
 
 function LoadResources(resourceLinks,overwrite) {
-    const loadTarget = overwrite ? LoadResourceOverwrite : LoadResource;
-    return Promise.all(resourceLinks.map(loadTarget));
+    return Promise.all(resourceLinks.map(LoadResource));
+}
+
+function getLoadList(resourceLinks,overwrite) {
+    const loadList = {};
+    resourceLinks.forEach(resourceLink => {
+        const {name,lookupName,type} = resourceLink;
+
+        let oldEntry = GetEntry(lookupName,type);
+        if(oldEntry === FAILED_RESOURCE) {
+            oldEntry = false;
+        } else {
+            oldEntry = true;
+        }
+        let pass = false;
+
+        if(oldEntry && overwrite) {
+            if(overwrite) pass = true;
+        } else {
+            pass = true;
+        }
+
+        if(pass) {
+            resourceLookup[name] = resourceLink;
+        }
+    });
+    return Object.values(loadList);
 }
 
 function ResourceManager() {
@@ -125,19 +141,22 @@ function ResourceManager() {
     this.getLink = LinkResource;
     this.queue = (...resourceLinks) => {
         resourceLinks = resourceLinks.flat();
-        return resourceQueue.push(...resourceLinks);
+        resourceQueue.push(...resourceLinks);
+        return this;
     };
     this.load = (overwrite=false) => {
         if(!resourceQueue.length) return;
         const resourceLinks = resourceQueue.splice(0);
-        return LoadResources(resourceLinks,overwrite);
+        const loadList = getLoadList(resourceLinks,overwrite);
+        if(!loadList.length) return;
+        return LoadResources(loadList);
     };
 
     RESOURCE_BIND_DATA.forEach(([
         typeName,type
     ]) => {
-        this[`get${typeName}Link`] = name => {
-            return LinkResource(name,type);
+        this[`get${typeName}Link`] = file => {
+            return LinkResource(file,type);
         };
         this[`get${typeName}`] = name => {
             return GetEntry(name,type);
