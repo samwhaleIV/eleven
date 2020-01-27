@@ -10,6 +10,9 @@ const FRAME_SIGNATURE = Constants.FrameSignature;
 const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
     throw Error("Gamepad input method already exists for base frame, cannot use managed gamepad");
 };
+const INVALID_PARAMETERS = () => {
+    throw Error("Frame parameters must be an array, not array-like or data type");
+};
 
 import KeyBind from "./key-bind.js";
 import ManagedGamepad from "./managed-gamepad.js";
@@ -38,11 +41,18 @@ function installKeyBinds(keyBinds) {
     DefineProxy(this,KEY_UP,keyBind.keyFilter);
     DefineProxy(this,INPUT,keyBind.keyFilter);
 }
+function validateParameters(parameters) {
+    if(!parameters) return;
+    if(!Array.isArray(parameters)) INVALID_PARAMETERS();
+}
 function Frame({
     base,parameters,
     gamepad=true,
     keyBinds=null
 }) {
+    validateParameters(parameters);
+    this.render = missingRenderMethod;
+    this.opaque = true;
     this.child = null;
     base.apply(this,parameters);
     if(gamepad) {
@@ -58,6 +68,15 @@ function sendMessage(target,message,data) {
     if(endpoint) {
         endpoint.apply(target,data);
     }
+}
+function missingRenderMethod(context,size) {
+    context.fillStyle = "black";
+    context.fillRect(0,0,size.width,size.height);
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = "white";
+    context.font = "16px sans-serif";
+    context.fillText("Missing Render Method",size.halfWidth,size.halfHeight);
 }
 Frame.prototype.getDeepest = function() {
     let frame = this;

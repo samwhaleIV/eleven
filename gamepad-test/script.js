@@ -14,7 +14,7 @@ function TestFrame() {
     this.load = () => {
         return new Promise(resolve=>setTimeout(resolve,2000));
     };
-    this.resize = (size,context) => {
+    this.resize = context => {
         context.fillStyle = "red";
     };
     this.render = (context,size) => {

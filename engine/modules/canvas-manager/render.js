@@ -25,6 +25,9 @@ const BAD_SIGNATURE = frame => {
 const BAD_FRAME_LOADER = frameLoader => {
     throw Error(`Frame loader '${frameLoader}' of type '${typeof frameLoader}' is not a valid load function`);
 };
+const UNEXPECTED_PARAMETERS = () => {
+    throw Error("Parameter use is only valid when supplying an uninstantiated frame function");
+};
 
 let firstTime = true;
 const LOG_LOOP_STARTED = () => {
@@ -47,12 +50,17 @@ function Render(canvasManager,modules) {
         return internalFrame.deepRender.bind(internalFrame);
     };
 
-    async function setFrame(frame) {
+    async function setFrame(frame,parameters) {
         if(!frame) {
             INVALID_FRAME(frame);
         }
         if(typeof frame === "function") {
-            frame = Frame.create(frame);
+            frame = Frame.create({
+                base: frame,
+                parameters: parameters
+            });
+        } else if(parameters !== undefined) {
+            UNEXPECTED_PARAMETERS();
         }
         if(frame.signature !== FRAME_SIGNATURE) {
             BAD_SIGNATURE(frame);
@@ -98,9 +106,15 @@ function Render(canvasManager,modules) {
         renderFrame(renderData);
         animationFrame = requestAnimationFrame(render);
     };
-    canvasManager.start = async ({target,frame,markLoaded}) => {
+    canvasManager.start = async ({
+        target,frame,parameters,markLoaded=true,markLoading=true
+    }) => {
         if(!paused) {
             RENDER_LOOP_ALREADY_STARTED();
+        }
+
+        if(markLoading) {
+            canvasManager.markLoading();
         }
 
         if(target) {
@@ -112,7 +126,9 @@ function Render(canvasManager,modules) {
         }
 
         if(frame) {
-            await setFrame(frame);
+            await setFrame(frame,parameters);
+        } else if(parameters) {
+            UNEXPECTED_PARAMETERS();
         }
         if(!internalFrame) {
             MISSING_FRAME();

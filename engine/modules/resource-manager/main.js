@@ -82,8 +82,8 @@ const ResourceLoaders = Object.freeze({
 });
 
 function LoadResource(resourceLink) {
-    const {name, type} = resourceLink;
-    return new Promise(async resolve => {
+    const {name, lookupName, type} = resourceLink;
+    return new Promise(resolve => {
         const resourceLoader = ResourceLoaders[type];
         fetch(name).then(response => {
             if(!response.ok) {
@@ -96,11 +96,11 @@ function LoadResource(resourceLink) {
             }
             SetEntry(resourceLink,data);
             console.log(`${LOG_NAME}: Loaded '${name}'`);
-            resolve();
+            resolve(GetEntry(lookupName,type));
         }).catch(error => {
             SetEntry(resourceLink,FAILED_RESOURCE);
             console.error(`${LOG_NAME}: ${error} '${name}'`);
-            resolve();
+            resolve(GetEntry(lookupName,type));
         });
     });
 }
@@ -127,7 +127,7 @@ function getLoadList(resourceLinks,overwrite) {
         }
 
         if(pass) {
-            resourceLookup[name] = resourceLink;
+            loadList[name] = resourceLink;
         }
     });
     return Object.values(loadList);

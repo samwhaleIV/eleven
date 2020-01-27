@@ -36,7 +36,7 @@ function DrawApp() {
         movementBuffer.splice(0);
     };
 
-    this.resize = size => {
+    this.resize = (_,size) => {
         CanvasManager.bufferResize({
             canvas: buffer,
             context: bufferContext
