@@ -117,8 +117,6 @@ function getLoadList(resourceLinks,overwrite) {
         let oldEntry = GetEntry(lookupName,type);
         if(oldEntry === FAILED_RESOURCE) {
             oldEntry = false;
-        } else {
-            oldEntry = true;
         }
         let pass = false;
 
