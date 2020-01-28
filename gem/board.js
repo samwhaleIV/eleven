@@ -5,7 +5,7 @@ const { CanvasManager, ResourceManager } = Eleven;
 
 const GEM_IMAGE = "gems.png";
 const BOARD_ROWS = 9;
-const BOARD_COLUMNS = 16;
+const BOARD_COLUMNS = 9;
 const GEM_SIZE = 10;
 const GEM_SPACE = 1;
 const GEM_STRIDE = GEM_SIZE + GEM_SPACE;
@@ -176,12 +176,15 @@ function Board() {
             selection.state = SELECT_STATES.Lock;
             connection.state = SELECT_STATES.HoverConnect;
         } else if(clickLock) {
+            if(selection.state === SELECT_STATES.Lock) {
+                this.pointerMove(event);
+            }
             clickTime = -Infinity;
             this.clickUp(event,true);
             clickLock = false;
         }
     };
-    this.clickUp = (event,ignoreClickLock) => {
+    this.clickUp = (_,ignoreClickLock) => {
         if(locked) return;
         if(!ignoreClickLock) {
             if(clickLock) {
@@ -198,7 +201,7 @@ function Board() {
             selection.state = SELECT_STATES.Hover;
             connection.state = SELECT_STATES.None;
             connection.gem = null;
-        } else if(connection.state === SELECT_STATES.HoverConnect && connection.state !== SELECT_STATES.None) {
+        } else if(connection.state === SELECT_STATES.HoverConnect && selection.state === SELECT_STATES.Lock) {
             let moveCount = 0;
             const callback = () => {
                 if(++moveCount !== 2) return;
@@ -252,7 +255,6 @@ function Board() {
             selection.state = SELECT_STATES.Hover;
             connection.state = SELECT_STATES.None;
             connection.gem = null;
-            this.pointerMove(event);
         }
         
     };
@@ -303,8 +305,8 @@ function Board() {
     
                 context.drawImage(gemImage,
                     gemX,gemY,GEM_SIZE,GEM_SIZE,
-                    (GEM_SPACE+x * GEM_STRIDE + xOffset) * RENDER_SCALE,
-                    (GEM_SPACE+y * GEM_STRIDE + yOffset) * RENDER_SCALE,
+                    (GEM_SPACE + x * GEM_STRIDE + xOffset) * RENDER_SCALE,
+                    (GEM_SPACE + y * GEM_STRIDE + yOffset) * RENDER_SCALE,
                     GEM_RENDER_SIZE,GEM_RENDER_SIZE
                 );
             }
