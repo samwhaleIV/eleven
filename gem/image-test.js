@@ -1,5 +1,5 @@
 import Eleven from "../engine/eleven.js";
-const { ResourceManager } = Eleven;
+const { ResourceManager, CanvasManager } = Eleven;
 
 function ImageTest() {
 
@@ -9,7 +9,7 @@ function ImageTest() {
 
     let gemImage = "gems.png";
     this.load = async () => {
-        [gemImage] = await ResourceManager.queueImage(gemImage).load();
+        [gemImage] = await ResourceManager.queueImage([gemImage]).load();
     };
 
     let gemWidth, gemHeight;

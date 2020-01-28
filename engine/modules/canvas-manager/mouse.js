@@ -27,8 +27,8 @@ function PointerStatus(canSendEvent,sendDown,sendUp) {
             isDown = false;
         }
         if(!canSendEvent()) return;
+        pointerUpdate(sendData);
         if(down) {
-            pointerUpdate(sendData);
             sendDown(sendData);
         } else {
             sendUp(sendData);
