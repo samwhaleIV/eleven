@@ -69,6 +69,7 @@ function Input(canvasManager,modules) {
 
     const summariseKeyEvent = event => {
         return {
+            impulse: event.code,
             code: event.code,
             key: event.key,
             ctrlKey: event.ctrlKey,

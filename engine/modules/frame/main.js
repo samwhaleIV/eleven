@@ -7,15 +7,21 @@ const INPUT = inputRoutes.input;
 const INPUT_GAMEPAD = inputRoutes.inputGamepad;
 const FRAME_SIGNATURE = Constants.FrameSignature;
 
+import KeyBind from "./key-bind.js";
+import ManagedGamepad from "./managed-gamepad.js";
+
+import GamepadBinds from "./gamepad-binds.js";
+const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
+
 const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
     throw Error("Gamepad input method already exists for base frame, cannot use managed gamepad");
 };
 const INVALID_PARAMETERS = () => {
     throw Error("Frame parameters must be an array, not array-like or data type");
 };
-
-import KeyBind from "./key-bind.js";
-import ManagedGamepad from "./managed-gamepad.js";
+const BAD_BASE = base => {
+    throw Error(`Base '${base}' of type '${typeof base}' is an invalid frame base, must be a function`);
+};
 
 function DefineProxy(target,propertyName,proxy) {
     let value = null;
@@ -35,6 +41,23 @@ function installManagedGamepad(gamepadSettings) {
         value: managedGamepad.pollingFilter.bind(null,this)
     });
 }
+function getStaticInputs(target) {
+    const getOrNull = property => {
+        const value = target[property];
+        if(value) return value;
+        return null;
+    };
+    return Object.freeze({
+        [KEY_DOWN]: getOrNull(KEY_DOWN),
+        [KEY_UP]: getOrNull(KEY_UP),
+        [INPUT]: getOrNull(INPUT),
+    });
+}
+function defineGamepadInputs(isStatic) {
+    let inputTarget = this;
+    if(isStatic) inputTarget = getStaticInputs(this);
+    Object.defineProperty(this,GAMEPAD_INPUT_TARGET,{value:inputTarget});
+}
 function installKeyBinds(keyBinds) {
     const keyBind = new KeyBind(keyBinds);
     DefineProxy(this,KEY_DOWN,keyBind.keyFilter);
@@ -45,22 +68,42 @@ function validateParameters(parameters) {
     if(!parameters) return;
     if(!Array.isArray(parameters)) INVALID_PARAMETERS();
 }
+function validateBase(base) {
+    if(typeof base === "function") return;
+    BAD_BASE();
+}
+function validateFrameData(base,parameters) {
+    validateBase(base);
+    validateParameters(parameters);
+}
+function setDefaultProperties(target) {
+    target.render = missingRenderMethod;
+    target.opaque = true;
+    target.child = null;
+}
+function installBase(target,base,parameters) {
+    validateFrameData(base,parameters);
+    base.apply(target,parameters);
+}
+function installInputManagement(target,gamepad,keyBinds) {
+    const hasKeyBinds = keyBinds ? true : false;
+    if(gamepad) {
+        defineGamepadInputs.call(target,hasKeyBinds);
+        installManagedGamepad.call(target,gamepad);
+    }
+    if(hasKeyBinds) {
+        installKeyBinds.call(target,keyBinds);
+    }
+}
+
 function Frame({
     base,parameters,
     gamepad=true,
     keyBinds=null
 }) {
-    validateParameters(parameters);
-    this.render = missingRenderMethod;
-    this.opaque = true;
-    this.child = null;
-    base.apply(this,parameters);
-    if(gamepad) {
-        installManagedGamepad.call(this,gamepad);
-    }
-    if(keyBinds) {
-        installKeyBinds.call(this,keyBinds);
-    }
+    setDefaultProperties(this);
+    installBase(this,base,parameters);
+    installInputManagement(this,gamepad,keyBinds);
 }
 
 function sendMessage(target,message,data) {

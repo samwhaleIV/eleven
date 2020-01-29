@@ -1,3 +1,6 @@
+//Used so the gamepad processor can access original, unfiltered key events on the base frame in case a key bind filter is also applied
+const GAMEPAD_INPUT_TARGET = Symbol("GamepadInputTarget");
+
 const DIRECTION_KEY = "Direction";
 const BUMPER_KEY = "Bumper";
 const TRIGGER_KEY = "Trigger";
@@ -102,5 +105,6 @@ export default Object.freeze({
     Keys: keys,
     TriggerKey: TRIGGER_KEY,
     DirectionKey: DIRECTION_KEY,
-    JOYSTICK_KEY: JOYSTICK_KEY
+    JoystickMove: JOYSTICK_KEY,
+    GamepadInputTarget: GAMEPAD_INPUT_TARGET
 });

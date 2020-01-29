@@ -22,6 +22,8 @@ const LEFT_Y_AXIS = 1;
 const RIGHT_X_AXIS = 2
 const RIGHT_Y_AXIS = 3;
 
+const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
+
 const getImpulseEvent = (impulse,{code,key}) => {
     return {
         impulse: impulse, code, key,
@@ -114,6 +116,10 @@ function GamepadProcessor(settings) {
         return {leftAxisState, rightAxisState};
     })(settings);
 
+    const getFrameTarget = (frame,target) => {
+        return frame[GAMEPAD_INPUT_TARGET][target];
+    };
+
     const sendKey = (frame,down,buttonState) => {
         const target = down ? KEY_DOWN : KEY_UP;
         const code = buttonState.inverseCode;
@@ -121,7 +127,7 @@ function GamepadProcessor(settings) {
         if(code in binds) {
             impulse = binds[code];
         } else return;
-        const frameTarget = frame[target];
+        const frameTarget = getFrameTarget(frame,target);
         if(frameTarget) {
             frameTarget(getImpulseEvent(
                 impulse,buttonState
