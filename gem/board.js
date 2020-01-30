@@ -3,13 +3,14 @@
 import Eleven from "../engine/eleven.js";
 const { CanvasManager, ResourceManager } = Eleven;
 
+const BACKGROUND_COLOR = "white";
 const GEM_IMAGE = "gems.png";
 const BOARD_ROWS = 9;
 const BOARD_COLUMNS = 9;
 const GEM_SIZE = 10;
 const GEM_SPACE = 1;
 const GEM_STRIDE = GEM_SIZE + GEM_SPACE;
-const GEM_COUNT = 5;
+const GEM_COUNT = 6;
 const SELECT_START = GEM_COUNT * GEM_SIZE;
 
 const ANIMATION_ROWS = 10;
@@ -551,7 +552,7 @@ function Board() {
 
     this.resize = context => {
         context.imageSmoothingEnabled = false;
-        context.fillStyle = "white";
+        context.fillStyle = BACKGROUND_COLOR;
     };
 
     const gemData = boardData.rows;
