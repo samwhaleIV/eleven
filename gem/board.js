@@ -187,74 +187,17 @@ function Board() {
         return x >= 0 && y >= 0 && y < BOARD_ROWS && x < BOARD_COLUMNS;
     };
 
-    const dropColumn = (column,end) => {
-        return new Promise(resolve => {
-            const endStart = end;
-
-            while(column[end].deleteStart && end > 0) {
-                end--;
-            }
-
-            const distance = endStart - end;
-            if(!distance) {
-                const gem = column[0];
-                gem.deleteStart = null;
-                gem.type = getRandomGemType();
-                moveGem(gem,0,1,0,performance.now()+moveTime,()=>{
-                    gem.moveStart = null;
-                    resolve();
-                });
-                return;
-            }
-
-            let start = end;
-            for(let y = start;y>=0;y--) {
-                if(!y || column[y].deleteStart) {
-                    start = y;
-                    break;
-                }
-            }
-            const count = end - start + 1;
-            if(!count) {
-                resolve();
-                return;
-            };
-            const callback = getCounterCallback(()=>{ 
-                let values = new Array(count);
-                for(let y = start;y<count;y++) {
-                    const gem = column[y];
-                    gem.deleteStart = -Infinity;
-                    gem.moveStart = null;
-                    values[y] = gem.type;
-                    gem.type = getRandomGemType();
-                }
-                for(let y = start;y<count;y++) {
-                    const gem = column[y+distance];
-                    gem.deleteStart = null;
-                    gem.moveStart = null;
-                    gem.type = values[y];
-                }
-                resolve();
-            },count);
-            const now = performance.now();
-            for(let y = start;y<count;y++) {
-                moveGem(column[y],0,1,distance,now,callback);
-            }
-        });
-    };
-
     const fillBoard = async () => {
         moveTime = MOVE_TIME;
-        for(let y = BOARD_ROWS-1;y>=0;y--) {
-            const row = boardData.rows[y];
-            const queue = [];
-            for(let x = 0;x<BOARD_COLUMNS;x++) {
-                if(row[x].deleteStart) {
-                    queue.push(dropColumn(boardData.columns[x],y));
-                }
-            }
-            await Promise.all(queue);
-        }
+
+        /*
+          Here lies the the old code that caused so much pain and damage. 1/29/2020 - 1/29/2020
+          Leave an F to pay respects.
+
+          F
+        */
+
+
         moveTime = SWAP_TIME;
     };
     const getMatches = (set,length) => {
@@ -284,17 +227,21 @@ function Board() {
         }
         return matches;
     };
+    const getAllMatches = () => {
+        const matches = [];
+        for(let y = 0;y<BOARD_ROWS;y++) {
+            const row = boardData.rows[y];
+            matches.push(...getMatches(row,BOARD_ROWS));
+        }
+        for(let x = 0;x<BOARD_COLUMNS;x++) {
+            const column = boardData.columns[x];
+            matches.push(...getMatches(column,BOARD_COLUMNS));
+        }
+        return matches;
+    };
     const removeMatches = async () => {
         return new Promise(resolve => {
-            const matches = [];
-            for(let y = 0;y<BOARD_ROWS;y++) {
-                const row = boardData.rows[y];
-                matches.push(...getMatches(row,BOARD_ROWS));
-            }
-            for(let x = 0;x<BOARD_COLUMNS;x++) {
-                const column = boardData.columns[x];
-                matches.push(...getMatches(column,BOARD_COLUMNS));
-            }
+            const matches = getAllMatches();
             const now = performance.now();
             for(let i = 0;i<matches.length;i++) {
                 matches[i].deleteStart = now;
