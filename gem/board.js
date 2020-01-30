@@ -187,16 +187,71 @@ function Board() {
         return x >= 0 && y >= 0 && y < BOARD_ROWS && x < BOARD_COLUMNS;
     };
 
+    const moveDown = gem => {
+        return new Promise(resolve =>{
+            moveGem(gem,0,1,1,performance.now(),()=>{
+                gem.moveStart = null;
+                const newGem = boardData.get(gem.x,gem.y+1)
+                newGem.type = gem.type;
+                newGem.deleteStart = null;
+                gem.deleteStart = -Infinity;
+                resolve();
+            });
+        });
+    };
+    const dropNewGem = async gem => {
+        gem.type = getRandomGemType();
+        return new Promise(resolve =>{
+            moveGem(gem,0,1,0,performance.now()+moveTime,()=>{
+                gem.moveStart = null;
+                gem.deleteStart = null;
+                resolve();
+            });
+        });
+    };
+
+    const countEmptyTiles = () => {
+        let count = 0;
+        for(let y = 0;y<BOARD_ROWS;y++) {
+            const row = boardData.rows[y];
+            for(let x = 0;x<BOARD_COLUMNS;x++) {
+                if(row[x].deleteStart) count++;
+            }
+        }
+        return count;
+    };
+
     const fillBoard = async () => {
         moveTime = MOVE_TIME;
 
-        /*
-          Here lies the the old code that caused so much pain and damage. 1/29/2020 - 1/29/2020
-          Leave an F to pay respects.
+/*
+        Here lies the the old code that caused so much pain and damage. 1/29/2020 - 1/29/2020
+        Leave an F to pay respects.
 
-          F
-        */
+        F
+*/
 
+        const start = BOARD_ROWS - 2;
+        const endRow = boardData.rows[0];
+        while(countEmptyTiles()) {
+            const drops = [];
+            for(let y = start;y>=0;y--) {//configure
+                const row = boardData.rows[y];
+                for(let x = 0;x<BOARD_COLUMNS;x++) {
+                    const gem = row[x];
+                    if(!gem.deleteStart && boardData.get(x,y+1).deleteStart) {
+                        drops.push(moveDown(gem));
+                    }
+                }
+            }
+            for(let x = 0;x<BOARD_COLUMNS;x++) {
+                const gem = endRow[x];
+                if(gem.deleteStart) {
+                    drops.push(dropNewGem(gem));
+                }
+            }
+            await Promise.all(drops);
+        }
 
         moveTime = SWAP_TIME;
     };
