@@ -583,12 +583,12 @@ function Board() {
                     const selectionGem = selection.gem;
                     const connectionGem = connection.gem;
                     if(selectionGem === gem) {
-                        if(selection.gem.moveStart === null && selectionGem.deleteStart === null) {
+                        if(!inputLocked && selection.gem.moveStart === null && selection.gem.deleteStart === null) {
                             gemX += SELECT_START;
                             gemY += selection.state * GEM_SIZE;
                         }
                     } else if(connectionGem === gem) {
-                        if(connectionGem.moveStart === null && connectionGem.deleteStart === null) {
+                        if(!inputLocked && connectionGem.moveStart === null && connection.gem.deleteStart === null) {
                             gemX += SELECT_START;
                             gemY += connection.state * GEM_SIZE;
                         }
