@@ -7,7 +7,7 @@ const BACKGROUND_COLOR = "white";
 const GEM_IMAGE = "gems.png";
 const BOARD_ROWS = 9;
 const BOARD_COLUMNS = 9;
-const GEM_SIZE = 10;
+const GEM_SIZE = 10
 const GEM_SPACE = 1;
 const GEM_STRIDE = GEM_SIZE + GEM_SPACE;
 const GEM_COUNT = 6;
@@ -334,13 +334,32 @@ function Board() {
         sourceGem.type = destinationGem.type;
         destinationGem.type = typeBuffer;
 
-        const matchCount = getAllMatches().length;
+        const allMatches = getAllMatches();
+        const matchCount = allMatches.length;
+        if(!matchCount) return false;
+
+        const sourceX = sourceGem.x;
+        const sourceY = sourceGem.y;
+
+        const destinationX = destinationGem.x;
+        const destinationY = destinationGem.y;
+
+        let localMatch = false;
+        for(let i = 0;i<matchCount;i++) {
+            const {x,y} = allMatches[i];
+            if(x === destinationX && y === destinationY) {
+                localMatch = true; break;
+            } else if(x === sourceX && y === sourceY) {
+                localMatch = true; break;
+            }
+        }
+        if(!localMatch) return false;
 
         typeBuffer = destinationGem.type;
         destinationGem.type = sourceGem.type;
         sourceGem.type = typeBuffer;
 
-        return matchCount >= 1;
+        return true;
     };
 
     const validateDirectionSwap = direction => {
