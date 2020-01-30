@@ -579,16 +579,16 @@ function Board() {
                 let {gemX, xOffset} = gemXData;
                 let {gemY, yOffset} = gemYData;
 
-                if(!gemY && !yOffset) {
+                if(!inputLocked && !gemY && !yOffset) {
                     const selectionGem = selection.gem;
                     const connectionGem = connection.gem;
                     if(selectionGem === gem) {
-                        if(!inputLocked && selection.gem.moveStart === null && selection.gem.deleteStart === null) {
+                        if(selection.gem.moveStart === null && selection.gem.deleteStart === null) {
                             gemX += SELECT_START;
                             gemY += selection.state * GEM_SIZE;
                         }
                     } else if(connectionGem === gem) {
-                        if(!inputLocked && connectionGem.moveStart === null && connection.gem.deleteStart === null) {
+                        if(connectionGem.moveStart === null && connection.gem.deleteStart === null) {
                             gemX += SELECT_START;
                             gemY += connection.state * GEM_SIZE;
                         }
