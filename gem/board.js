@@ -122,7 +122,7 @@ const moveGem = (gem,x,y,distance,time,callback) => {
 };
 const getRandomGemType = (()=>{
     let gemIndex = 0;
-    return () => gemIndex++ % GEM_COUNT;
+    return () => Math.floor(Math.random() * GEM_COUNT);
 })();
 const getRandomGem = () => getGem(getRandomGemType());
 const getDynamicFillArray = (size,fill) => {
@@ -328,6 +328,20 @@ function Board() {
         }
     };
 
+    const willHaveMatches = (sourceGem,destinationGem) => {
+        let typeBuffer = sourceGem.type;
+        sourceGem.type = destinationGem.type;
+        destinationGem.type = typeBuffer;
+
+        const matchCount = getAllMatches().length;
+
+        typeBuffer = destinationGem.type;
+        destinationGem.type = sourceGem.type;
+        sourceGem.type = typeBuffer;
+
+        return matchCount >= 1;
+    };
+
     const validateDirectionSwap = direction => {
         if(direction === null) return false;
         const sourceGem = selection.gem;
@@ -345,6 +359,7 @@ function Board() {
         const destinationGem = boardData.get(x,y);
         //if(destinationGem.type === sourceGem.type) return false;
         if(destinationGem.deleteStart || sourceGem.deleteStart) return false;
+        if(!willHaveMatches(sourceGem,destinationGem)) return false;
         x -= sourceX; y -= sourceY;
         return [sourceGem,destinationGem,x,y];
     };
