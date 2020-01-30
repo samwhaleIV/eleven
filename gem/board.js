@@ -334,32 +334,28 @@ function Board() {
         sourceGem.type = destinationGem.type;
         destinationGem.type = typeBuffer;
 
-        const allMatches = getAllMatches();
-        const matchCount = allMatches.length;
-        if(!matchCount) return false;
-
         const sourceX = sourceGem.x;
         const sourceY = sourceGem.y;
 
         const destinationX = destinationGem.x;
         const destinationY = destinationGem.y;
 
-        let localMatch = false;
-        for(let i = 0;i<matchCount;i++) {
-            const {x,y} = allMatches[i];
-            if(x === destinationX && y === destinationY) {
-                localMatch = true; break;
-            } else if(x === sourceX && y === sourceY) {
-                localMatch = true; break;
-            }
-        }
-        if(!localMatch) return false;
-
         typeBuffer = destinationGem.type;
         destinationGem.type = sourceGem.type;
         sourceGem.type = typeBuffer;
 
-        return true;
+        const allMatches = getAllMatches();
+        const matchCount = allMatches.length;
+
+        for(let i = 0;i<matchCount;i++) {
+            const {x,y} = allMatches[i];
+            if(x === destinationX && y === destinationY) {
+                return true;
+            } else if(x === sourceX && y === sourceY) {
+                return true;
+            }
+        }
+        return false;
     };
 
     const validateDirectionSwap = direction => {
