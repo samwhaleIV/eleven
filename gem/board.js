@@ -9,13 +9,16 @@ const BOARD_COLUMNS = 9;
 const GEM_SIZE = 10;
 const GEM_SPACE = 1;
 const GEM_STRIDE = GEM_SIZE + GEM_SPACE;
-const GEM_COUNT = 4;
+const GEM_COUNT = 5;
 const SELECT_START = GEM_COUNT * GEM_SIZE;
 
 const ANIMATION_ROWS = 10;
 const ANIMATION_STEP = 30;
-const MOVE_TIME = 250;
-const CLICK_TIMEOUT = 100;
+const ANIMATION_DURATION = ANIMATION_ROWS * ANIMATION_STEP;
+const MOVE_TIME = 175;
+const SWAP_TIME = 250;
+
+let moveTime = SWAP_TIME;
 
 const RENDER_SCALE = 5;
 
@@ -49,6 +52,7 @@ const KEY_ESCAPE = "Escape";
 const getGem = type => {
     return Object.seal({
         type,x:null,y:null,
+        moveDistance: null,
         moveStart: null,
         deleteStart: null,
         moveCallback: null,
@@ -60,16 +64,16 @@ const getGemY = (gem,time) => {
     let yOffset = 0;
     if(gem.moveStart !== null) {
         if(gem.direction % 2 !== 0) {
-            let delta = (time.now - gem.moveStart) / MOVE_TIME;
-            if(delta > 1) {
-                delta = 1;
+            let delta = (time.now - gem.moveStart) / moveTime;
+            if(delta > gem.moveDistance) {
+                delta = gem.moveDistance;
                 gem.moveCallback();
                 return null;
             }
             yOffset += Math.sign(gem.direction) * GEM_STRIDE * delta;
         }
     } else if(gem.deleteStart !== null) {
-        const delta = time.now - gem.deleteStart;
+        const delta = Math.max(time.now - gem.deleteStart,0);
         let animationRow = Math.floor(delta / ANIMATION_STEP);
         if(animationRow >= ANIMATION_ROWS) {
             animationRow = ANIMATION_ROWS - 1;
@@ -83,9 +87,9 @@ const getGemX = (gem,time) => {
     let xOffset = 0;
     if(gem.moveStart !== null) {
         if(gem.direction % 2 === 0) {
-            let delta = (time.now - gem.moveStart) / MOVE_TIME;
-            if(delta > 1) {
-                delta = 1;
+            let delta = (time.now - gem.moveStart) / moveTime;
+            if(delta > gem.moveDistance) {
+                delta = gem.moveDistance;
                 gem.moveCallback();
                 return null;
             }
@@ -95,21 +99,32 @@ const getGemX = (gem,time) => {
     return {gemX,xOffset};
 };
 
-const moveGem = (gem,x,y,callback) => {
+const getCounterCallback = (callback,count=0) => {
+    let invocations = 0;
+    return (...parameters) => {
+        if(++invocations === count) {
+            callback(...parameters);
+        }
+    };
+};
+
+const moveGem = (gem,x,y,distance,time,callback) => {
+    gem.moveDistance = distance;
     if(x) {
-        gem.moveStart = performance.now();
+        gem.moveStart = time;
         gem.direction = x < 0 ? LEFT : RIGHT;
         gem.moveCallback = callback;
-    } else if(y) {
-        gem.moveStart = performance.now();
+    } else {
+        gem.moveStart = time;
         gem.direction = y < 0 ? UP : DOWN;
         gem.moveCallback = callback;
     }
 };
-
-const getRandomGem = () => {
-    return getGem(Math.floor(Math.random() * GEM_COUNT));
-};
+const getRandomGemType = (()=>{
+    let gemIndex = 0;
+    return () => gemIndex++ % GEM_COUNT;
+})();
+const getRandomGem = () => getGem(getRandomGemType());
 const getDynamicFillArray = (size,fill) => {
     return Object.seal(new Array(size).fill()).map(fill);
 };
@@ -121,21 +136,29 @@ const getBoardData = () => {
 };
 
 function BoardData() {
-    const data = getBoardData();
+    const rows = getBoardData();
     this.get = (x,y) => {
-        return data[y][x];
+        return rows[y][x];
     };
     this.set = (x,y,value) => {
-        return data[y][x] = value;
+        return rows[y][x] = value;
     };
-    this.data = data;
+
+    const columns = new Array(BOARD_COLUMNS);
+    for(let i = 0;i<columns.length;i++) {
+        columns[i] = new Array(BOARD_ROWS);
+    }
+    this.rows = rows;
+    this.columns = columns;
+
     Object.freeze(this);
     for(let y = 0;y<BOARD_ROWS;y++) {
-        const row = data[y];
+        const row = rows[y];
         for(let x = 0;x<BOARD_COLUMNS;x++) {    
             const gem = row[x];
             gem.x = x;
             gem.y = y;
+            columns[x][y] = gem;
         }
     }
 }
@@ -161,7 +184,127 @@ function Board() {
     connection.state = SELECT_STATES.HoverConnect;
 
     const inBounds = (x,y) => {
-        return x >= 0 && y >= 0 && y < BOARD_ROWS && x < BOARD_COLUMNS
+        return x >= 0 && y >= 0 && y < BOARD_ROWS && x < BOARD_COLUMNS;
+    };
+
+    const dropColumn = (column,end) => {
+        return new Promise(resolve => {
+            const endStart = end;
+
+            while(column[end].deleteStart && end > 0) {
+                end--;
+            }
+
+            const distance = endStart - end;
+            if(!distance) {
+                const gem = column[0];
+                gem.deleteStart = null;
+                gem.type = getRandomGemType();
+                moveGem(gem,0,1,0,performance.now()+moveTime,()=>{
+                    gem.moveStart = null;
+                    resolve();
+                });
+                return;
+            }
+
+            let start = end;
+            for(let y = start;y>=0;y--) {
+                if(!y || column[y].deleteStart) {
+                    start = y;
+                    break;
+                }
+            }
+            const count = end - start + 1;
+            if(!count) {
+                resolve();
+                return;
+            };
+            const callback = getCounterCallback(()=>{ 
+                let values = new Array(count);
+                for(let y = start;y<count;y++) {
+                    const gem = column[y];
+                    gem.deleteStart = -Infinity;
+                    gem.moveStart = null;
+                    values[y] = gem.type;
+                    gem.type = getRandomGemType();
+                }
+                for(let y = start;y<count;y++) {
+                    const gem = column[y+distance];
+                    gem.deleteStart = null;
+                    gem.moveStart = null;
+                    gem.type = values[y];
+                }
+                resolve();
+            },count);
+            const now = performance.now();
+            for(let y = start;y<count;y++) {
+                moveGem(column[y],0,1,distance,now,callback);
+            }
+        });
+    };
+
+    const fillBoard = async () => {
+        moveTime = MOVE_TIME;
+        for(let y = BOARD_ROWS-1;y>=0;y--) {
+            const row = boardData.rows[y];
+            const queue = [];
+            for(let x = 0;x<BOARD_COLUMNS;x++) {
+                if(row[x].deleteStart) {
+                    queue.push(dropColumn(boardData.columns[x],y));
+                }
+            }
+            await Promise.all(queue);
+        }
+        moveTime = SWAP_TIME;
+    };
+    const getMatches = (set,length) => {
+        const matches = new Array();
+        const buffer = [];
+        let last = set[0];
+        if(!last.deleteStart) {
+            buffer.push(last);
+        }
+        for(let i = 1;i<length;i++) {
+            let gem = set[i];
+            if(gem.type === last.type && !gem.deleteStart) {
+                buffer.push(gem);
+            } else {
+                const removed = buffer.splice(0)
+                if(removed.length >= 3) {
+                    matches.push(...removed);
+                }
+                if(!gem.deleteStart) {
+                    buffer.push(gem);
+                }
+            }
+            last = gem;
+        }
+        if(buffer.length >= 3) {
+            matches.push(...buffer.splice(0));
+        }
+        return matches;
+    };
+    const removeMatches = async () => {
+        return new Promise(resolve => {
+            const matches = [];
+            for(let y = 0;y<BOARD_ROWS;y++) {
+                const row = boardData.rows[y];
+                matches.push(...getMatches(row,BOARD_ROWS));
+            }
+            for(let x = 0;x<BOARD_COLUMNS;x++) {
+                const column = boardData.columns[x];
+                matches.push(...getMatches(column,BOARD_COLUMNS));
+            }
+            const now = performance.now();
+            for(let i = 0;i<matches.length;i++) {
+                matches[i].deleteStart = now;
+            }
+            if(!matches.length) {
+                resolve(false);
+            } else {
+                setTimeout(resolve,ANIMATION_DURATION+100,true);
+            }
+        });
     };
 
     const getConnectionDirection = () => {
@@ -196,7 +339,10 @@ function Board() {
             case RIGHT: x++; break;
         }
         if(!inBounds(x,y)) return false;
+        //add other fail conditions
         const destinationGem = boardData.get(x,y);
+        //if(destinationGem.type === sourceGem.type) return false;
+        if(destinationGem.deleteStart || sourceGem.deleteStart) return false;
         x -= sourceX; y -= sourceY;
         return [sourceGem,destinationGem,x,y];
     };
@@ -230,21 +376,19 @@ function Board() {
     
     let inputLocked = false;
 
-    const getCounterCallback = (callback,count=0) => {
-        let invocations = 0;
-        return (...parameters) => {
-            if(++invocations === count) {
-                callback(...parameters);
-            }
-        };
-    };
-
     const setSelectionLock = () => {
         selection.state = SELECT_STATES.Lock;
     };
 
     const setSelectionHover = () => {
         selection.state = SELECT_STATES.Hover;
+    };
+
+    const swapEndHandOff = async () => {
+        while(await removeMatches()) {
+            await fillBoard();
+        }
+        inputLocked = false;
     };
 
     const getSwapEnd = (sourceGem,destinationGem) => {
@@ -267,7 +411,7 @@ function Board() {
                 removeConnectionGem();
             }
 
-            inputLocked = false;
+            swapEndHandOff();
         };
     };
 
@@ -277,8 +421,9 @@ function Board() {
         inputLocked = true;
         const swapEnd = getSwapEnd(sourceGem,destinationGem);
         const callback = getCounterCallback(swapEnd,2);
-        moveGem(sourceGem,xChange,yChange,callback);
-        moveGem(destinationGem,-xChange,-yChange,callback);
+        const now = performance.now();
+        moveGem(sourceGem,xChange,yChange,1,now,callback);
+        moveGem(destinationGem,-xChange,-yChange,1,now,callback);
     };
 
     const tryBoardSwap = (direction=null) => {
@@ -349,7 +494,11 @@ function Board() {
     };
     const tryMoveFocus = event => {
         const gem = selection.gem;
-        if(gem === null) return;
+        if(gem === null) {
+            selection.gem = boardData.get(0,0);
+            removeConnectionGem();
+            return;
+        }
         let x = gem.x;
         let y = gem.y;
         switch(event.impulse) {
@@ -361,14 +510,24 @@ function Board() {
             default: return;
         }
         if(!inBounds(x,y)) return;
-        selection.gem = boardData.get(x,y);
+
+        const changeX = x - gem.x;
+        const changeY = y - gem.y;
+        let selectionGem = boardData.get(x,y);
+        while(selectionGem.deleteStart) {
+            x += changeX; y += changeY;
+            if(!inBounds(x,y)) return;
+            selectionGem = boardData.get(x,y);
+        }
+        selection.gem = selectionGem;
+
         removeConnectionGem();
     };
 
     this.keyDown = inputLocker(event => {
         if(selectionIsLocked()) {
             tryKeySwap(event);
-        } else if(selection.gem !== null) {
+        } else {
             tryMoveFocus(event);
         }
     });
@@ -378,7 +537,7 @@ function Board() {
         context.fillStyle = "white";
     };
 
-    const gemData = boardData.data;
+    const gemData = boardData.rows;
 
     this.render = (context,size,time) => {
         context.fillRect(0,0,size.width,size.height);
@@ -404,13 +563,15 @@ function Board() {
                 let {gemY, yOffset} = gemYData;
 
                 if(!gemY && !yOffset) {
-                    if(selection.gem === gem) {
-                        if(selection.gem.moveStart === null) {
+                    const selectionGem = selection.gem;
+                    const connectionGem = connection.gem;
+                    if(selectionGem === gem) {
+                        if(selection.gem.moveStart === null && selectionGem.deleteStart === null) {
                             gemX += SELECT_START;
                             gemY += selection.state * GEM_SIZE;
                         }
-                    } else if(connection.gem === gem) {
-                        if(connection.gem.moveStart === null) {
+                    } else if(connectionGem === gem) {
+                        if(connectionGem.moveStart === null && connectionGem.deleteStart === null) {
                             gemX += SELECT_START;
                             gemY += connection.state * GEM_SIZE;
                         }
