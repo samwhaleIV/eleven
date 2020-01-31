@@ -14,6 +14,9 @@ const Constants = Object.freeze({
         audioFolder: "resources/audio/",
     }),
 
+    DefaultSoundVolume: 1,
+    DefaultMusicVolume: 1,
+
     ManagedGamepadSettings: Object.freeze({
         whitelist: false,
         triggerThreshold: 0.1,
