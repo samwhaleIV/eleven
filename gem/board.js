@@ -340,12 +340,12 @@ function Board() {
         const destinationX = destinationGem.x;
         const destinationY = destinationGem.y;
 
+        const allMatches = getAllMatches();
+        const matchCount = allMatches.length;
+
         typeBuffer = destinationGem.type;
         destinationGem.type = sourceGem.type;
         sourceGem.type = typeBuffer;
-
-        const allMatches = getAllMatches();
-        const matchCount = allMatches.length;
 
         for(let i = 0;i<matchCount;i++) {
             const {x,y} = allMatches[i];
