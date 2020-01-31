@@ -50,13 +50,28 @@ function SetEntry({type,lookupName},value) {
 }
 function GetEntry(name,type) {
     let entry = DictionaryLookup[type][name];
-    if(!entry || entry === FAILED_RESOURCE) {
+    if(!entry) {
+        return null;
+    }
+    if(entry === FAILED_RESOURCE) {
         entry = FallbackResources[type];
     }
     if(type === ResourceTypes.JSON) {
         entry = entry.call();
     }
     return entry;
+}
+function RemoveEntry(name,type) {
+    const dictionary = DictionaryLookup[type];
+    const resource = dictionary[name];
+    if(!resource) {
+        return false;
+    }
+    if(type === ResourceTypes.Image) {
+        resource.close();
+    }
+    delete dictionary[name];
+    return true;
 }
 function LinkResource(name,type) {
     return new Resource(name,type);
@@ -158,6 +173,9 @@ function ResourceManager() {
         };
         this[`get${typeName}`] = name => {
             return GetEntry(name,type);
+        };
+        this[`remove${typeName}`] = name => {
+            return RemoveEntry(name,type);
         };
         this[`has${typeName}`] = name => {
             return EntryExists(name,type);
