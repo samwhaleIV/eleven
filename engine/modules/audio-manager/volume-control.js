@@ -38,7 +38,7 @@ function VolumeControl({
     if(output !== null) node.connect(output);
 }
 
-function InstallVolumeControl({
+function InstallVolumeControls({
     target,soundVolume,musicVolume
 }) {
     const outputNode = audioContext.destination;
@@ -76,4 +76,4 @@ function InstallVolumeControl({
 
     return {soundNode, musicNode};
 }
-export default InstallVolumeControl;
+export default InstallVolumeControls;
