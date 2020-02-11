@@ -62,6 +62,16 @@ RemoteControl.prototype.fadeIn = function(duration,callback,...parameters) {
     FadeIn(this[RCData].gainNode,duration,WrapBind(callback,parameters));
     return this;
 }
+RemoteControl.prototype.fadeOutAsync = function(duration) {
+    return new Promise(resolve => {
+        this.fadeOut(duration,resolve);
+    });
+}
+RemoteControl.prototype.fadeInAsync = function(duration) {
+    return new Promise(resolve => {
+        this.fadeIn(duration,resolve);
+    });
+}
 RemoteControl.prototype.stop = function() {
     const {radio, cacheID} = this[RCData]; radio.stop(cacheID);
     return this;

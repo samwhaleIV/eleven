@@ -59,14 +59,24 @@ function AudioManager() {
         });
     };
 
-    const radioFadeOut = (radio,duration) => {
-        return new Promise(resolve => radio.fadeOut(duration,resolve));
+    const radioFadeOutAsync = (radio,duration) => {
+        return radio.fadeOutAsync(duration,resolve);
     };
-    this.fadeOutSounds = function(duration) {
-        return radioFadeOut(soundRadio,duration);
+    this.fadeOutSoundsAsync = function(duration) {
+        return radioFadeOutAsync(soundRadio,duration);
     };
-    this.fadeOutMusic = function(duration) {
-        return radioFadeOut(musicRadio,duration);
+    this.fadeOutMusicAsync = function(duration) {
+        return radioFadeOutAsync(musicRadio,duration);
+    };
+
+    const radioFadeOut = (radio,duration,callback,parameters) => {
+        return radio.fadeOut(duration,resolve,callback,...parameters);
+    };
+    this.fadeOutSounds = function(duration,callback,...parameters) {
+        return radioFadeOut(soundRadio,duration,callback,parameters);
+    };
+    this.fadeOutMusic = function(duration,callback,...parameters) {
+        return radioFadeOut(musicRadio,duration,callback,parameters);
     };
 
     this.stopAllSounds = function() {

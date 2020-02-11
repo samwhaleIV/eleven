@@ -68,14 +68,26 @@ function Radio({
 
 Radio.prototype.fadeOut = function(duration,callback,...parameters) {
     FadeOut(this.targetNode,duration,()=>{
-        radio.stopAll();
+        this.stopAll();
         const now = audioContext.currentTime;
-        this.targetNode.setValueAtTime(DEFAULT_VOLUME,now);
+        this.targetNode.gain.setValueAtTime(DEFAULT_VOLUME,now);
         Wrap(callback,parameters);
     });
+    return this;
 }
 Radio.prototype.fadeIn = function(duration,callback,...parameters) {
     FadeIn(this.targetNode,duration,WrapBind(callback,parameters));
+    return this;
+}
+Radio.prototype.fadeOutAsync = function(duration) {
+    return new Promise(resolve => {
+        this.fadeOut(duration,resolve);
+    });
+}
+Radio.prototype.fadeInAsync = function(duration) {
+    return new Promise(resolve => {
+        this.fadeIn(duration,resolve);
+    });
 }
 
 Radio.prototype.play = function({
