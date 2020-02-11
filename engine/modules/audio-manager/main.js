@@ -88,6 +88,9 @@ function AudioManager() {
     this.play = function(buffer,isMusic) {
         return (isMusic ? this.playMusic: this.playSound)({buffer});
     };
+    this.playLooping = function(buffer,loopStart=0,isMusic=true) {
+        return (isMusic ? this.playMusicLooping: this.playSoundLooping)({buffer,loopStart});
+    };
 
     Object.freeze(this);
 }

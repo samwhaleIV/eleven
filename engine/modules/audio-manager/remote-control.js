@@ -1,6 +1,7 @@
 import RCData from "./rc-symbol.js";
 import {FadeIn, FadeOut} from "./fader.js";
 import CallbackWrap from "../../internal/callback-wrap.js";
+import ResourceManager from "../resource-manager/main.js";
 const {WrapBind} = CallbackWrap;
 
 function RemoteControl(data) {
@@ -74,6 +75,15 @@ RemoteControl.prototype.fadeInAsync = function(duration) {
 }
 RemoteControl.prototype.stop = function() {
     const {radio, cacheID} = this[RCData]; radio.stop(cacheID);
+    return this;
+}
+RemoteControl.prototype.waitForEnd = function() {
+    return new Promise(resolve => {
+        this[RCData].addEndHandler(resolve);
+    });
+}
+RemoteControl.prototype.addEndHandler = function(handler) {
+    this[RCData].addEndHandler(handler);
     return this;
 }
 Object.freeze(RemoteControl.prototype); //Don't fuck with this one either

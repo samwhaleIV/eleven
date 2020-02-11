@@ -40,16 +40,20 @@ function MergeAudioBuffers(bufferA,bufferB) {
 
     for(let channel = 0;channel<channelCount;channel++) {
         const bufferData = audioBuffer.getChannelData(channel);
-        bufferA.copyFromChannel(bufferData,channel,0);
-        bufferB.copyFromChannel(bufferData,channel,lengthA);
+        bufferData.set(
+            bufferA.getChannelData(channel),0
+        );
+        bufferData.set(
+            bufferB.getChannelData(channel),lengthA
+        );
     }
 
     const loopStart = lengthA / totalLength * audioBuffer.duration;
 
-    resolve({audioBuffer,loopStart});
+    return {buffer: audioBuffer, loopStart}
 }
 
 function InstallIntroHelper(target) {
-    target.MergeAudioBuffers = MergeAudioBuffers;
+    target.mergeAudioBuffers = MergeAudioBuffers;
 }
 export default InstallIntroHelper;

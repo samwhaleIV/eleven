@@ -9,10 +9,14 @@ function TestFrame() {
     let testSong = "song.mp3";
     let testSound = "sound.mp3";
 
+    const inv_intro = "inv_intro.ogg";
+    const inv_loop = "inv_loop.ogg";
+
+    let inv_full = null;
+
     const audioContext = new AudioContext();
 
     this.RAW_TEST = () => {
-
         const source = audioContext.createBufferSource();
         source.buffer = testSound;
 
@@ -23,27 +27,24 @@ function TestFrame() {
         source.start();
     };
 
-    const hell = () => {
-        setTimeout(()=>{
-            AudioManager.play(testSound);
-            hell();
-        },100);
-    }
-
     this.clickDown = () => {
-        //this.RAW_TEST();return;
-        const control = AudioManager.playSound({buffer:testSound});
-        
+        AudioManager.stopMusic();
     };
     this.altClickDown = async () => {
-        await AudioManager.play(testSong,true).fadeOutAsync(1000);
-        console.log("Fade out done");
+        await AudioManager.playMusicLooping(inv_full,true).waitForEnd();
+        console.log("Song finished playing");
     };
 
     this.load = async () => {
-        [testSong,testSound] = await ResourceManager.queueAudio([testSong,testSound]).load();
+        let intro, loop;
+        [testSong,testSound,intro,loop] = await ResourceManager.queueAudio([testSong,testSound,inv_intro,inv_loop]).load();
+
         console.log("Test song:",testSong);
         console.log("Test sound:",testSound);
+
+        inv_full = AudioManager.mergeAudioBuffers(intro,loop);
+        ResourceManager.removeAudio(inv_intro);
+        ResourceManager.removeAudio(inv_loop);
     };
     this.resize = context => {
         context.fillStyle = "green";
