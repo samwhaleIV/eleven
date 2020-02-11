@@ -1,11 +1,11 @@
 import audioContext from "../../internal/audio-context.js";
 import SmartCache from "./smart-cache.js";
-import {FadeIn, FadeOut} from "./fader.js";
+import RCData from "./rc-symbol.js";
+import RemoteControl from "./remote-control.js";
 
+import {FadeIn, FadeOut} from "./fader.js";
 import CallbackWrap from "../../internal/callback-wrap.js";
 const {Wrap, WrapBind} = CallbackWrap;
-
-const RCData = Symbol("RCData");
 
 const DEFAULT_VOLUME = 1;
 const DEFAULT_PLAYBACK_RATE = 1;
@@ -36,34 +36,6 @@ const getSourceNode = data => {
     sourceNode.playbackRate.setValueAtTime(data.playbackRate,now);
     return sourceNode;
 };
-
-function RemoteControl(data) {
-    const {radio, cacheID} = data;
-    this[RCData] = data;
-
-    const isStopped = () => {
-        return !radio.smartCache.contains(cacheID);
-    };
-
-    let endCallback = null;
-    Object.defineProperty(this,"onended",{
-        get: () => {
-            return endCallback;
-        },
-        set: value => {
-            if(!value) value = null;
-            endCallback = value;
-        },
-        enumerable: true
-    });
-
-    Object.defineProperty(this,"stopped",{
-        get: isStopped,
-        enumerable: true
-    });
-
-    Object.freeze(this);
-}
 
 function Radio({
     targetNode = null,
@@ -105,21 +77,6 @@ Radio.prototype.fadeOut = function(duration,callback,...parameters) {
 Radio.prototype.fadeIn = function(duration,callback,...parameters) {
     FadeIn(this.targetNode,duration,WrapBind(callback,parameters));
 }
-RemoteControl.prototype.fadeOut = function(duration,callback,...parameters) {
-    FadeOut(this[RCData].gainNode,duration,()=>{
-        if(this.stopped) return;
-        this.stop(); Wrap(callback,parameters);
-    });
-    return this;
-}
-RemoteControl.prototype.fadeIn = function(duration,callback,...parameters) {
-    FadeIn(this[RCData].gainNode,duration,WrapBind(callback,parameters));
-    return this;
-}
-RemoteControl.prototype.stop = function() {
-    const {radio, cacheID} = this[RCData]; radio.stop(cacheID);
-    return this;
-}
 
 Radio.prototype.play = function({
     buffer,loop,callback,
@@ -155,10 +112,11 @@ Radio.prototype.play = function({
         if(callback !== null) callback;
         const remoteCallback = remoteControl.onended;
         if(remoteCallback !== null) remoteCallback();
+        remoteControl[RCData].sendEndHandlers();
     });
-    remoteControl = new RemoteControl(Object.freeze({
+    remoteControl = new RemoteControl({
         radio:this,sourceNode,gainNode,cacheID
-    }));
+    });
 
     sourceNode.start(audioContext.currentTime);
 
@@ -166,6 +124,5 @@ Radio.prototype.play = function({
 }
 
 Object.freeze(Radio.prototype); //Because you shouldn't be fucking with this ad hoc
-Object.freeze(RemoteControl.prototype); //Note: Probably don't fuck with this one either
 
 export default Radio;

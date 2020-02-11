@@ -36,10 +36,9 @@ function TestFrame() {
         
     };
     this.altClickDown = () => {
-        const control = AudioManager.playMusic({buffer:testSong});
-        control.fadeOut(5000,()=>{
+        AudioManager.playMusic({buffer:testSong}).fadeOut(5000,()=>{
             console.log("Fade out done");
-        })
+        });
     };
 
     this.load = async () => {
