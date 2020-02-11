@@ -108,7 +108,7 @@ Radio.prototype.fadeIn = function(duration,callback,...parameters) {
 RemoteControl.prototype.fadeOut = function(duration,callback,...parameters) {
     FadeOut(this[RCData].gainNode,duration,()=>{
         if(this.stopped) return;
-        this.stop();Wrap(callback,parameters)
+        this.stop(); Wrap(callback,parameters);
     });
     return this;
 }
