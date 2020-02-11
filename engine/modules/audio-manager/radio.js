@@ -15,17 +15,25 @@ const DEFAULT_DETUNE = 0;
 const INVALID_TARGET_NODE = node => {
     throw Error(`Target node '${node}' of type '${typeof node}' is not a valid radio target`);
 };
+const MISSING_AUDIO_BUFFER = () => {
+    throw Error("Missing audio buffer, radio cannot play");
+};
 
 const getGainNode = volume => {
     const node = audioContext.createGain();
-    const time = audioContext.currentTime;
-    node.gain.setValueAtTime(volume,time);
+    const now = audioContext.currentTime;
+    node.gain.setValueAtTime(volume,now);
     return node;
 };
 
 const getSourceNode = data => {
     const sourceNode = audioContext.createBufferSource();
-    Object.assign(sourceNode,data);
+    sourceNode.buffer = data.buffer;
+    sourceNode.loop = data.loop;
+    sourceNode.loopStart = data.loopStart;
+    const now = audioContext.currentTime;
+    sourceNode.detune.setValueAtTime(data.detune,now);
+    sourceNode.playbackRate.setValueAtTime(data.playbackRate,now);
     return sourceNode;
 };
 
@@ -35,9 +43,6 @@ function RemoteControl(data) {
 
     const isStopped = () => {
         return !radio.smartCache.contains(cacheID);
-    };
-    this.stop = () => {
-        return radio.stop(cacheID);
     };
 
     let endCallback = null;
@@ -69,8 +74,6 @@ function Radio({
             INVALID_TARGET_NODE(masterNode);
         }
         const proxyNode = audioContext.createGain();
-        const now = audioContext.currentTime;
-        proxyNode.gain.setValueAtTime(DEFAULT_VOLUME,now);
         proxyNode.connect(masterNode);
         targetNode = proxyNode;
     })(targetNode);
@@ -83,11 +86,7 @@ function Radio({
 
     if(!singleSource) {
         this.stopAll = smartCache.clear;
-        this.stop = remoteControl => {
-            const data = remoteControl[RCData];
-            const cacheID = data.cacheID;
-            return smartCache.release(cacheID);
-        };
+        this.stop = smartCache.release;
     } else {
         this.stopAll = smartCache.clear;
         this.stop = smartCache.clear;
@@ -107,9 +106,9 @@ Radio.prototype.fadeIn = function(duration,callback,...parameters) {
     FadeIn(this.targetNode,duration,WrapBind(callback,parameters));
 }
 RemoteControl.prototype.fadeOut = function(duration,callback,...parameters) {
-    const {radio, gainNode, cacheID} = this[RCData];
-    FadeOut(gainNode,duration,()=>{
-        radio.stop(cacheID);Wrap(callback,parameters);
+    FadeOut(this[RCData].gainNode,duration,()=>{
+        if(this.stopped) return;
+        this.stop();Wrap(callback,parameters)
     });
     return this;
 }
@@ -117,35 +116,20 @@ RemoteControl.prototype.fadeIn = function(duration,callback,...parameters) {
     FadeIn(this[RCData].gainNode,duration,WrapBind(callback,parameters));
     return this;
 }
-
-const radioDisconnect = ({
-    sourceNode,gainNode,destination
-}) => {
-    sourceNode.disconnect(gainNode);
-    gainNode.disconnect(destination);
-};
-const basicTermination = radioDisconnect;
-const loopTermination = data => {
-    data.sourceNode.stop();
-    radioDisconnect(data);
-};
-const getRadioTerminator = data => {
-    if(data.loop) {
-        return loopTermination(data);
-    } else {
-        return basicTermination(data);
-    }
-};
+RemoteControl.prototype.stop = function() {
+    const {radio, cacheID} = this[RCData]; radio.stop(cacheID);
+    return this;
+}
 
 Radio.prototype.play = function({
-    buffer = null,
-    loop = false,
+    buffer,loop,callback,
     loopStart = DEFAULT_LOOP_START,
     volume = DEFAULT_VOLUME,
     playbackRate = DEFAULT_PLAYBACK_RATE,
     detune = DEFAULT_DETUNE,
-    callback = null
 }){
+    loop = Boolean(loop);
+    if(!buffer) MISSING_AUDIO_BUFFER();
     if(!callback) callback = null;
     if(this.singleSource) this.smartCache.clear();
 
@@ -157,34 +141,31 @@ Radio.prototype.play = function({
         buffer,loop,loopStart,playbackRate,detune
     });
 
+    let cacheID, remoteControl;
+
+    sourceNode.onended = () => {
+        this.smartCache.release(cacheID);
+    };
+
     sourceNode.connect(gainNode);
 
-    let cacheID = null, remoteControl = null;
-
-    if(!loop) sourceNode.onended = () => {
-        const didRelease = this.smartCache.release(cacheID);
-        if(!didRelease) return;
-
+    cacheID = this.smartCache.add(()=>{
+        sourceNode.stop();
+        gainNode.disconnect(destination);
         if(callback !== null) callback;
         const remoteCallback = remoteControl.onended;
         if(remoteCallback !== null) remoteCallback();
-    };
-
-    const termination = getRadioTerminator({
-        loop,sourceNode,gainNode,destination
     });
-
-    cacheID = this.smartCache.add(termination);
-
-    sourceNode.play();
-    remoteControl = RemoteControl(Object.freeze({
+    remoteControl = new RemoteControl(Object.freeze({
         radio:this,sourceNode,gainNode,cacheID
     }));
+
+    sourceNode.start(audioContext.currentTime);
 
     return remoteControl;
 }
 
 Object.freeze(Radio.prototype); //Because you shouldn't be fucking with this ad hoc
-Object.freeze(RemoteControl.prototype); //Note: Probably don't fuck with this one too
+Object.freeze(RemoteControl.prototype); //Note: Probably don't fuck with this one either
 
 export default Radio;

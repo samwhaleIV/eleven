@@ -13,8 +13,10 @@ function SmartCache() {
         return entries.length >= 1;
     };
     this.add = release => {
-        cache[IDCounter] = release;
-        return ++IDCounter;
+        const cacheID = IDCounter;
+        cache[cacheID] = release;
+        IDCounter += 1;
+        return cacheID;
     };
     this.release = ID => {
         /*

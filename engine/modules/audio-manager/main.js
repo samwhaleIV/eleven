@@ -1,3 +1,4 @@
+import audioContext from "../../internal/audio-context.js";
 import Constants from "../../internal/constants.js";
 import InstallVolumeControls from "./volume-control.js";
 import Radio from "./radio.js";
@@ -13,6 +14,7 @@ function AudioManager() {
     const {soundRadio, musicRadio} = (()=>{
         const {soundNode, musicNode} = InstallVolumeControls({
             target: this,
+            output: audioContext.destination,
             soundVolume: DEFAULT_SOUND_VOLUME,
             musicVolume: DEFAULT_MUSIC_VOLUME
         });
@@ -73,8 +75,8 @@ function AudioManager() {
     this.stopMusic = function() {
         return musicRadio.stopAll();
     };
-    this.play = function(buffer,isSound) {
-        return (isSound ? this.playSound : this.playMusic)({buffer});
+    this.play = function(buffer,isMusic) {
+        return (isMusic ? this.playMusic: this.playSound)({buffer});
     };
 
     Object.freeze(this);

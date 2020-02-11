@@ -1,3 +1,5 @@
+import audioContext from "../../internal/audio-context.js";
+
 function FadeIn(gainNode,duration,callback) {
     const gainControl = gainNode.gain;
     const endValue = gainControl.value;

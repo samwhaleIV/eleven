@@ -6,9 +6,10 @@ function VolumeControl({
     muted = false
 }) {
     const node = audioContext.createGain();
+    const gainControl = node.gain;
     const setVolume = value => {
         const time = audioContext.currentTime;
-        node.gain.setValueAtTime(value,time);
+        gainControl.setValueAtTime(value,time);
         volume = value;
     };
     this.node = node;
@@ -39,15 +40,13 @@ function VolumeControl({
 }
 
 function InstallVolumeControls({
-    target,soundVolume,musicVolume
+    target,output,soundVolume,musicVolume
 }) {
-    const outputNode = audioContext.destination;
-
     const soundControl = new VolumeControl({
-        volume: soundVolume,outputNode
+        volume: soundVolume,output
     });
     const musicControl = new VolumeControl({
-        volume: musicVolume,outputNode
+        volume: musicVolume,output
     });
 
     Object.defineProperties(target,{
