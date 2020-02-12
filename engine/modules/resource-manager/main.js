@@ -4,7 +4,10 @@ import GetFallbackImage from "./fallback-image.js";
 import DecodeImageResponse from "./image-decode.js";
 import audioContext from "../../internal/audio-context.js";
 
-const RESOURCE_BIND_DATA = Object.entries(ResourceTypes);
+const TYPES = Object.entries(ResourceTypes);
+const TYPE_NAMES = TYPES.reduce((set,[name,symbol])=>{
+    set[symbol] = name; return set;
+},new Object());
 
 const FAILED_RESOURCE = Symbol("FailedResource");
 const LOG_NAME = "Resource manager";
@@ -18,6 +21,9 @@ const FALLBACK_OCTET = TextToOctet(FALLBACK_TEXT);
 
 const INVALID_RESOURCE_DATA = () => {
     throw "Invalid resource data";
+};
+const BUCKET_IS_NOT_ARRAY = (name,value) => {
+    throw Error(`Manifest bucket '${name}' must be an array, not $'${value}'!`);
 };
 
 const FALLBACK_AUDIO = audioContext.createBuffer(
@@ -165,7 +171,7 @@ function ResourceManager() {
         return LoadResources(loadList);
     };
 
-    RESOURCE_BIND_DATA.forEach(([
+    TYPES.forEach(([
         typeName,type
     ]) => {
         this[`get${typeName}Link`] = file => {
@@ -187,6 +193,56 @@ function ResourceManager() {
             return this.queue(...files);
         };
     });
+
+    this.queueJSON = json => {
+        const data = JSON.parse(json);
+        const resourceLinks = new Array();
+        TYPES.forEach(([typeName,type]) => {
+            if(!(typeName in data)) return;
+            const files = data[typeName];
+            if(!Array.isArray(files)) BUCKET_IS_NOT_ARRAY(typeName,files);
+            files.forEach(file=>{
+                resourceLinks.push(LinkResource(file,type))
+            });
+        });
+        if(!resourceLinks.length) return;
+        this.queue(resourceLinks);
+        return this;
+    };
+
+    const mapFilesList = (files,type) => {
+        return files.reduce((set,value)=>{
+            set[value] = GetEntry(value,type);
+            return set;
+        },new Object());
+    };
+
+    this.loadWithDictionary = async (overwrite=false) => {
+        const dictionary = new Object();
+        TYPES.forEach(([typeName,type]) => {
+            dictionary[typeName] = new Array();
+            dictionary[`remove${typeName}`] = (...files) => {
+                files = files.flat();
+                const container = dictionary[typeName];
+                const removalData = files.forEach(file => {
+                    RemoveEntry(file,type);
+                    delete container[file];
+                });
+                return removalData;
+            };
+        });
+        resourceQueue.forEach(resourceLink => {
+            const {lookupName, type} = resourceLink;
+            const typeName = TYPE_NAMES[type];
+            dictionary[typeName].push(lookupName);
+        });
+        await this.load(overwrite);
+        TYPES.forEach(([typeName,type]) => {
+            const files = dictionary[typeName];
+            dictionary[typeName] = mapFilesList(files,type);
+        });
+        return dictionary;
+    };
 
     Object.freeze(this);
 }

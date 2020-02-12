@@ -6,52 +6,49 @@ const ResourceManager = engine.ResourceManager;
 const AudioManager = engine.AudioManager;
 
 function TestFrame() {
-    let testSong = "song.mp3";
-    let testSound = "sound.mp3";
-
-    const inv_intro = "inv_intro.ogg";
-    const inv_loop = "inv_loop.ogg";
-
-    let inv_full = null;
 
     const audioContext = new AudioContext();
 
     this.RAW_TEST = () => {
         const source = audioContext.createBufferSource();
         source.buffer = testSound;
-
         source.addEventListener("ended",()=>{console.log("Ended")});
-
         source.connect(audioContext.destination);
-
         source.start();
     };
 
     this.clickDown = () => {
-        AudioManager.stopMusic();
+        AudioManager.play(this.resources.Audio.sound);
     };
     this.altClickDown = async () => {
-        await AudioManager.playMusicLooping(inv_full,true).waitForEnd();
+        await AudioManager.playMusicLooping(this.resources.Audio.song_full).waitForEnd();
         console.log("Song finished playing");
     };
 
+    this.resources = null;
     this.load = async () => {
-        let intro, loop;
-        [testSong,testSound,intro,loop] = await ResourceManager.queueAudio([testSong,testSound,inv_intro,inv_loop]).load();
-
-        console.log("Test song:",testSong);
-        console.log("Test sound:",testSound);
-
-        inv_full = AudioManager.mergeAudioBuffers(intro,loop);
-        ResourceManager.removeAudio(inv_intro);
-        ResourceManager.removeAudio(inv_loop);
+        const song_intro = "inv_intro";
+        const song_loop = "inv_loop";
+        this.resources = await ResourceManager.queueJSON(`{
+            "Audio": [
+                "song.mp3",
+                "sound.mp3",
+                "${song_intro}.ogg",
+                "${song_loop}.ogg"
+            ]
+        }`).loadWithDictionary();
+        const audio = this.resources.Audio;
+        audio.song_full = AudioManager.mergeAudioBuffers(
+            audio[song_intro],
+            audio[song_loop]
+        );
+        this.resources.removeAudio(song_intro,song_loop);
     };
     this.resize = context => {
         context.fillStyle = "green";
     }; this.render = (context,size) => {
         context.fillRect(0,0,size.width,size.height);
     }
-   
 }
 
 CanvasManager.start({
