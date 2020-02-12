@@ -7,15 +7,19 @@ const AudioManager = engine.AudioManager;
 
 function TestFrame() {
 
-    const audioContext = new AudioContext();
+    const song_intro = "inv_intro";
+    const song_loop = "inv_loop";
 
-    this.RAW_TEST = () => {
-        const source = audioContext.createBufferSource();
-        source.buffer = testSound;
-        source.addEventListener("ended",()=>{console.log("Ended")});
-        source.connect(audioContext.destination);
-        source.start();
-    };
+    this.RAW_TEST = (()=>{
+        const audioContext = new AudioContext();
+        return () => {
+            const source = audioContext.createBufferSource();
+            source.buffer = testSound;
+            source.addEventListener("ended",()=>{console.log("Ended")});
+            source.connect(audioContext.destination);
+            source.start();
+        };
+    })();
 
     this.clickDown = () => {
         AudioManager.play(this.resources.Audio.sound);
@@ -25,10 +29,17 @@ function TestFrame() {
         console.log("Song finished playing");
     };
 
+    const songConversion = () => {
+        const audio = this.resources.Audio;
+        audio.song_full = AudioManager.mergeAudioBuffers(
+            audio[song_intro],
+            audio[song_loop]
+        );
+        this.resources.removeAudio(song_intro,song_loop);
+    };
+
     this.resources = null;
     this.load = async () => {
-        const song_intro = "inv_intro";
-        const song_loop = "inv_loop";
         this.resources = await ResourceManager.queueJSON(`{
             "Audio": [
                 "song.mp3",
@@ -37,12 +48,8 @@ function TestFrame() {
                 "${song_loop}.ogg"
             ]
         }`).loadWithDictionary();
-        const audio = this.resources.Audio;
-        audio.song_full = AudioManager.mergeAudioBuffers(
-            audio[song_intro],
-            audio[song_loop]
-        );
-        this.resources.removeAudio(song_intro,song_loop);
+
+        songConversion();
     };
     this.resize = context => {
         context.fillStyle = "green";
