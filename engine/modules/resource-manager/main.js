@@ -326,7 +326,7 @@ function ResourceManager() {
             dictionary[typeName].push(lookupName);
         });
         await this.load(overwrite);
-        TYPES.forEach(([typeName,type]) => {
+        TypeIterator((typeName,type) => {
             const files = dictionary[typeName];
             dictionary[typeName] = mapFilesList(files,type);
         });
