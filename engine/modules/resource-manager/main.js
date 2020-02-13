@@ -3,6 +3,7 @@ import ResourceTypes from "./resource-types.js";
 import GetFallbackImage from "./fallback-image.js";
 import DecodeImageResponse from "./image-decode.js";
 import audioContext from "../../internal/audio-context.js";
+import { TextToOctet } from "../../internal/octet-helper.js";
 
 const TYPES = Object.entries(ResourceTypes);
 const TYPE_NAMES = TYPES.reduce((set,[name,symbol])=>{
@@ -19,21 +20,30 @@ const GET_FALLBACK_JSON_OBJECT = () => {
 };
 const FALLBACK_OCTET = TextToOctet(FALLBACK_TEXT);
 
+const USE_NULL_RETRIEVAL_WARNING = false;
+const NULL_RETRIEVAL_WARNING = (name,type) => {
+    const typeName = TYPE_NAMES[type];
+    console.warn(`'${name}' is not present in cache for '${typeName}'`);
+};
+
 const INVALID_RESOURCE_DATA = () => {
-    throw "Invalid resource data";
+    throw "Invalid resource data!";
 };
 const BUCKET_IS_NOT_ARRAY = (name,value) => {
     throw Error(`Manifest bucket '${name}' must be an array, not $'${value}'!`);
+};
+const INVALID_TYPE = type => {
+    throw Error(`Type '${type}' is not a valid resource type!`);
+};
+const LOAD_CONCURRENCY_THREAT = () => {
+    throw Error("Only one loading operation can occur at any given time. " +
+    "This prevents potential concurrency bugs. Please reconsider your queue usage.");
 };
 
 const FALLBACK_AUDIO = audioContext.createBuffer(
     audioContext.destination.channelCount,
     audioContext.sampleRate,audioContext.sampleRate
 );
-
-function TextToOctet(string) {
-    return new TextEncoder().encode(string);
-}
 
 const FallbackResources = Object.freeze(Object.defineProperty({
     [ResourceTypes.Audio]: FALLBACK_AUDIO,
@@ -57,14 +67,11 @@ function SetEntry({type,lookupName},value) {
 function GetEntry(name,type) {
     let entry = DictionaryLookup[type][name];
     if(!entry) {
+        if(USE_NULL_RETRIEVAL_WARNING) NULL_RETRIEVAL_WARNING(name,type);
         return null;
     }
-    if(entry === FAILED_RESOURCE) {
-        entry = FallbackResources[type];
-    }
-    if(type === ResourceTypes.JSON) {
-        entry = entry.call();
-    }
+    if(entry === FAILED_RESOURCE) entry = FallbackResources[type];
+    if(type === ResourceTypes.JSON) entry = entry.call();
     return entry;
 }
 function RemoveEntry(name,type) {
@@ -125,72 +132,165 @@ function LoadResource(resourceLink) {
         });
     });
 }
-
-function LoadResources(resourceLinks,overwrite) {
+function LoadResources(resourceLinks) {
     return Promise.all(resourceLinks.map(LoadResource));
 }
 
-function getLoadList(resourceLinks,overwrite) {
-    const loadList = {};
-    resourceLinks.forEach(resourceLink => {
-        const {name,lookupName,type} = resourceLink;
-
-        let oldEntry = GetEntry(lookupName,type);
-        if(oldEntry === FAILED_RESOURCE) {
-            oldEntry = false;
-        }
-        let pass = false;
-
-        if(oldEntry && overwrite) {
-            if(overwrite) pass = true;
-        } else {
-            pass = true;
-        }
-
-        if(pass) {
-            loadList[name] = resourceLink;
-        }
+function ResourceDictionary() {
+    TYPES.forEach(([typeName]) => {
+        this[typeName] = new Array();
     });
-    return Object.values(loadList);
 }
+(removeEntry=>{
+    const removeFiles = (container,files,type) => {
+        files.forEach(file => {
+            removeEntry(file,type);
+            delete container[file];
+        });
+    };
+    TYPES.forEach(([typeName,type]) => {
+        const methodName = `remove${typeName}`;
+        ResourceDictionary.prototype[methodName] = function removeFile(...files) {
+            removeFiles(this[typeName],files.flat(),type);
+        };
+    });
+    Object.freeze(ResourceDictionary.prototype);
+})(RemoveEntry);
+
+const mapFilesList = (removeEntry=>{
+    const getProxyHandler = (mappedProperties,type) => {
+        return {    
+            deleteProperty(target,property) {
+                if(property in mappedProperties) {
+                    removeEntry(property,type);
+                    delete mappedProperties[property];
+                }
+                const canDelete = property in target;
+                if(canDelete) delete target[property];
+                return canDelete;
+            }
+        };
+    };
+    return (files,type) => {
+        const set = new Object();
+        const mappedProperties = new Object();
+    
+        const definitionBlock = new Object();
+        files.forEach(file => {
+            mappedProperties[file] = true;
+            definitionBlock[file] = {
+                set: value => {
+                    set[file] = value;
+                    delete mappedProperties[file];
+                },
+                get: () => GetEntry(file,type),
+                enumerable: true,
+                configurable: true,
+            };
+        });
+        Object.defineProperties(set,definitionBlock);
+
+        const proxyHandler = getProxyHandler(mappedProperties,type);
+        const setProxy = new Proxy(set,proxyHandler);
+        return setProxy;
+    };
+})(RemoveEntry);
 
 function ResourceManager() {
-
     const resourceQueue = [];
-    this.getLink = LinkResource;
-    this.queue = (...resourceLinks) => {
+    const queue = (...resourceLinks) => {
         resourceLinks = resourceLinks.flat();
         resourceQueue.push(...resourceLinks);
         return this;
     };
-    this.load = (overwrite=false) => {
-        if(!resourceQueue.length) return;
-        const resourceLinks = resourceQueue.splice(0);
-        const loadList = getLoadList(resourceLinks,overwrite);
-        if(!loadList.length) return;
-        return LoadResources(loadList);
-    };
 
-    TYPES.forEach(([
+    this.load = (()=>{
+        const getLoadList = (resourceLinks,overwrite) => {
+            const loadList = {};
+            resourceLinks.forEach(resourceLink => {
+                const {name,lookupName,type} = resourceLink;
+        
+                let oldEntry = GetEntry(lookupName,type);
+                if(oldEntry === FAILED_RESOURCE) {
+                    oldEntry = false;
+                }
+                let pass = false;
+        
+                if(oldEntry && overwrite) {
+                    if(overwrite) pass = true;
+                } else {
+                    pass = true;
+                }
+        
+                if(pass) {
+                    loadList[name] = resourceLink;
+                }
+            });
+            return Object.values(loadList);
+        };
+        let loadLock = false;
+        return async (overwrite=false) => {
+            if(loadLock) LOAD_CONCURRENCY_THREAT();
+            loadLock = true;
+            if(!resourceQueue.length) return;
+            const resourceLinks = resourceQueue.splice(0);
+            const loadList = getLoadList(resourceLinks,overwrite);
+            if(!loadList.length) return;
+            const resources = await LoadResources(loadList);
+            loadLock = false;
+            return resources;
+        };
+    })();
+
+    const queueLinkers = (()=>{
+        const getQueueLinker = type => {
+            return files => {
+                if(!Array.isArray(files)) return LinkResource(files,type);
+                return files.map(file => {
+                    return LinkResource(file,type);
+                });
+            };
+        };
+        return TYPES.map(([type])=>getQueueLinker(type));
+    })();
+
+    /* Dynamic cache methods */ (()=>{
+        const validateDynamicType = type => {
+            if(type in TYPE_NAMES) return TYPE_NAMES[type];
+            INVALID_TYPE(type);
+        };
+        this.get = (file,type) => {
+            return GetEntry(file,validateDynamicType(type));
+        };
+        this.remove = (file,type) => {
+            return RemoveEntry(file,validateDynamicType(type));
+        };
+        this.has = (file,type) => {
+            return EntryExists(file,validateDynamicType(type));
+        };
+        this.queue = (file,type) => {
+            const dynamicType = validateDynamicType(type);
+            const queueLinker = queueLinkers[dynamicType];
+            return queue(queueLinker(file));
+        };
+    })();
+
+    /* Static cache methods */ TYPES.forEach(([
         typeName,type
     ]) => {
-        this[`get${typeName}Link`] = file => {
-            return LinkResource(file,type);
+        this[`get${typeName}`] = file => {
+            return GetEntry(file,type);
         };
-        this[`get${typeName}`] = name => {
-            return GetEntry(name,type);
+        this[`remove${typeName}`] = file => {
+            return RemoveEntry(file,type);
         };
-        this[`remove${typeName}`] = name => {
-            return RemoveEntry(name,type);
+        this[`has${typeName}`] = file => {
+            return EntryExists(file,type);
         };
-        this[`has${typeName}`] = name => {
-            return EntryExists(name,type);
-        };
+        const queueLinker = queueLinkers[type];
         this[`queue${typeName}`] = (...files) => {
-            files = files.flat().map(fileName => {
-                return LinkResource(fileName,type);
-            });
-            return this.queue(...files);
+            files = queueLinker(files.flat());
+            return queue(...files);
         };
     });
 
@@ -206,31 +306,10 @@ function ResourceManager() {
             });
         });
         if(!resourceLinks.length) return;
-        this.queue(resourceLinks);
-        return this;
+        return queue(resourceLinks);
     };
-
-    const mapFilesList = (files,type) => {
-        return files.reduce((set,value)=>{
-            set[value] = GetEntry(value,type);
-            return set;
-        },new Object());
-    };
-
     this.loadWithDictionary = async (overwrite=false) => {
-        const dictionary = new Object();
-        TYPES.forEach(([typeName,type]) => {
-            dictionary[typeName] = new Array();
-            dictionary[`remove${typeName}`] = (...files) => {
-                files = files.flat();
-                const container = dictionary[typeName];
-                const removalData = files.forEach(file => {
-                    RemoveEntry(file,type);
-                    delete container[file];
-                });
-                return removalData;
-            };
-        });
+        const dictionary = new ResourceDictionary();
         resourceQueue.forEach(resourceLink => {
             const {lookupName, type} = resourceLink;
             const typeName = TYPE_NAMES[type];
@@ -241,9 +320,9 @@ function ResourceManager() {
             const files = dictionary[typeName];
             dictionary[typeName] = mapFilesList(files,type);
         });
+        Object.freeze(dictionary);
         return dictionary;
     };
-
     Object.freeze(this);
 }
 

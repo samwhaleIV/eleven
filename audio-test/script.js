@@ -49,6 +49,10 @@ function TestFrame() {
             ]
         }`).loadWithDictionary();
 
+        console.log(ResourceManager);
+
+        console.log(this.resources);
+
         songConversion();
     };
     this.resize = context => {

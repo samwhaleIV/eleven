@@ -23,7 +23,8 @@ function RemoteControl(data) {
     };
     Object.freeze(data);
     const {radio, cacheID} = data;
-    this[RCData] = data;
+
+    Object.defineProperty(this,RCData,{value:data});
 
     const isStopped = () => {
         return !radio.smartCache.contains(cacheID);
