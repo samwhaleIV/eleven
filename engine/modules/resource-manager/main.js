@@ -5,10 +5,15 @@ import DecodeImageResponse from "./image-decode.js";
 import audioContext from "../../internal/audio-context.js";
 import { TextToOctet } from "../../internal/octet-helper.js";
 
-const TYPES = Object.entries(ResourceTypes);
-const TYPE_NAMES = TYPES.reduce((set,[name,symbol])=>{
-    set[symbol] = name; return set;
-},new Object());
+const TypeIterator = (()=>{
+    const types = Object.freeze(Object.entries(ResourceTypes));
+    return method => {
+        types.forEach(([typeName,type]) => method(typeName,type));
+    };
+})();
+
+const TYPE_SYMBOLS = Object.freeze(Object.values(ResourceTypes));
+const TYPE_NAMES = Object.freeze(Object.keys(ResourceTypes));
 
 const FAILED_RESOURCE = Symbol("FailedResource");
 const LOG_NAME = "Resource manager";
@@ -22,7 +27,7 @@ const FALLBACK_OCTET = TextToOctet(FALLBACK_TEXT);
 
 const USE_NULL_RETRIEVAL_WARNING = false;
 const NULL_RETRIEVAL_WARNING = (name,type) => {
-    const typeName = TYPE_NAMES[type];
+    const typeName = type.description;
     console.warn(`'${name}' is not present in cache for '${typeName}'`);
 };
 
@@ -137,7 +142,7 @@ function LoadResources(resourceLinks) {
 }
 
 function ResourceDictionary() {
-    TYPES.forEach(([typeName]) => {
+    TYPE_NAMES.forEach(typeName => {
         this[typeName] = new Array();
     });
 }
@@ -148,7 +153,7 @@ function ResourceDictionary() {
             delete container[file];
         });
     };
-    TYPES.forEach(([typeName,type]) => {
+    TypeIterator((typeName,type) => {
         const methodName = `remove${typeName}`;
         ResourceDictionary.prototype[methodName] = function removeFile(...files) {
             removeFiles(this[typeName],files.flat(),type);
@@ -251,12 +256,19 @@ function ResourceManager() {
                 });
             };
         };
-        return TYPES.map(([type])=>getQueueLinker(type));
+        const linkers = new Object();
+        const addLinker = type => {
+            linkers[type] = getQueueLinker(type);
+        };
+        TYPE_SYMBOLS.forEach(addLinker);
+
+        Object.freeze(linkers);
+        return linkers;
     })();
 
     /* Dynamic cache methods */ (()=>{
         const validateDynamicType = type => {
-            if(type in TYPE_NAMES) return TYPE_NAMES[type];
+            if(type in ResourceTypes) return ResourceTypes[type];
             INVALID_TYPE(type);
         };
         this.get = (file,type) => {
@@ -275,9 +287,7 @@ function ResourceManager() {
         };
     })();
 
-    /* Static cache methods */ TYPES.forEach(([
-        typeName,type
-    ]) => {
+    /* Static cache methods */ TypeIterator((typeName,type) =>  {
         this[`get${typeName}`] = file => {
             return GetEntry(file,type);
         };
@@ -297,7 +307,7 @@ function ResourceManager() {
     this.queueJSON = json => {
         const data = JSON.parse(json);
         const resourceLinks = new Array();
-        TYPES.forEach(([typeName,type]) => {
+        TypeIterator((typeName,type) => {
             if(!(typeName in data)) return;
             const files = data[typeName];
             if(!Array.isArray(files)) BUCKET_IS_NOT_ARRAY(typeName,files);
@@ -312,7 +322,7 @@ function ResourceManager() {
         const dictionary = new ResourceDictionary();
         resourceQueue.forEach(resourceLink => {
             const {lookupName, type} = resourceLink;
-            const typeName = TYPE_NAMES[type];
+            const typeName = type.description;
             dictionary[typeName].push(lookupName);
         });
         await this.load(overwrite);

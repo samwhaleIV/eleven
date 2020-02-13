@@ -47,7 +47,7 @@ function ValidateType(type) {
                 case ResourceTypes.Text:
                     return type;
                 default:
-                    throw Error(`Invalid symbolic resource type: ${type.toString()}`)
+                    throw Error(`Invalid symbolic resource type: ${type.description}`)
             }
         default:
             throw Error(`Resource type (${valueType}) is not of type 'string'`);

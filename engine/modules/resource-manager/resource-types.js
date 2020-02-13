@@ -1,8 +1,7 @@
-const ResourceTypes = Object.freeze({
-    Image: Symbol("ImageResource"),
-    JSON: Symbol("JSONResource"),
-    Text: Symbol("TextResource"),
-    Audio: Symbol("AudioResource"),
-    Octet: Symbol("Octet")
-});
+const ResourceTypes = Object.freeze([
+    "Image","JSON","Text","Audio","Octet"
+].reduce((set,typeName) => {
+    set[typeName] = Symbol(typeName);
+},new Object()));
+
 export default ResourceTypes;
