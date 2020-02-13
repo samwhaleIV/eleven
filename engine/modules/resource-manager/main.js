@@ -306,17 +306,20 @@ function ResourceManager() {
 
     this.queueJSON = json => {
         const data = JSON.parse(json);
-        const resourceLinks = new Array();
+
+        let linkType = null;
+        const addLink = file => {
+            resourceQueue.push(LinkResource(file,linkType));
+        };
+
         TypeIterator((typeName,type) => {
             if(!(typeName in data)) return;
             const files = data[typeName];
             if(!Array.isArray(files)) BUCKET_IS_NOT_ARRAY(typeName,files);
-            files.forEach(file=>{
-                resourceLinks.push(LinkResource(file,type))
-            });
+            
+            linkType = type;files.forEach(addLink);
         });
-        if(!resourceLinks.length) return;
-        return queue(resourceLinks);
+        return this;
     };
     this.loadWithDictionary = async (overwrite=false) => {
         const dictionary = new ResourceDictionary();
