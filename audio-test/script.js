@@ -25,20 +25,23 @@ function TestFrame() {
         AudioManager.play(this.resources.Audio.sound);
     };
     this.altClickDown = async () => {
-        await AudioManager.playMusicLooping(this.resources.Audio.song_full).waitForEnd();
+        await AudioManager.playMusicLooping({buffer:this.resources.Audio.song}).waitForEnd();
         console.log("Song finished playing");
     };
 
     const songConversion = () => {
         const audio = this.resources.Audio;
+
+        //Attaches to the shadow cache
         audio.song_full = AudioManager.mergeAudioBuffers(
             audio[song_intro],
             audio[song_loop]
         );
+
+        //Removes from the master cache
         this.resources.removeAudio(song_intro,song_loop);
     };
 
-    this.resources = null;
     this.load = async () => {
         this.resources = await ResourceManager.queueJSON(`{
             "Audio": [
@@ -49,8 +52,13 @@ function TestFrame() {
             ]
         }`).loadWithDictionary();
 
-        console.log(ResourceManager);
+        //Detaches from the master cache, stays in shadow cache
+        this.resources.lockAudio("song");
 
+        //Removes from the master cache
+        ResourceManager.removeAudio("song");
+
+        console.log(ResourceManager);
         console.log(this.resources);
 
         songConversion();
