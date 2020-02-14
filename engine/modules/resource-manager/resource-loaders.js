@@ -5,19 +5,20 @@ import ResourceTypes from "./resource-types.js";
 const ResourceLoaders = Object.freeze({
     [ResourceTypes.Audio]: response => {
         return response.arrayBuffer().then(arrayBuffer => {
-            return audioContext.decodeAudioData(arrayBuffer)
+            return audioContext.decodeAudioData(arrayBuffer);
+        }).then(audioBuffer => {
+            return Object.defineProperty(audioBuffer,"buffer",{value:audioBuffer});
         });
     },
     [ResourceTypes.Image]: DecodeImageResponse,
     [ResourceTypes.Text]: response => {
         return response.text();
     },
-    [ResourceTypes.Octet]: response => {
-        return response.arrayBuffer();
-    },
     [ResourceTypes.JSON]: response => {
-        const responseObject = response.json();
-        return () => Object.assign(new Object(),responseObject);
+        return response.text();
+    },
+    [ResourceTypes.Binary]: response => {
+        return response.arrayBuffer();
     }
 });
 export default ResourceLoaders;

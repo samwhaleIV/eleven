@@ -14,7 +14,7 @@ const AudioPrefix = constants.audioFolder;
 const TypeLookup = Object.freeze({
     "audio": ResourceTypes.Audio,
     "text": ResourceTypes.Text,
-    "octet": ResourceTypes.Octet,
+    "binary": ResourceTypes.Binary,
     "json": ResourceTypes.JSON,
     "image": ResourceTypes.Image
 });
@@ -24,7 +24,7 @@ const PrefixLookup = Object.freeze({
     [ResourceTypes.Image]: ImagePrefix,
     [ResourceTypes.JSON]: DataPrefix,
     [ResourceTypes.Text]: DataPrefix,
-    [ResourceTypes.Octet]: DataPrefix
+    [ResourceTypes.Binary]: DataPrefix
 });
 const SuffixLookup = Object.freeze({
     [ResourceTypes.Audio]: DEFAULT_AUDIO_TYPE,
@@ -43,7 +43,7 @@ function ValidateType(type) {
                 case ResourceTypes.Image:
                 case ResourceTypes.Audio:
                 case ResourceTypes.JSON:
-                case ResourceTypes.Octet:
+                case ResourceTypes.Binary:
                 case ResourceTypes.Text:
                     return type;
                 default:

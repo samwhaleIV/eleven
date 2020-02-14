@@ -7,6 +7,11 @@ const AudioManager = engine.AudioManager;
 
 function TestFrame() {
 
+    const sound = "sound";
+    const soundExtension = ".mp3";
+
+    const song_full = "song_full";
+
     const song_intro = "inv_intro";
     const song_loop = "inv_loop";
 
@@ -22,46 +27,34 @@ function TestFrame() {
     })();
 
     this.clickDown = () => {
-        AudioManager.play(this.resources.Audio.sound);
+        AudioManager.play(ResourceManager.getAudio(sound));
     };
     this.altClickDown = async () => {
-        await AudioManager.playMusicLooping({buffer:this.resources.Audio.song}).waitForEnd();
+        await AudioManager.playMusicLooping(
+            ResourceManager.getAudio(song_full)
+        ).waitForEnd();
         console.log("Song finished playing");
     };
 
-    const songConversion = () => {
-        const audio = this.resources.Audio;
-
-        //Attaches to the shadow cache
-        audio.song_full = AudioManager.mergeAudioBuffers(
-            audio[song_intro],
-            audio[song_loop]
-        );
-
-        //Removes from the master cache
-        this.resources.removeAudio(song_intro,song_loop);
-    };
-
     this.load = async () => {
-        this.resources = await ResourceManager.queueJSON(`{
-            "Audio": [
-                "song.mp3",
-                "sound.mp3",
-                "${song_intro}.ogg",
-                "${song_loop}.ogg"
-            ]
-        }`).loadWithDictionary();
+        const shouldMerge = !ResourceManager.hasAudio(song_full);
 
-        //Detaches from the master cache, stays in shadow cache
-        this.resources.lockAudio("song");
+        if(shouldMerge) {
+            ResourceManager.queueAudio(song_intro,song_loop);
+        }
+    
+        ResourceManager.queueManifest(`{
+            "Audio": ["${sound}${soundExtension}"]
+        }`);
 
-        //Removes from the master cache
-        ResourceManager.removeAudio("song");
+        const {Audio} = await ResourceManager.loadWithDictionary();
 
-        console.log(ResourceManager);
-        console.log(this.resources);
-
-        songConversion();
+        if(shouldMerge) {
+            ResourceManager.setAudio(song_full,AudioManager.mergeBuffers(
+                Audio[song_intro],Audio[song_loop]
+            ));
+            ResourceManager.removeAudio(song_intro,song_loop);
+        }
     };
     this.resize = context => {
         context.fillStyle = "green";

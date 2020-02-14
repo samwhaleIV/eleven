@@ -17,24 +17,29 @@ function EntryExists(name,type) {
     return name in DictionaryLookup[type];
 }
 function SetEntry({type,lookupName},value) {
-    return DictionaryLookup[type][lookupName] = value;
+    const dictionary = DictionaryLookup[type];
+    if(EntryExists(lookupName,type)) {
+        RemoveEntry(lookupName,type);
+    }
+    dictionary[lookupName] = value;
+    return value;
 }
 function GetEntry(name,type) {
     let entry = DictionaryLookup[type][name];
-    if(!entry) {
+    if(!EntryExists(name,type)) {
         if(USE_NULL_RETRIEVAL_WARNING) NULL_RETRIEVAL_WARNING(name,type);
         return null;
     }
     if(entry === FAILED_RESOURCE) entry = FallbackResources[type];
-    if(type === ResourceTypes.JSON) entry = entry.call();
+    if(type === ResourceTypes.JSON) entry = JSON.parse(entry);
     return entry;
 }
 function RemoveEntry(name,type) {
     const dictionary = DictionaryLookup[type];
-    const resource = dictionary[name];
-    if(!resource) {
+    if(!EntryExists(name,type)) {
         return false;
     }
+    const resource = dictionary[name];
     if(type === ResourceTypes.Image) {
         resource.close();
     }

@@ -10,7 +10,7 @@ const checkMatch = (a,b,failure) => {
     if(a !== b) failure(a,b);
 };
 
-function MergeAudioBuffers(bufferA,bufferB) {
+function mergeBuffers(bufferA,bufferB) {
 
     /*
       It would be wise to use this function inside a promise/other asynchronous wrapper,
@@ -50,10 +50,13 @@ function MergeAudioBuffers(bufferA,bufferB) {
 
     const loopStart = lengthA / totalLength * audioBuffer.duration;
 
-    return {buffer: audioBuffer, loopStart}
+    Object.defineProperty(audioBuffer,"loopStart",{value:loopStart});
+    Object.defineProperty(audioBuffer,"buffer",{value:audioBuffer});
+
+    return audioBuffer;
 }
 
 function InstallIntroHelper(target) {
-    target.mergeAudioBuffers = MergeAudioBuffers;
+    target.mergeBuffers = mergeBuffers;
 }
 export default InstallIntroHelper;

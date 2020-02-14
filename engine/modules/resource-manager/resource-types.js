@@ -2,7 +2,7 @@ const TYPE_SYMBOLS = new Array();
 const TYPE_NAMES = new Array();
 
 const ResourceTypes = Object.freeze([
-    "Image","JSON","Text","Audio","Octet"
+    "Image","JSON","Text","Audio","Binary"
 ].reduce((set,typeName) => {
     const symbol = Symbol(typeName);
     set[typeName] = symbol;

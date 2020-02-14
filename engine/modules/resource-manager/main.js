@@ -3,10 +3,12 @@ import {ResourceTypes, TypeIterator, TypeSymbolIterator} from "./resource-types.
 import ResourceDictionary from "./resource-dictionary.js";
 import CacheController from "./cache-controller.js";
 import GetLoader from "./loader.js";
+import LoadValidators from "./load-validators.js";
 
 const GetEntry = CacheController.get;
 const EntryExists = CacheController.has;
 const RemoveEntry = CacheController.remove;
+const SetEntry = CacheController.set;
 
 const BUCKET_IS_NOT_ARRAY = (name,value) => {
     throw Error(`Manifest bucket '${name}' must be an array, not $'${value}'!`);
@@ -18,6 +20,11 @@ const INVALID_TYPE = type => {
 function ResourceManager() {
     const linkResource = (name,type) => {
         return new Resource(name,type);
+    };
+
+    const validateSetValue = (value,type) => {
+        LoadValidators[type](value);
+        return value;
     };
 
     const resourceQueue = new Array();
@@ -58,6 +65,11 @@ function ResourceManager() {
         this.get = (file,type) => {
             return GetEntry(file,validateDynamicType(type));
         };
+        this.set = (file,value,type) => {
+            const dynamicType = validateDynamicType(type);
+            const setValue = validateSetValue(value,dynamicType);
+            return SetEntry({type:dynamicType,lookupName:file},setValue);
+        };
         this.remove = (file,type) => {
             return RemoveEntry(file,validateDynamicType(type));
         };
@@ -75,6 +87,10 @@ function ResourceManager() {
         this[`get${typeName}`] = file => {
             return GetEntry(file,type);
         };
+        this[`set${typeName}`] = (file,value) => {
+            const setValue = validateSetValue(value,type);
+            return SetEntry({type,lookupName:file},setValue);
+        };
         this[`remove${typeName}`] = file => {
             return RemoveEntry(file,type);
         };
@@ -88,7 +104,7 @@ function ResourceManager() {
         };
     });
 
-    this.queueJSON = json => {
+    this.queueManifest = json => {
         const data = JSON.parse(json);
 
         let linkType = null;

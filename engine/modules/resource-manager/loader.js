@@ -1,6 +1,7 @@
 import CacheController from "./cache-controller.js";
 import ResourceLoaders from "./resource-loaders.js";
 import FallbackResources from "./fallback-resources.js";
+import LoadValidators from "./load-validators.js";
 
 const FAILED_RESOURCE = FallbackResources.FailedResource;
 const LOG_NAME = "Resource manager";
@@ -25,9 +26,8 @@ function LoadResource(resourceLink) {
             }
             return response;
         }).then(resourceLoader).then(data => {
-            if(!data) {
-                INVALID_RESOURCE_DATA();
-            }
+            if(!data) INVALID_RESOURCE_DATA();
+            LoadValidators[type](data);
             SetEntry(resourceLink,data);
             console.log(`${LOG_NAME}: Loaded '${name}'`);
             resolve(GetEntry(lookupName,type));
