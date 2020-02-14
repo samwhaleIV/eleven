@@ -60,7 +60,7 @@ function AudioManager() {
     };
 
     const radioFadeOutAsync = (radio,duration) => {
-        return radio.fadeOutAsync(duration,resolve);
+        return radio.fadeOutAsync(duration);
     };
     this.fadeOutSoundsAsync = function(duration) {
         return radioFadeOutAsync(soundRadio,duration);
@@ -70,7 +70,7 @@ function AudioManager() {
     };
 
     const radioFadeOut = (radio,duration,callback,parameters) => {
-        return radio.fadeOut(duration,resolve,callback,...parameters);
+        return radio.fadeOut(duration,callback,...parameters);
     };
     this.fadeOutSounds = function(duration,callback,...parameters) {
         return radioFadeOut(soundRadio,duration,callback,parameters);
