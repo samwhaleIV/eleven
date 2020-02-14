@@ -22,6 +22,9 @@ const validateType = (value,type,stringTag) => {
 const LoadValidators = Object.freeze({
     [ResourceTypes.Audio]: value => {
         validateType(value,ResourceTypes.Audio,"AudioBuffer");
+        if(!("buffer" in value)) {
+            Object.defineProperty(value,"buffer",{value:value});
+        }
     },
     [ResourceTypes.Image]: value => {
         validateType(value,ResourceTypes.Image,"ImageBitmap");

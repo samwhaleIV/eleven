@@ -6,8 +6,6 @@ const ResourceLoaders = Object.freeze({
     [ResourceTypes.Audio]: response => {
         return response.arrayBuffer().then(arrayBuffer => {
             return audioContext.decodeAudioData(arrayBuffer);
-        }).then(audioBuffer => {
-            return Object.defineProperty(audioBuffer,"buffer",{value:audioBuffer});
         });
     },
     [ResourceTypes.Image]: DecodeImageResponse,

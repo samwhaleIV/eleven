@@ -51,7 +51,6 @@ function mergeBuffers(bufferA,bufferB) {
     const loopStart = lengthA / totalLength * audioBuffer.duration;
 
     Object.defineProperty(audioBuffer,"loopStart",{value:loopStart});
-    Object.defineProperty(audioBuffer,"buffer",{value:audioBuffer});
 
     return audioBuffer;
 }

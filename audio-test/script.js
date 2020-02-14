@@ -55,6 +55,12 @@ function TestFrame() {
             ));
             ResourceManager.removeAudio(song_intro,song_loop);
         }
+
+        ResourceManager.setText("test_string","Ligma balls.");
+        console.log(ResourceManager.getText("test_string"));
+
+        ResourceManager.set("test_string_2","Ligma balls again.","Text");
+        console.log(ResourceManager.getText("test_string_2"));
     };
     this.resize = context => {
         context.fillStyle = "green";
