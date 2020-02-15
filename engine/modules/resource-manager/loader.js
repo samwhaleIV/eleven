@@ -29,9 +29,8 @@ function LoadResource(resourceLink) {
         }).then(resourceLoader).then(data => {
             if(!data) INVALID_RESOURCE_DATA();
             LoadValidators[type](data);
-            let log = !EntryExists(resourceLink.lookupName,resourceLink.type);
             SetEntry(resourceLink,data);
-            if(log) console.log(`${LOG_NAME}: Loaded '${name}'`);
+            console.log(`${LOG_NAME}: Loaded '${name}'`);
             resolve(GetEntry(lookupName,type));
         }).catch(error => {
             SetEntry(resourceLink,FAILED_RESOURCE);
@@ -56,10 +55,16 @@ const GetLoader = resourceQueue => {
                 oldEntry = false;
             }
             let pass = false;
-    
-            if(oldEntry && overwrite) {
-                if(overwrite) pass = true;
+
+            if(overwrite) {
+                //overwrite, old entry
+                //overwrite, no old entry
+                pass = true;
+            } else if(oldEntry) {
+                //no overwrite, but old entry
+                pass = false;
             } else {
+                //no overwrite, but no entry
                 pass = true;
             }
     
