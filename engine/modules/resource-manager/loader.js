@@ -15,6 +15,7 @@ const LOAD_CONCURRENCY_THREAT = () => {
 
 const SetEntry = CacheController.set;
 const GetEntry = CacheController.get;
+const EntryExists = CacheController.has;
 
 function LoadResource(resourceLink) {
     const {name, lookupName, type} = resourceLink;
@@ -28,8 +29,9 @@ function LoadResource(resourceLink) {
         }).then(resourceLoader).then(data => {
             if(!data) INVALID_RESOURCE_DATA();
             LoadValidators[type](data);
+            let log = !EntryExists(resourceLink.lookupName,resourceLink.type);
             SetEntry(resourceLink,data);
-            console.log(`${LOG_NAME}: Loaded '${name}'`);
+            if(log) console.log(`${LOG_NAME}: Loaded '${name}'`);
             resolve(GetEntry(lookupName,type));
         }).catch(error => {
             SetEntry(resourceLink,FAILED_RESOURCE);
