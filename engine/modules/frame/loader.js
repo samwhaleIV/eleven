@@ -2,7 +2,7 @@ import Constants from "../../internal/constants.js";
 import Frame from "./main.js";
 
 const FRAME_SIGNATURE = Constants.FrameSignature;
-const LOAD_SYMBOL = Symbol("LoadSymbol");
+const LOADED_SYMBOL = Symbol("LoadedSymbol");
 
 const INVALID_FRAME = frame => {
     throw Error(`Invalid frame '${frame}'`);
@@ -18,8 +18,8 @@ const UNEXPECTED_PARAMETERS = () => {
 };
 
 async function InstallFrame(frame,parameters) {
-    if(LOAD_SYMBOL in frame) {
-        if(frame.load === frame[LOAD_SYMBOL]) {
+    if(LOADED_SYMBOL in frame) {
+        if(frame.load === frame[LOADED_SYMBOL]) {
             if(parameters) UNEXPECTED_PARAMETERS();
             return frame;
         }
@@ -44,7 +44,7 @@ async function InstallFrame(frame,parameters) {
         }
         await frameLoader.call(frame);
     }
-    frame[LOAD_SYMBOL] = frame.load;
+    Object.defineProperty(frame,LOADED_SYMBOL,{value:frame.load});
     return frame;
 }
 export default InstallFrame;

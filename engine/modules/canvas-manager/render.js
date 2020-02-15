@@ -125,6 +125,14 @@ function Render(canvasManager,modules) {
         enumerable: true,
         get: function() {
             return paused;
+        },
+        set: value => {
+            value = Boolean(value);
+            if(value) {
+                canvasManager.pause();
+            } else {
+                canvasManager.start();
+            }
         }
     });
     
