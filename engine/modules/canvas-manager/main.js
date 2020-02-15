@@ -9,7 +9,6 @@ import Render from "./render.js";
 import BufferResize from "./buffer-resize.js";
 
 /*
-  Notice!
   CanvasManager's use of Frame objects relies on the default Frame.prototype
 */
 

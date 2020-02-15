@@ -1,4 +1,4 @@
-import InstallFrame from "../frame/install.js";
+import InstallFrame from "../frame/loader.js";
 
 const LOG_PREFIX = "Canvas manager";
 
@@ -15,7 +15,7 @@ const CANVAS_NOT_IN_DOM = () => {
     throw Error("Cannot start rendering, the canvas element is not attached to the DOM");
 };
 const UNEXPECTED_PARAMETERS = () => {
-    throw Error("Parameter use is only valid when supplying an uninstantiated frame function");
+    throw Error("Parameter use is only valid when supplying an uninstantiated frame constructor");
 };
 
 let firstTime = true;

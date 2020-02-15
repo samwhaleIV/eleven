@@ -1,4 +1,10 @@
 import Constants from "../../internal/constants.js";
+import KeyBind from "./key-bind.js";
+import ManagedGamepad from "./managed-gamepad.js";
+import GamepadBinds from "./gamepad-binds.js";
+import InstallFrame from "./loader.js";
+import MissingRender from "./missing-render.js";
+
 const inputRoutes = Constants.InputRoutes;
 
 const KEY_UP = inputRoutes.keyUp;
@@ -7,11 +13,6 @@ const INPUT = inputRoutes.input;
 const INPUT_GAMEPAD = inputRoutes.inputGamepad;
 const FRAME_SIGNATURE = Constants.FrameSignature;
 
-import KeyBind from "./key-bind.js";
-import ManagedGamepad from "./managed-gamepad.js";
-
-import GamepadBinds from "./gamepad-binds.js";
-import InstallFrame from "./install.js";
 const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
 
 const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
@@ -78,7 +79,7 @@ function validateFrameData(base,parameters) {
     validateParameters(parameters);
 }
 function setDefaultProperties(target) {
-    target.render = missingRenderMethod;
+    target.render = MissingRender;
     target.opaque = true;
     target.child = null;
 }
@@ -87,7 +88,7 @@ function installBase(target,base,parameters) {
     base.apply(target,parameters);
 }
 function installInputManagement(target,gamepad,keyBinds) {
-    const hasKeyBinds = keyBinds ? true : false;
+    const hasKeyBinds = Boolean(keyBinds);
     if(gamepad) {
         defineGamepadInputs.call(target,hasKeyBinds);
         installManagedGamepad.call(target,gamepad);
@@ -98,9 +99,7 @@ function installInputManagement(target,gamepad,keyBinds) {
 }
 
 function Frame({
-    base,parameters,
-    gamepad=true,
-    keyBinds=null
+    base,parameters,gamepad=false,keyBinds=false
 }) {
     setDefaultProperties(this);
     installBase(this,base,parameters);
@@ -109,18 +108,7 @@ function Frame({
 
 function sendMessage(target,message,data) {
     const endpoint = target[message];
-    if(endpoint) {
-        endpoint.apply(target,data);
-    }
-}
-function missingRenderMethod(context,size) {
-    context.fillStyle = "black";
-    context.fillRect(size.halfWidth-120,size.halfHeight-100,240,200);
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillStyle = "white";
-    context.font = "16px sans-serif";
-    context.fillText("Missing Render Method",size.halfWidth,size.halfHeight);
+    if(endpoint) endpoint.apply(target,data);
 }
 Frame.prototype.getDeepest = function() {
     let frame = this;
@@ -156,10 +144,15 @@ Frame.prototype.deepRender = function(data) {
     }
 }
 Frame.prototype.setChild = async function(frame,...parameters) {
-    const newFrame = await InstallFrame(new Frame({
-        base: frame, gamepad: null, keyBinds: null, parameters
-    }));
-    this.child = newFrame;
+    if(typeof frame === "function") {
+        frame = new Frame({
+            base: frame, parameters: parameters,
+            gamepad: false, keyBinds: false
+        });
+    }
+    await Frame.load(frame);
+    this.child = frame;
+    return this.child;
 }
 Frame.prototype.message = function(message,...data) {
     sendMessage(this,message,data);
@@ -185,12 +178,14 @@ Object.freeze(Frame.prototype);
 
 Frame.create = function(settings) {
     if(typeof settings === "function") {
-        settings = {
-            base: settings
-        };
+        settings = {base: settings};
     }
     return new Frame(settings);
-};
+}
+Frame.load = async function(frame) {
+    frame = await InstallFrame(frame);
+    return frame;
+}
 Object.freeze(Frame);
 
 export default Frame;

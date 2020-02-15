@@ -2,6 +2,7 @@ import Constants from "../../internal/constants.js";
 import Frame from "./main.js";
 
 const FRAME_SIGNATURE = Constants.FrameSignature;
+const LOAD_SYMBOL = Symbol("LoadSymbol");
 
 const INVALID_FRAME = frame => {
     throw Error(`Invalid frame '${frame}'`);
@@ -12,15 +13,23 @@ const BAD_SIGNATURE = frame => {
 const BAD_FRAME_LOADER = frameLoader => {
     throw Error(`Frame loader '${frameLoader}' of type '${typeof frameLoader}' is not a valid load function`);
 };
+const UNEXPECTED_PARAMETERS = () => {
+    throw Error("Parameter use is only valid when supplying an uninstantiated frame constructor");
+};
 
 async function InstallFrame(frame,parameters) {
+    if(LOAD_SYMBOL in frame) {
+        if(frame.load === frame[LOAD_SYMBOL]) {
+            if(parameters) UNEXPECTED_PARAMETERS();
+            return frame;
+        }
+    }
     if(!frame) {
         INVALID_FRAME(frame);
     }
     if(typeof frame === "function") {
         frame = Frame.create({
-            base: frame,
-            parameters: parameters
+            base: frame, parameters: parameters
         });
     } else if(parameters !== undefined) {
         UNEXPECTED_PARAMETERS();
@@ -35,6 +44,7 @@ async function InstallFrame(frame,parameters) {
         }
         await frameLoader.call(frame);
     }
+    frame[LOAD_SYMBOL] = frame.load;
     return frame;
 }
 export default InstallFrame;
