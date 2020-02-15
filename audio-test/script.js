@@ -5,7 +5,7 @@ const CanvasManager = engine.CanvasManager;
 const ResourceManager = engine.ResourceManager;
 const AudioManager = engine.AudioManager;
 
-function TestFrame() {
+function TestFrame(noRecursion=false) {
 
     const sound = "sound";
     const soundExtension = ".mp3";
@@ -37,6 +37,19 @@ function TestFrame() {
     };
 
     this.load = async () => {
+
+        if(!noRecursion) {
+            await this.setChild(function() {
+                this.load = async () => {
+                    await new Promise(resolve => {
+                        setTimeout(resolve,100);
+                    });
+                    console.log("I just loaded after 100ms!");
+                };
+            });
+            await this.setChild(TestFrame,true);
+        }
+
         const shouldMerge = !ResourceManager.hasAudio(song_full);
 
         if(shouldMerge) {
@@ -64,9 +77,13 @@ function TestFrame() {
     };
     this.resize = context => {
         context.fillStyle = "green";
-    }; this.render = (context,size) => {
+    };
+    this.render = (context,size) => {
+        if(this.child) {
+            context.fillStyle = "green";
+        }
         context.fillRect(0,0,size.width,size.height);
-    }
+    };
 }
 
 CanvasManager.start({

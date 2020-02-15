@@ -2,7 +2,7 @@ import InstallModules from "./modules.js";
 import Singleton from "./singleton.js";
 import Symbols from "./symbols.js";
 
-const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
+const NAMESPACE_IDENTIFIER = Symbols.NamespaceIdentifier;
 
 const INVALID_NAMESPACE = name => {
     throw Error(`Invalid namespace name '${name}'`);

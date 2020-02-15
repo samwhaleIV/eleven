@@ -64,17 +64,17 @@ function Singleton({
         name: {
             value: name
         },
-        [Symbols.isSingleton]: {
+        [Symbols.IsSingleton]: {
             value: true
         }
     };
     if(!autoInstantiation) {
-        singletonData[Symbols.manualSingleton] = {
+        singletonData[Symbols.ManualSingleton] = {
             value: true
         };
     }
     if(deferInstantiation) {
-        singletonData[Symbols.deferredSingleton] = {
+        singletonData[Symbols.DeferredSingleton] = {
             value: true
         }
     }

@@ -1,7 +1,5 @@
-import Constants from "../../internal/constants.js";
-import Frame from "../frame/main.js";
+import InstallFrame from "../frame/install.js";
 
-const FRAME_SIGNATURE = Constants.FrameSignature;
 const LOG_PREFIX = "Canvas manager";
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
@@ -13,17 +11,8 @@ const RENDER_LOOP_ALREADY_STARTED = () => {
 const MISSING_FRAME = () => {
     throw Error("Cannot start rendering, there is no frame to render");
 };
-const INVALID_FRAME = frame => {
-    throw Error(`Invalid frame '${frame}'`);
-};
 const CANVAS_NOT_IN_DOM = () => {
     throw Error("Cannot start rendering, the canvas element is not attached to the DOM");
-};
-const BAD_SIGNATURE = frame => {
-    throw Error(`Frame '${frame}' has incorrect signature. Does frame inherit Eleven.Frame's prototype?`);
-};
-const BAD_FRAME_LOADER = frameLoader => {
-    throw Error(`Frame loader '${frameLoader}' of type '${typeof frameLoader}' is not a valid load function`);
 };
 const UNEXPECTED_PARAMETERS = () => {
     throw Error("Parameter use is only valid when supplying an uninstantiated frame function");
@@ -51,28 +40,7 @@ function Render(canvasManager,modules) {
     };
 
     async function setFrame(frame,parameters) {
-        if(!frame) {
-            INVALID_FRAME(frame);
-        }
-        if(typeof frame === "function") {
-            frame = Frame.create({
-                base: frame,
-                parameters: parameters
-            });
-        } else if(parameters !== undefined) {
-            UNEXPECTED_PARAMETERS();
-        }
-        if(frame.signature !== FRAME_SIGNATURE) {
-            BAD_SIGNATURE(frame);
-        }
-        const frameLoader = frame.load;
-        if(frameLoader !== undefined) {
-            if(typeof frameLoader !== "function") {
-                BAD_FRAME_LOADER(frameLoader);
-            }
-            await frameLoader.call(frame);
-        }
-        internalFrame = frame;
+        internalFrame = await InstallFrame(frame,parameters);
         renderFrame = getDeepRenderer();
     }
     function getFrame() {

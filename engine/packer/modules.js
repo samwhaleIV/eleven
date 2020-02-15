@@ -22,19 +22,19 @@ const MODULE_COLLISION = module => {
     throw Error(`Module set collision with module ${module.name}`);
 };
 
-const NAMESPACE_IDENTIFIER = Symbols.namespaceIdentifier;
+const NAMESPACE_IDENTIFIER = Symbols.NamespaceIdentifier;
 
 function symbolMatch(module,symbol) {
     return symbol in module && module[symbol] === true;
 }
 function isSingleton(module) {
-    return symbolMatch(module,Symbols.isSingleton);
+    return symbolMatch(module,Symbols.IsSingleton);
 }
 function manualSingleton(module) {
-    return symbolMatch(module,Symbols.manualSingleton);
+    return symbolMatch(module,Symbols.ManualSingleton);
 }
 function deferredSingleton(module) {
-    return symbolMatch(module,Symbols.deferredSingleton);
+    return symbolMatch(module,Symbols.DeferredSingleton);
 }
 
 function getDefaultModuleTarget() {

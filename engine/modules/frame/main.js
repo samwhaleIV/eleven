@@ -11,6 +11,7 @@ import KeyBind from "./key-bind.js";
 import ManagedGamepad from "./managed-gamepad.js";
 
 import GamepadBinds from "./gamepad-binds.js";
+import InstallFrame from "./install.js";
 const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
 
 const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
@@ -20,7 +21,7 @@ const INVALID_PARAMETERS = () => {
     throw Error("Frame parameters must be an array, not array-like or data type");
 };
 const BAD_BASE = base => {
-    throw Error(`Base '${base}' of type '${typeof base}' is an invalid frame base, must be a function`);
+    throw Error(`Base '${base}' of type '${typeof base}' is an invalid frame base, must be "function"`);
 };
 
 function DefineProxy(target,propertyName,proxy) {
@@ -70,7 +71,7 @@ function validateParameters(parameters) {
 }
 function validateBase(base) {
     if(typeof base === "function") return;
-    BAD_BASE();
+    BAD_BASE(base);
 }
 function validateFrameData(base,parameters) {
     validateBase(base);
@@ -114,7 +115,7 @@ function sendMessage(target,message,data) {
 }
 function missingRenderMethod(context,size) {
     context.fillStyle = "black";
-    context.fillRect(0,0,size.width,size.height);
+    context.fillRect(size.halfWidth-120,size.halfHeight-100,240,200);
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillStyle = "white";
@@ -153,6 +154,12 @@ Frame.prototype.deepRender = function(data) {
         frame.render.apply(frame,data);
         i++;
     }
+}
+Frame.prototype.setChild = async function(frame,...parameters) {
+    const newFrame = await InstallFrame(new Frame({
+        base: frame, gamepad: null, keyBinds: null, parameters
+    }));
+    this.child = newFrame;
 }
 Frame.prototype.message = function(message,...data) {
     sendMessage(this,message,data);

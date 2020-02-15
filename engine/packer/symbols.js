@@ -1,7 +1,7 @@
 const Symbols = Object.freeze({
-    isSingleton: Symbol("isSingleton"),
-    manualSingleton: Symbol("manualSingleton"),
-    deferredSingleton: Symbol("deferredSingleton"),
-    namespaceIdentifier: Symbol("namespaceIdentifier")
+    IsSingleton: Symbol("IsSingleton"),
+    ManualSingleton: Symbol("ManualSingleton"),
+    DeferredSingleton: Symbol("DeferredSingleton"),
+    NamespaceIdentifier: Symbol("NamespaceIdentifier")
 });
 export default Symbols;
