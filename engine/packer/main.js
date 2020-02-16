@@ -3,6 +3,7 @@ import Singleton from "./singleton.js";
 import Symbols from "./symbols.js";
 
 const NAMESPACE_IDENTIFIER = Symbols.NamespaceIdentifier;
+const RESERVED_NAMESPACE = Symbols.ReservedNamespace;
 
 const INVALID_NAMESPACE = name => {
     throw Error(`Invalid namespace name '${name}'`);
@@ -22,8 +23,14 @@ const NAMESPACE_ALREADY_UPGRADED = name => {
 const INVALID_GLOBAL_TYPE = value => {
     throw Error(`Expected namespace or namespace name, got '${value}'`);
 };
+const CANNOT_GET_RESERVED_NAMESPACE = name => {
+    throw Error(`'${name}' is reserved. It is not a namespace`);
+};
 
-const NamespaceTable = new Object();
+const NamespaceTable = {
+    Singleton: RESERVED_NAMESPACE,
+    Namespace: RESERVED_NAMESPACE
+};
 
 function ValidateNamespaceName(name) {
     if(!name || typeof name !== "string") {
@@ -46,13 +53,19 @@ function CreateNamespace({name,modules}) {
 function GetNamespace(name) {
     ValidateNamespaceName(name);
     if(name in NamespaceTable) {
+        const namespace = NamespaceTable[name];
+        if(namespace === RESERVED_NAMESPACE) {
+            CANNOT_GET_RESERVED_NAMESPACE(name);
+        }
         return NamespaceTable[name];
     } else {
         MISSING_NAMESPACE(name);
     }
 }
 function ListNamespaces() {
-    return Object.keys(NamespaceTable);
+    return Object.entries(NamespaceTable).filter(entry=>{
+        return entry[1] !== RESERVED_NAMESPACE;
+    }).map(entry=>entry[0]);
 }
 function MakeGlobal(value) {
     let namespace, name;

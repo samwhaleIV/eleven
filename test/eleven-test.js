@@ -14,6 +14,20 @@ function Add(test,name) {
     const testObject = {test,name};
     tests.push(testObject);
 }
+function Assert(condition,errorMessage,invert) {
+    if((invert && condition) || (!invert && !condition)) throw Error(errorMessage);
+}
+function ExpectFailure(test,errorMessage) {
+    let passed = false;
+    try {
+        test();
+    } catch {
+        passed = true;
+    }
+    if(!passed) {
+        throw Error(errorMessage);
+    }
+}
 function Clear() {
     test.splice(0);
 }
@@ -49,11 +63,11 @@ function addResult(message,name,testPassed) {
     result.appendChild(resultParagraph);
 }
 
-function RunTest({test,name}) {
+async function RunTest({test,name}) {
     let passed = false;
     let message = null;
     try {
-        const result = test();
+        const result = await test();
         if(result) {
             message = result;
             console.log(`${name}: ${message}`);
@@ -61,17 +75,17 @@ function RunTest({test,name}) {
         passed = true;
     } catch(error) {
         console.error(error);
-        errorMessage = error;
+        message = error;
     }
     addResult(message,name,passed);
     return passed;
 }
 
-function RunTests(output) {
+async function RunTests(output) {
     const testCount = tests.length;
     const passed = 0;
     for(let i = 0;i<testCount;i++) {
-        let passed = RunTest(tests[i]);
+        let passed = await RunTest(tests[i]);
         if(passed) passed++;
     }
     if(!output) return;
@@ -80,7 +94,7 @@ function RunTests(output) {
     console.log(outputMessage);
 }
 const ElevenTest = Namespace.create({
-    name: "ElevenTest", modules: [Add,Clear,Execute]
+    name: "ElevenTest", modules: [Add,Clear,Execute,ExpectFailure,Assert]
 });
 Namespace.makeGlobal(ElevenTest);
 

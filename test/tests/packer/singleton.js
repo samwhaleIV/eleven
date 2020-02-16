@@ -1,46 +1,69 @@
 ElevenTest.Add(function(){
-    const NAMESPACE_NAME = "Shapes";
-
-    function Square(x=0,y=0,size=0) {
+    function Square(x,y,size) {
         this.x = x;
         this.y = y;
         this.size = size;
-        Object.seal(this);
     }
-    function Circle(x=0,y=0,radius=0) {
+    function Circle(x,y,radius) {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        Object.seal(this);
     }
-    function FixedSquare(x,y) {
-        this.x = x;
-        this.y = y;
-        Object.freeze(this);
+    function FixedSquare(x,y,size) {
+        Square.call(this,x,y,size);
     }
     const shapes = Namespace.create({
-        name: NAMESPACE_NAME,
+        name: "Shapes",
         modules: [
-            Square,
-            Circle,
+            Square,Circle,
             Singleton({
-                name: "BrokenSquare",
+                name: "FixedSquare2",
                 module: FixedSquare,
-                autoInstantiation: false,
+            }),
+            Singleton({
+                name: "FixedSquareDeferred",
+                module: FixedSquare,
+                autoInstantiation: true,
                 deferInstantiation: true
             }),
             Singleton({
+                name: "ImmediateFixedSquare",
                 module: FixedSquare,
-                deferInstantiation: true,
-                parameters: [69,420]
+                autoInstantiation: true,
+                deferInstantiation: false,
+                parameters: [69,420,20]
             }),
             Singleton({
-                name: "FixedSquareDank",
+                name: "FixedSquareManual",
                 module: FixedSquare,
-                parameters: ["ayy","lmao"]
-            }),
+                autoInstantiation: false,
+                deferInstantiation: true
+            })
         ]
     });
-    //TODO: use shapes to test further
-    return "Namespace singleton modes are loading correctly";
-});
+
+    const fixedSquareValue = 27;
+    const immediateSquareValue = 69;
+
+    let target;
+    target = shapes.FixedSquareDeferred;
+    target.x = fixedSquareValue;
+    target = shapes.ImmediateFixedSquare;
+    target.x = immediateSquareValue;
+    target = shapes.FixedSquareManual(0,0,10);
+    target.x = -5;
+    target = shapes.FixedSquareManual();
+    target.x += 10;
+    target = shapes.FixedSquareManual(241341234,2342423,42342423);
+    target.x += 5;
+    target = shapes.FixedSquareManual();
+
+    ElevenTest.Assert(target.x === 10 && target.size === 10,`Fixed singleton failure. {autoInstantiation: false,deferInstantiation: true}`);
+
+    target = shapes.FixedSquareDeferred;
+    ElevenTest.Assert(target.x === fixedSquareValue,"FixedSquareDeferred has unexpected value");
+
+    target = shapes.ImmediateFixedSquare;
+    ElevenTest.Assert(target.x === immediateSquareValue,"ImmediateFixedSquare has expected value");
+
+},"packer/singleton.js");
