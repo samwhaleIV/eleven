@@ -14,6 +14,7 @@ const INPUT_GAMEPAD = inputRoutes.inputGamepad;
 const FRAME_SIGNATURE = Constants.FrameSignature;
 
 const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
+const CHILD_PROXY = Symbol("ChildProxy");
 
 const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
     throw Error("Gamepad input method already exists for base frame, cannot use managed gamepad");
@@ -101,6 +102,11 @@ function installInputManagement(target,gamepad,keyBinds) {
 function Frame({
     base,parameters,gamepad=false,keyBinds=false
 }) {
+    this[CHILD_PROXY] = null;
+    Object.defineProperty(this,"child",{
+        get: () => this[CHILD_PROXY],
+        set: this.setChild
+    });
     setDefaultProperties(this);
     installBase(this,base,parameters);
     installInputManagement(this,gamepad,keyBinds);
@@ -144,6 +150,11 @@ Frame.prototype.deepRender = function(data) {
     }
 }
 Frame.prototype.setChild = async function(frame,...parameters) {
+    const isFrame = Boolean(frame);
+    if(!isFrame) {
+        this[CHILD_PROXY] = null;
+        return null;
+    }
     if(typeof frame === "function") {
         frame = new Frame({
             base: frame, parameters: parameters,
@@ -151,8 +162,8 @@ Frame.prototype.setChild = async function(frame,...parameters) {
         });
     }
     await Frame.load(frame);
-    this.child = frame;
-    return this.child;
+    this[CHILD_PROXY] = frame;
+    return frame;
 }
 Frame.prototype.message = function(message,...data) {
     sendMessage(this,message,data);
