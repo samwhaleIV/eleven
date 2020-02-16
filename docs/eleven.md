@@ -1,7 +1,6 @@
 # eleven
 
-Eleven is a game engine for the web. I know what you're thinking: **"Wow, what a unique idea."** Currently only modern Chromium based browsers are supported (*Google Chrome*, *Chromium Edge*, *Electron*, etc).
-
+Eleven is a 2D game engine for the web. I know what you're thinking: **"Wow, what a unique idea."** Currently only modern Chromium based browsers are supported (*Google Chrome*, *Chromium Edge*, *Electron*, etc).
 
 Eleven aims to do everything that *Elven* could do, but better in every way possible.
 

@@ -9,7 +9,7 @@ body, html {
 body:not(.loaded)::after {
     content: "";
     color: #fff;
-    margin: 10px;
+    margin: 6px;
     font-size: 22px;
     font-family: sans-serif;
     user-select: none;
@@ -20,7 +20,8 @@ body:not(.loaded)::after {
     top: 0;
     left: 0;
     z-index: 100;
-    text-shadow: 0px 0px 6px black;
+    background-color: black;
+    padding: 10px;
 }
 @keyframes loading {
     0% {content:   "Loading.";}
