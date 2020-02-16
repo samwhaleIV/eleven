@@ -1,5 +1,4 @@
 import engine from "../engine/eleven.js";
-Namespace.makeGlobal(engine);
 
 const CanvasManager = engine.CanvasManager;
 const ResourceManager = engine.ResourceManager;

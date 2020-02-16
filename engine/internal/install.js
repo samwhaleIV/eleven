@@ -16,10 +16,13 @@ import Constants from "./constants.js";
 const NAMESPACE_NAME = Constants.EngineNamespace;
 
 function MakeEngineNamespace(modules) {
-    return namespace.create({
+    const engineNamespace = namespace.create({
         name: NAMESPACE_NAME,
         modules: modules
     });
+    namespace.makeGlobal(engineNamespace);
+    return engineNamespace;
 }
+
 export default MakeEngineNamespace;
 
