@@ -30,7 +30,7 @@ function Camera(world) {
     this.moveTo = (newX,newY,duration) => {
         if(updater !== null) return;
         return new Promise(resolve => {
-            let start = performance.now();
+            const startTime = performance.now();
 
             const startX = this.x;
             const startY = this.y;
@@ -39,7 +39,7 @@ function Camera(world) {
             const yDifference = newY - this.y;
 
             updater = time => {
-                let delta = (time.now - start) / duration;
+                let delta = (time.now - startTime) / duration;
                 if(delta < 0) {
                     delta = 0;
                 } else if(delta > 1) {
