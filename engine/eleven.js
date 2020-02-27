@@ -4,6 +4,7 @@ import CanvasManager from "./modules/canvas-manager/main.js";
 import ResourceManager from "./modules/resource-manager/main.js";
 import AudioManager from "./modules/audio-manager/main.js";
 import Frame from "./modules/frame/main.js";
+import World2D from "./modules/world2D/main.js";
 
 const Eleven = Install([
     Singleton({
@@ -18,7 +19,8 @@ const Eleven = Install([
         module: AudioManager,
         deferInstantiation: true
     }),
-    Frame
+    Frame,
+    World2D
 ]);
 
 export default Eleven;

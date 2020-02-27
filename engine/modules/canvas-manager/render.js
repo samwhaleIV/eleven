@@ -48,7 +48,7 @@ function Render(canvasManager,modules) {
     }
 
     const time = Object.seal({
-        now: 0,
+        now: 0, 
         delta: 0
     });
     const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
