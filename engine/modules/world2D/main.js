@@ -23,7 +23,8 @@ function World2D() {
             height = size.height;
         }
 
-        tileSize = Math.ceil(width * camera.scale / SCALE_FACTOR / TILE_SIZE) * TILE_SIZE;
+        tileSize = Math.ceil(width / SCALE_FACTOR / TILE_SIZE) * TILE_SIZE;
+        tileSize = Math.floor(tileSize * camera.scale);
 
         horizontalTiles = Math.ceil(width / tileSize);
         verticalTiles = Math.ceil(height / tileSize);

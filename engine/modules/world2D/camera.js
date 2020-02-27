@@ -1,3 +1,5 @@
+import MultiLayer from "../../internal/multi-layer.js";
+
 const DEFAULT_SCALE = 1;
 const DEFAULT_X = 0;
 const DEFAULT_Y = 0;
@@ -20,45 +22,79 @@ function Camera(world) {
         enumerable: true
     });
 
+    const updateLayers = new MultiLayer();
+
     this.reset = () => {
+        const fakeTime = {
+            now: Infinity, delta: 0
+        };
+        updateLayers.clear(updater => updater(fakeTime));
         this.x = DEFAULT_X;
         this.y = DEFAULT_Y;
         this.scale = DEFAULT_SCALE;
     }
 
-    let updater = null;
+    let zooming = false;
+    this.zoomTo = (newScale,duration) => {
+        if(zooming) return;
+        if(newScale == scale) return;
+        zooming = true;
+        return new Promise(resolve => {
+            const startTime = performance.now();
+
+            const startScale = scale;
+            const scaleDifference = newScale - startScale;
+
+            const ID = updateLayers.add(time => {
+                let delta = (time.now - startTime) / duration;
+                if(delta < 0) {
+                    delta = 0;
+                } else if(delta > 1) {
+                    this.scale = newScale;
+                    updateLayers.remove(ID);
+                    zooming = false;
+                    resolve();
+                    return;
+                }
+                this.scale = startScale + scaleDifference * delta;
+            });
+        })
+    };
+
+    let moving = false;
     this.moveTo = (newX,newY,duration) => {
-        if(updater !== null) return;
+        if(moving) return;
+        if(newX == this.x && newY == this.y) return;
+        moving = true;
         return new Promise(resolve => {
             const startTime = performance.now();
 
             const startX = this.x;
             const startY = this.y;
 
-            const xDifference = newX - this.x;
-            const yDifference = newY - this.y;
+            const xDifference = newX - startX;
+            const yDifference = newY - startY;
 
-            updater = time => {
+            const ID = updateLayers.add(time => {
                 let delta = (time.now - startTime) / duration;
                 if(delta < 0) {
                     delta = 0;
                 } else if(delta > 1) {
                     this.x = newX;
                     this.y = newY;
-                    updater = null;
+                    updateLayers.remove(ID);
+                    moving = false;
                     resolve();
                     return;
                 }
                 this.x = startX + xDifference * delta;
                 this.y = startY + yDifference * delta;
-            };
+            });
         });
     };
 
     this.update = time => {
-        if(updater !== null) {
-            updater(time);
-        }
+        updateLayers.forEach(updater => updater(time));
     };
     Object.seal(this);
 }
