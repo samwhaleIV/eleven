@@ -42,10 +42,15 @@ function Resize(canvasManager,modules) {
     };
 
     const context = modules.internal.context;
+    const sizeChangeData = Object.freeze({
+        context: context,
+        size: sizeValuesReadonly
+    });
+
     const notifySizeUpdate = () => {
         const frame = canvasManager.getFrame();
         if(!frame) return;
-        frame.messageAll(RESIZE_METHOD,context,sizeValuesReadonly);
+        frame.messageAll(RESIZE_METHOD,sizeChangeData);
     };
 
     let fixedSize = null;

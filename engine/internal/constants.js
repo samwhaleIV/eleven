@@ -39,6 +39,7 @@ const Constants = Object.freeze({
         altClickUp: "altClickUp",
     
         pointerMove: "pointerMove",
+        pointerScroll: "pointerScroll",
     
         keyUp: "keyUp",
         keyDown: "keyDown",

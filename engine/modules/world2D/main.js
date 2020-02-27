@@ -1,4 +1,5 @@
 import Camera from "./camera.js";
+import PanZoom from "./pan-zoom.js";
 
 const TILE_SIZE = 16;
 const SCALE_FACTOR = 15;
@@ -12,15 +13,48 @@ function World2D() {
     let tileXOffset, tileYOffset;
     let cameraXOffset, cameraYOffset;
 
-    let gridWidth = 10;//temp
-    let gridHeight = 10;//temp
+    let gridWidth = 9;
+    let gridHeight = 9;
 
-    let width, height;
+    Object.defineProperty(this,"width",{
+        get: () => gridWidth,
+        enumerable: true
+    });
+    Object.defineProperty(this,"height",{
+        get: () => gridHeight,
+        enumerable: true
+    });
 
-    this.resize = (_,size) => {
-        if(size) {
+    let width = 0, height = 0;
+    let halfWidth = 0, halfHeight = 0;
+
+    Object.defineProperty(this,"tileSize",{
+        get: () => tileSize,
+        enumerable: true
+    });
+
+    let panZoom = null;
+
+    const resizePanZoom = () => {
+        panZoom.resize({halfWidth,halfHeight});
+    };
+
+    this.getPanZoom = () => {
+        if(!panZoom) {
+            panZoom = new PanZoom(this,camera);
+            resizePanZoom();
+        }
+        return panZoom;
+    };
+
+    this.resize = data => {
+        if(data && data.size) {
+            const size = data.size;
             width = size.width;
             height = size.height;
+            halfWidth = size.halfWidth;
+            halfHeight = size.halfHeight;
+            if(panZoom) resizePanZoom();
         }
 
         tileSize = Math.ceil(width / SCALE_FACTOR / TILE_SIZE) * TILE_SIZE;

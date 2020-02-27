@@ -9,6 +9,7 @@ const ALT_CLICK_UP = constants.altClickUp;
 const ALT_CLICK_DOWN = constants.altClickDown;
 
 const POINTER_MOVE = constants.pointerMove;
+const POINTER_SCROLL = constants.pointerScroll;
 
 const DEFAULT_CODE = 0;
 const ALT_CODE = 2;
@@ -135,6 +136,7 @@ function Mouse(canvasManager,modules) {
             targetBind(sendData);
         }
     }(getTargetBind(POINTER_MOVE)));
+    const sendPointerScroll = getTargetBind(POINTER_SCROLL);
 
     pointerStatus = new PointerStatus(
         canSendEvent,sendPointerDown,sendPointerUp
@@ -169,6 +171,16 @@ function Mouse(canvasManager,modules) {
         const sendData = getSendData(event);
         updateLocationData(sendData);
         sendPointerMove(sendData);
+    };
+    const pointerScroll = delta => {
+        if(!delta) return;
+        if(!canSendEvent()) return;
+        const scrollingUp = delta < 0;
+        const {x,y} = sendDataContainer;
+        const sendData = {
+            delta,x,y,scrollingUp
+        };
+        sendPointerScroll(sendData);
     };
 
     const isNavigationControl = event => {
@@ -205,6 +217,13 @@ function Mouse(canvasManager,modules) {
         target.addEventListener("pointermove",function(event){
             if(!preprocess(event)) return;
             pointerMove(event);
+        },captureOptions);
+
+        target.addEventListener("wheel",function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            const delta = event.deltaY;
+            pointerScroll(delta);
         },captureOptions);
     };
 

@@ -5,8 +5,18 @@ const DEFAULT_X = 0;
 const DEFAULT_Y = 0;
 
 function Camera(world) {
-    this.x = DEFAULT_X;
-    this.y = DEFAULT_Y;
+    const setDefaultPosition = () => {
+        this.x = DEFAULT_X;
+        this.y = DEFAULT_Y;
+    };
+    this.center = (x=0.5,y=0.5) => {
+        this.x = (world.width - 1) * x;
+        this.y = (world.height - 1) * y;
+        return this;
+    };
+
+    setDefaultPosition();
+
     let scale = DEFAULT_SCALE;
 
     Object.defineProperty(this,"scale",{
@@ -16,9 +26,7 @@ function Camera(world) {
             world.resize();
             return scale;
         },
-        get: () => {
-            return scale;
-        },
+        get: () => scale,
         enumerable: true
     });
 
@@ -29,10 +37,10 @@ function Camera(world) {
             now: Infinity, delta: 0
         };
         updateLayers.clear(updater => updater(fakeTime));
-        this.x = DEFAULT_X;
-        this.y = DEFAULT_Y;
+        setDefaultPosition();
         this.scale = DEFAULT_SCALE;
-    }
+        return this;
+    };
 
     let zooming = false;
     this.zoomTo = (newScale,duration) => {
