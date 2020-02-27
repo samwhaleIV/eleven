@@ -120,13 +120,13 @@ function Grid2D() {
         let verticalLength = verticalTiles;
         let horizontalStride = horizontalLength * tileSize;
 
-        if(renderX < -tileSize) {
+        if(renderX <= -tileSize) {
             renderX += tileSize;
             horizontalLength--;
             horizontalStride -= tileSize;
             startX++;
         }
-        if(renderY < -tileSize) {
+        if(renderY <= -tileSize) {
             renderY += tileSize;
             verticalLength--;
             startY++;

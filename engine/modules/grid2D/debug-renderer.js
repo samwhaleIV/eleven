@@ -42,7 +42,7 @@ function DebugRenderer(world) {
 
     this.renderEnd = () => {
         const expected = rangeX * rangeY;
-        if(renderCounter !== expected) {
+        if(renderCounter > 0 && renderCounter !== expected) {
             console.error(`Unchecked overdraw. Expected ${expected} renders, got ${renderCounter}`);
         }
         renderCounter = 0;
