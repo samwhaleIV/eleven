@@ -1,5 +1,7 @@
 const ZOOM_RATE = 0.1;
 const ZOOM_PAN_DAMPENER = 10;
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 2;
 
 function PanZoom(camera) {
     let panData = null;
@@ -25,6 +27,13 @@ function PanZoom(camera) {
     this.zoom = ({scrollingUp,x,y}) => {
         const scaleChange = 1 + (scrollingUp?ZOOM_RATE:-ZOOM_RATE);
         camera.scale *= scaleChange;
+        if(camera.scale < MIN_SCALE) {
+            camera.scale = MIN_SCALE;
+            return;
+        } else if(camera.scale > MAX_SCALE) {
+            camera.scale = MAX_SCALE;
+            return;
+        }
 
         let centerXOffset = x - halfWidth;
         let centerYOffset = y - halfHeight;

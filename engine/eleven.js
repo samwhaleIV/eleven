@@ -4,7 +4,7 @@ import CanvasManager from "./modules/canvas-manager/main.js";
 import ResourceManager from "./modules/resource-manager/main.js";
 import AudioManager from "./modules/audio-manager/main.js";
 import Frame from "./modules/frame/main.js";
-import World2D from "./modules/world2D/main.js";
+import Grid2D from "./modules/grid2D/main.js";
 
 const Eleven = Install([
     Singleton({
@@ -20,7 +20,7 @@ const Eleven = Install([
         deferInstantiation: true
     }),
     Frame,
-    World2D
+    Grid2D
 ]);
 
 export default Eleven;

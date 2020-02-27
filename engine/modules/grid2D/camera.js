@@ -1,4 +1,4 @@
-import MultiLayer from "../../internal/multi-layer.js";
+import MultiLayer from "./multi-layer.js";
 
 const DEFAULT_SCALE = 1;
 const DEFAULT_X = 0;

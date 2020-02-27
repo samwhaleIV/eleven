@@ -1,10 +1,19 @@
 import Camera from "./camera.js";
 import PanZoom from "./pan-zoom.js";
+import DebugRenderer from "./debug-renderer.js";
 
 const TILE_SIZE = 16;
 const SCALE_FACTOR = 15;
 
-function World2D() {
+const DEFAULT_WIDTH = 64;
+const DEFAULT_HEIGHT = 64;
+
+const DUMMY_RENDER_METHOD = () => {};
+const RENDER_METHODS = Object.freeze([
+    "renderStart","renderEnd","renderTile","configTileRender"
+]);
+
+function Grid2D() {
 
     const camera = new Camera(this);
     this.camera = camera;
@@ -13,17 +22,23 @@ function World2D() {
     let tileXOffset, tileYOffset;
     let cameraXOffset, cameraYOffset;
 
-    let gridWidth = 9;
-    let gridHeight = 9;
+    let gridWidth = DEFAULT_WIDTH;
+    let gridHeight = DEFAULT_HEIGHT;
 
     Object.defineProperty(this,"width",{
         get: () => gridWidth,
+        set: value => gridWidth = value,
         enumerable: true
     });
     Object.defineProperty(this,"height",{
         get: () => gridHeight,
+        set: value => gridHeight = value,
         enumerable: true
     });
+    this.setSize = (width,height) => {
+        gridWidth = width;
+        gridHeight = height;
+    };
 
     let width = 0, height = 0;
     let halfWidth = 0, halfHeight = 0;
@@ -68,10 +83,28 @@ function World2D() {
         cameraYOffset = -Math.floor(verticalTiles / 2);
     };
 
-    this.render = (context,{width,height},time) => {
+    let renderer = new Object();
+    this.setRenderer = newRenderer => {
+        if(typeof newRenderer === "function") {
+            newRenderer = new newRenderer(this);
+        }
+        for(let i = 0;i<RENDER_METHODS.length;i++) {
+            const renderMethod = RENDER_METHODS[i];
+            if(!(renderMethod in newRenderer)) {
+                newRenderer[renderMethod] = DUMMY_RENDER_METHOD;
+            }
+        }
+        renderer = newRenderer;
+    };
+    this.setRenderer(renderer);
 
-        context.fillStyle = "purple";
-        context.fillRect(0,0,width,height);
+    this.debug = () => {
+        this.setRenderer(DebugRenderer);
+    };
+
+    this.render = (context,size,time) => {
+        const {width, height} = size;
+        renderer.renderStart(context,size,time);
         camera.update(time);
 
         const cameraX = this.camera.x + cameraXOffset;
@@ -87,6 +120,17 @@ function World2D() {
         let verticalLength = verticalTiles;
         let horizontalStride = horizontalLength * tileSize;
 
+        if(renderX < -tileSize) {
+            renderX += tileSize;
+            horizontalLength--;
+            horizontalStride -= tileSize;
+            startX++;
+        }
+        if(renderY < -tileSize) {
+            renderY += tileSize;
+            verticalLength--;
+            startY++;
+        }
         if(renderX + horizontalStride < width) {
             horizontalLength++;
             horizontalStride += tileSize;
@@ -122,24 +166,24 @@ function World2D() {
             tileYEnd = gridHeight;
         }
 
+        renderer.configTileRender({
+            context, tileSize, time, startX, startY, endX: tileXEnd - 1, endY: tileYEnd - 1,
+            rangeX: tileXEnd - startX, rangeY: tileYEnd - startY
+        });
+
         for(let y = startY;y<tileYEnd;y++) {
             for(let x = startX;x<tileXEnd;x++) {
-
-                if((x + y) % 2 === 0) {
-                    context.fillStyle = "black";
-                } else {
-                    context.fillStyle = "white";
-                }
-
-                context.fillRect(renderX,renderY,tileSize,tileSize);
+                renderer.renderTile(x,y,renderX,renderY);
                 renderX += tileSize;
             }
             renderX -= horizontalStride;
             renderY += tileSize;
         }
+
+        renderer.renderEnd(context,size,time);
     };
 
     Object.freeze(this);
 }
 
-export default World2D;
+export default Grid2D;
