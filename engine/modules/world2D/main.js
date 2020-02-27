@@ -28,37 +28,32 @@ function World2D() {
     let width = 0, height = 0;
     let halfWidth = 0, halfHeight = 0;
 
-    Object.defineProperty(this,"tileSize",{
-        get: () => tileSize,
-        enumerable: true
-    });
-
     let panZoom = null;
-
     const resizePanZoom = () => {
-        panZoom.resize({halfWidth,halfHeight});
+        panZoom.resize({halfWidth,halfHeight,tileSize});
     };
-
     this.getPanZoom = () => {
         if(!panZoom) {
-            panZoom = new PanZoom(this,camera);
+            panZoom = new PanZoom(camera);
             resizePanZoom();
         }
         return panZoom;
     };
 
     this.resize = data => {
-        if(data && data.size) {
+        const hasNewSizeData = data && data.size;
+        if(hasNewSizeData) {
             const size = data.size;
             width = size.width;
             height = size.height;
             halfWidth = size.halfWidth;
             halfHeight = size.halfHeight;
-            if(panZoom) resizePanZoom();
         }
 
         tileSize = Math.ceil(width / SCALE_FACTOR / TILE_SIZE) * TILE_SIZE;
         tileSize = Math.floor(tileSize * camera.scale);
+
+        if(panZoom) resizePanZoom();
 
         horizontalTiles = Math.ceil(width / tileSize);
         verticalTiles = Math.ceil(height / tileSize);

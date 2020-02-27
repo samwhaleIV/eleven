@@ -1,12 +1,13 @@
 const ZOOM_RATE = 0.1;
 const ZOOM_PAN_DAMPENER = 10;
 
-function PanZoom(world,camera) {
+function PanZoom(camera) {
     let panData = null;
-    let halfWidth = 0, halfHeight = 0;
+    let halfWidth = 0, halfHeight = 0, tileSize = 0;
     this.resize = size => {
         halfWidth = size.halfWidth;
         halfHeight = size.halfHeight;
+        tileSize = size.tileSize;
     };
     this.panStart = ({x,y}) => {
         panData = {x,y,cameraX:camera.x,cameraY:camera.y};
@@ -18,8 +19,8 @@ function PanZoom(world,camera) {
         if(!panData) return;
         const xDifference = panData.x - x;
         const yDifference = panData.y - y;
-        camera.x = panData.cameraX + xDifference / world.tileSize;
-        camera.y = panData.cameraY + yDifference / world.tileSize;
+        camera.x = panData.cameraX + xDifference / tileSize;
+        camera.y = panData.cameraY + yDifference / tileSize;
     };
     this.zoom = ({scrollingUp,x,y}) => {
         const scaleChange = 1 + (scrollingUp?ZOOM_RATE:-ZOOM_RATE);
@@ -33,8 +34,8 @@ function PanZoom(world,camera) {
             centerYOffset = -centerYOffset;
         }
 
-        camera.x += centerXOffset / world.tileSize / ZOOM_PAN_DAMPENER;
-        camera.y += centerYOffset / world.tileSize / ZOOM_PAN_DAMPENER;
+        camera.x += centerXOffset / tileSize / ZOOM_PAN_DAMPENER;
+        camera.y += centerYOffset / tileSize / ZOOM_PAN_DAMPENER;
         if(panData) {
             panData = {x,y,cameraX:camera.x,cameraY:camera.y};
         }
