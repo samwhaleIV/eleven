@@ -2,18 +2,19 @@ import Camera from "./camera.js";
 import PanZoom from "./pan-zoom.js";
 import DebugRenderer from "./debug-renderer.js";
 
-const TILE_SIZE = 16;
+const DEFAULT_TILE_SIZE = 16;
 const SCALE_FACTOR = 15;
 
-const DEFAULT_WIDTH = 64;
-const DEFAULT_HEIGHT = 64;
+const DEFAULT_WIDTH = 1;
+const DEFAULT_HEIGHT = 1;
 
 const DUMMY_RENDER_METHOD = () => {};
 const RENDER_METHODS = Object.freeze([
     "renderStart","renderEnd","renderTile","configTileRender"
 ]);
 
-function Grid2D() {
+function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
+    const adjustedScaleFactor = SCALE_FACTOR * DEFAULT_TILE_SIZE / baseTileSize;
 
     const camera = new Camera(this);
     this.camera = camera;
@@ -55,7 +56,7 @@ function Grid2D() {
         return panZoom;
     };
 
-    this.baseTileSize = TILE_SIZE;
+    this.baseTileSize = baseTileSize;
 
     this.resize = data => {
         const hasNewSizeData = data && data.size;
@@ -67,7 +68,7 @@ function Grid2D() {
             halfHeight = size.halfHeight;
         }
 
-        tileSize = Math.ceil(width / SCALE_FACTOR / TILE_SIZE) * TILE_SIZE;
+        tileSize = Math.ceil(width / adjustedScaleFactor / baseTileSize) * baseTileSize;
         tileSize = Math.floor(tileSize * camera.scale);
 
         if(panZoom) resizePanZoom();
