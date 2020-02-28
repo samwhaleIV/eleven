@@ -5,6 +5,7 @@ import ResourceManager from "./modules/resource-manager/main.js";
 import AudioManager from "./modules/audio-manager/main.js";
 import Frame from "./modules/frame/main.js";
 import Grid2D from "./modules/grid2D/main.js";
+import TileRenderer from "./modules/tile-renderer/main.js";
 
 const Eleven = Install([
     Singleton({
@@ -20,7 +21,8 @@ const Eleven = Install([
         deferInstantiation: true
     }),
     Frame,
-    Grid2D
+    Grid2D,
+    TileRenderer
 ]);
 
 export default Eleven;

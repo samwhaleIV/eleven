@@ -55,6 +55,8 @@ function Grid2D() {
         return panZoom;
     };
 
+    this.baseTileSize = TILE_SIZE;
+
     this.resize = data => {
         const hasNewSizeData = data && data.size;
         if(hasNewSizeData) {
@@ -84,7 +86,7 @@ function Grid2D() {
     };
 
     let renderer = new Object();
-    this.setRenderer = newRenderer => {
+    const setRenderer = newRenderer => {
         if(typeof newRenderer === "function") {
             newRenderer = new newRenderer(this);
         }
@@ -96,10 +98,18 @@ function Grid2D() {
         }
         renderer = newRenderer;
     };
-    this.setRenderer(renderer);
+
+    Object.defineProperty(this,"renderer",{
+        get: () => renderer,
+        set: value => {
+            setRenderer(value);
+        },
+        enumerable: true
+    });
+    setRenderer(renderer);
 
     this.debug = () => {
-        this.setRenderer(DebugRenderer);
+        setRenderer(DebugRenderer);
     };
 
     this.render = (context,size,time) => {
@@ -181,6 +191,11 @@ function Grid2D() {
         }
 
         renderer.renderEnd(context,size,time);
+    };
+
+    this.bindToFrame = frame => {
+        frame.resize = this.resize;
+        frame.render = this.render;
     };
 
     Object.freeze(this);

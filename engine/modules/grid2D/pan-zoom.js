@@ -1,3 +1,11 @@
+import Constants from "../../internal/constants.js";
+const {
+    clickDown,
+    clickUp,
+    pointerMove,
+    pointerScroll
+} = Constants.InputRoutes;
+
 const ZOOM_RATE = 0.1;
 const ZOOM_PAN_DAMPENER = 10;
 const MIN_SCALE = 0.1;
@@ -48,6 +56,12 @@ function PanZoom(camera) {
         if(panData) {
             panData = {x,y,cameraX:camera.x,cameraY:camera.y};
         }
+    };
+    this.bindToFrame = frame => {
+        frame[clickDown] = this.panStart;
+        frame[clickUp] = this.panEnd;
+        frame[pointerMove] = this.pan;
+        frame[pointerScroll] = this.zoom;
     };
 }
 export default PanZoom;
