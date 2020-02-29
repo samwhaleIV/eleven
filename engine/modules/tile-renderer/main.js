@@ -1,6 +1,6 @@
 import ParseRenderInformation from "./parse.js";
 
-function TileRenderer(grid,data) {
+function TileRenderer(textureSize,data) {
     const {
         columns, rows,
         layerCount, layerSize,
@@ -15,10 +15,8 @@ function TileRenderer(grid,data) {
             renderData[i] = mapper(renderData[i],i);
         }
     };
-    grid.setSize(columns,rows);
 
-    let textureColumns = 0, textureRows = 0;
-    let textureCount = 0, textureSize = 0;
+    let textureColumns = 0, textureRows = 0, textureCount = 0;
     let tileset = null, textureCache = new Array();
 
     const getIdx = (x,y) => {
@@ -90,11 +88,9 @@ function TileRenderer(grid,data) {
     };
 
     const parseTextureMetadata = () => {
-        const tileSize = grid.baseTileSize;
-        textureColumns = tileset.width / tileSize;
-        textureRows = tileset.height / tileSize;
+        textureColumns = tileset.width / textureSize;
+        textureRows = tileset.height / textureSize;
         textureCount = textureRows * textureColumns;
-        textureSize = tileSize;
     };
 
     const setTileset = newTileset => {

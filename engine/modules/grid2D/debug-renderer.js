@@ -1,5 +1,4 @@
-function DebugRenderer(world) {
-    world.setSize(100,40);
+function DebugRenderer() {
 
     this.renderStart = (context,{width,height}) => {
         context.fillStyle = "purple";
