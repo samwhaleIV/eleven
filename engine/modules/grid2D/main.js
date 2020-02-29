@@ -25,6 +25,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.TileRenderer = function(data) {
         TileRenderer.call(this,baseTileSize,data);
         if(data.setSize) parent.setSize(this.columns,this.rows);
+        if(data.setRenderer) parent.renderer = this;
     };
 
     let horizontalTiles, verticalTiles, tileSize;
