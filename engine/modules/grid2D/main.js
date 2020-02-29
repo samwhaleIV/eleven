@@ -1,7 +1,7 @@
 import Camera from "./camera.js";
 import PanZoom from "./pan-zoom.js";
 import DebugRenderer from "./debug-renderer.js";
-import TileRenderer from "../tile-renderer/main.js";
+import TileRenderer from "./tile-renderer/main.js";
 
 const DEFAULT_TILE_SIZE = 16;
 const SCALE_FACTOR = 15;
@@ -24,7 +24,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
     this.TileRenderer = function(data) {
         TileRenderer.call(this,baseTileSize,data);
-        if(data.applySize) parent.setSize(this.columns,this.rows);
+        if(data.setSize) parent.setSize(this.columns,this.rows);
     };
 
     let horizontalTiles, verticalTiles, tileSize;
