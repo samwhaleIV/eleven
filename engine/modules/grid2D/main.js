@@ -135,9 +135,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     });
     setRenderer();
 
-    this.debug = () => {
-        setRenderer(DebugRenderer);
-    };
+    this.debug = () => setRenderer(DebugRenderer);
 
     const bottomCache = new GridCache(this);
     const topCache = new GridCache(this);
@@ -237,13 +235,17 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return {left:x,right,top:y,bottom,width:xLength,height:yLength};
     };
 
-    this.getScreenArea = getScreenArea;
+    this.getScreenArea = () => screenArea;
     this.getScreenPosition = getScreenPosition;
 
-    this.pointOnScreen = (x,y) => {
-        const {left, right, top, bottom} = getScreenArea();
+    const inBounds = (x,y,area) => {
+        const {left, right, top, bottom} = area;
         return x >= left && x <= right && y >= top && y <= bottom;
     };
+
+    const pointOnScreen = (x,y) => inBounds(x,y,screenArea);
+    this.pointOnScreen = pointOnScreen;
+
     this.tileOnScreen = (x,y) => {
         const xStart = horizontalRenderData.startTile;
         const xEnd = horizontalRenderData.endTile - 1;
@@ -253,6 +255,16 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
         return x >= xStart && x <= xEnd && y >= yStart && y <= yEnd;
     };
+
+    this.objectOnScreen = (x,y,width,height) => {
+        let count = 0;
+        if(pointOnScreen(x,y)) count++; 
+        if(pointOnScreen(x+width,y)) count++;
+        if(pointOnScreen(x,y+height)) count++;
+        if(pointOnScreen(x+width,y+height)) count++;
+        return count > 0;
+    };
+
     this.getLocation = (x,y) => {
         return {
             x: Math.floor(horizontalRenderData.renderPosition + (x - horizontalRenderData.startTile) * tileSize),
