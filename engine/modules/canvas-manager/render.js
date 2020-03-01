@@ -51,9 +51,16 @@ function Render(canvasManager,modules) {
         now: 0, 
         delta: 0
     });
+
     const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
-        now: {get: function() {return time.now}},
-        delta: {get: function() {return time.delta}}
+        now: {
+            get: () => time.now,
+            enumerable: true
+        },
+        delta: {
+            get: () => time.delta,
+            enumerable: true
+        }
     }));
 
     const renderData = [

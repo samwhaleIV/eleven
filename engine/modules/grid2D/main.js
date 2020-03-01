@@ -238,12 +238,25 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.getScreenArea = () => screenArea;
     this.getScreenPosition = getScreenPosition;
 
-    const inBounds = (x,y,area) => {
-        const {left, right, top, bottom} = area;
-        return x >= left && x <= right && y >= top && y <= bottom;
+    const pointOnScreen = (x,y) => {
+        const {left, right, top, bottom} = screenArea;
+        return x >= left && x < right && y >= top && y < bottom;
     };
 
-    const pointOnScreen = (x,y) => inBounds(x,y,screenArea);
+    const xInBoundsUpper = (x,left,right) => {
+        return x >= left && x < right;
+    };
+    const yInBoundsUpper = (y,top,bottom) => {
+        return y >= top && y < bottom;
+    };
+
+    const xInBoundsLower = (x,left,right) => {
+        return x > left && x <= right;
+    };
+    const yInBoundsLower = (y,top,bottom) => {
+        return y > top && y <= bottom;
+    };
+
     this.pointOnScreen = pointOnScreen;
 
     this.tileOnScreen = (x,y) => {
@@ -257,11 +270,19 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     this.objectOnScreen = (x,y,width,height) => {
+        const {top, left, bottom, right} = screenArea;
         let count = 0;
-        if(pointOnScreen(x,y)) count++; 
-        if(pointOnScreen(x+width,y)) count++;
-        if(pointOnScreen(x,y+height)) count++;
-        if(pointOnScreen(x+width,y+height)) count++;
+
+        const xInUpper = xInBoundsUpper(x,left,right);
+        const yInUpper = yInBoundsUpper(y,top,bottom);
+        const xInLower = xInBoundsLower(x + width,left,right);
+        const yInLower = yInBoundsLower(y + height,top,bottom);
+        
+        if(xInLower && yInLower) count++;
+        if(xInUpper && yInLower) count++;
+        if(xInLower && yInUpper) count++;
+        if(xInUpper && yInUpper) count++;
+
         return count > 0;
     };
 
