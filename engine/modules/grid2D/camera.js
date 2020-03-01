@@ -108,7 +108,7 @@ function Camera(grid) {
     this.clearPostProcessors = postProcessors.clear;
 
     const paddingProcessor = () => {
-        const {left,right,top,bottom} = grid.getScreenArea();
+        const {left,right,top,bottom} = grid.getArea();
         const {width,height} = grid;
 
         const leftClip = left < 0;
