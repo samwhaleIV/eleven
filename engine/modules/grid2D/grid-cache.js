@@ -50,5 +50,7 @@ function GridCache(grid) {
         this.data = null;
         this.isValid = false;
     };
+
+    Object.seal(this);
 }
 export default GridCache;

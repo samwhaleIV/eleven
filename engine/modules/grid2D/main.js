@@ -35,6 +35,18 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     let gridWidth = DEFAULT_WIDTH;
     let gridHeight = DEFAULT_HEIGHT;
 
+    let horizontalRenderData = null, verticalRenderData = null;
+
+    let screenArea = null;
+    const cacheArea = Object.seal({x:0,y:0,width:0,height:0});
+
+    const updateCacheArea = () => {
+        cacheArea.x = screenArea.left * baseTileSize;
+        cacheArea.y = screenArea.top * baseTileSize;
+        cacheArea.width = screenArea.width * baseTileSize;
+        cacheArea.height = screenArea.height * baseTileSize;
+    };
+
     Object.defineProperty(this,"width",{
         get: () => gridWidth,
         set: value => gridWidth = value,
@@ -144,17 +156,12 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const drawCache = (cache,context) => {
-        const renderX = (camera.x + cameraXOffset) * -tileSize + tileXOffset;
-        const renderY = (camera.y + cameraYOffset) * -tileSize + tileYOffset;
-
-        const {buffer, width, height, columns, rows} = cache.data;
-
-        const renderWidth = columns * tileSize;
-        const renderHeight = rows * tileSize;
-
+        const area = cacheArea;
         context.drawImage(
-            buffer,0,0,width,height,
-            renderX,renderY,renderWidth,renderHeight
+            cache.data.buffer,
+            area.x,area.y,
+            area.width,area.height,
+            0,0,width,height
         );
     };
 
@@ -206,11 +213,9 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const getScreenPosition = (pixelX,pixelY) => {
-        const horizontalRenderData = getHorizontalRenderData();
         const renderX = horizontalRenderData.renderPosition;
         const startTileX = horizontalRenderData.startTile;
 
-        const verticalRenderData = getVerticalRenderData();
         const renderY = verticalRenderData.renderPosition;
         const startTileY = verticalRenderData.startTile;
 
@@ -228,7 +233,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         const right = x + width / tileSize;
         const bottom = y + height / tileSize;
 
-        return {left:x,right,top:y,bottom};
+        const xLength = right - x;
+        const yLength = bottom - y;
+
+        return {left:x,right,top:y,bottom,width:xLength,height:yLength};
     };
 
     this.getScreenArea = getScreenArea;
@@ -241,28 +249,33 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     
     this.render = (context,size,time) => {
         camera.update(time);
+
+        horizontalRenderData = getHorizontalRenderData();
+        verticalRenderData = getVerticalRenderData();
+        screenArea = getScreenArea();
+
         if(renderer.renderStart) renderer.renderStart(context,size,time);
 
-        debugPointer();
-
         const useBottomCache = bottomCache.isValid;
+        const useTopCache = topCache.isValid;
 
         if(useBottomCache) {
+            updateCacheArea();
             drawCache(bottomCache,context);
             if(!iterateForCache) {
-                if(topCache.isValid) drawCache(topCache,context);
+                if(useTopCache) drawCache(topCache,context);
                 if(renderer.renderEnd) renderer.renderEnd(context,size,time);
                 return;
             }
+        } else if(useTopCache) {
+            updateCacheArea();
         }
 
-        const horizontalRenderData = getHorizontalRenderData();
         let renderX = horizontalRenderData.renderPosition;
         const startX = horizontalRenderData.startTile;
         const tileXEnd = horizontalRenderData.endTile;
         const horizontalStride = horizontalRenderData.renderStride;
 
-        const verticalRenderData = getVerticalRenderData();
         let renderY = verticalRenderData.renderPosition;
         const startY = verticalRenderData.startTile;
         const tileYEnd = verticalRenderData.endTile;
@@ -301,7 +314,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             }
         }
 
-        if(topCache.isValid) drawCache(topCache,context);
+        if(useTopCache) drawCache(topCache,context);
         if(renderer.renderEnd) renderer.renderEnd(context,size,time);
     };
 
