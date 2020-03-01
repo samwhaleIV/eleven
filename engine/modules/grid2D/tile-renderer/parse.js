@@ -1,5 +1,4 @@
 import DecodeUVTCMap from "./uvtc-parse.js";
-const DEFAULT_BACKGROUND_COLOR = "black";
 
 const CANNOT_PARSE_RENDER_INFO = renderInformation => {
     throw Error(`Invalid metadata for 'renderData' of length '${renderInformation.renderData}'`);
@@ -24,16 +23,11 @@ function UVTCMapPrelude(data) {
     return ParseRenderInformation(decodedMapData);
 }
 function ParseRenderInformation(data={}) {
-    if(data.uvtc) return UVTCMapPrelude(data);
+    if(data.uvtcDecoding) return UVTCMapPrelude(data);
 
     let width = 0;
     let height = 0;
     let renderData = null;
-
-    let backgroundColor = data.backgroundColor;
-    if(backgroundColor === undefined) {
-        backgroundColor = DEFAULT_BACKGROUND_COLOR;
-    }
 
     let skipZero = data.skipZero;
     if(skipZero === undefined) {
@@ -96,7 +90,7 @@ function ParseRenderInformation(data={}) {
     }
 
     return {
-        backgroundColor,renderData,
+        renderData,
         columns: width,rows: height,
         layerCount,layerSize,skipZero,
         renderLayerCount

@@ -21,9 +21,14 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.camera = camera;
 
     this.getTileRenderer = data => {
+        const {setRenderer, setSize} = data;
         const tileRenderer = new TileRenderer(baseTileSize,data);
-        if(data.setSize) this.setSize(tileRenderer.columns,tileRenderer.rows);
-        if(data.setRenderer) this.renderer = tileRenderer;
+        if(setRenderer) {
+            this.renderer = tileRenderer;
+        }
+        if(setSize) {
+            this.setSize(tileRenderer.columns,tileRenderer.rows);
+        }
         return tileRenderer;
     };
 
@@ -143,13 +148,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.cacheTop = topCache.cache;
     this.decacheTop = topCache.decache;
     
-    let iterateForCache = false;
-    Object.defineProperty(this,"renderOnCache",{
-        get: () => iterateForCache,
-        set: value => iterateForCache = Boolean(value),
-        enumerable: true
-    });
-
     const verifyConfigTileRender = () => {
         if(!renderer.configTileRender) NO_RENDER_CONFIG_METHOD();
         return true;
@@ -242,34 +240,34 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.getScreenArea = getScreenArea;
     this.getScreenPosition = getScreenPosition;
 
-    this.onScreen = (x,y) => {
+    this.pointOnScreen = (x,y) => {
         const {left, right, top, bottom} = getScreenArea();
         return x >= left && x <= right && y >= top && y <= bottom;
     };
-    
-    this.render = (context,size,time) => {
-        camera.update(time);
+    this.tileOnScreen = (x,y) => {
+        const xStart = horizontalRenderData.startTile;
+        const xEnd = horizontalRenderData.endTile - 1;
 
-        horizontalRenderData = getHorizontalRenderData();
-        verticalRenderData = getVerticalRenderData();
-        screenArea = getScreenArea();
+        const yStart = verticalRenderData.startTile;
+        const yEnd = verticalRenderData.endTile - 1;
 
-        if(renderer.renderStart) renderer.renderStart(context,size,time);
+        return x >= xStart && x <= xEnd && y >= yStart && y <= yEnd;
+    };
+    this.getLocation = (x,y) => {
+        return {
+            x: Math.floor(horizontalRenderData.renderPosition + (x - horizontalRenderData.startTile) * tileSize),
+            y: Math.floor(verticalRenderData.renderPosition + (y - verticalRenderData.startTile) * tileSize)
+        };
+    };
 
-        const useBottomCache = bottomCache.isValid;
-        const useTopCache = topCache.isValid;
+    Object.defineProperty(this,"tileSize",{
+        get: () => tileSize,
+        enumerable: true
+    });
 
-        if(useBottomCache) {
-            updateCacheArea();
-            drawCache(bottomCache,context);
-            if(!iterateForCache) {
-                if(useTopCache) drawCache(topCache,context);
-                if(renderer.renderEnd) renderer.renderEnd(context,size,time);
-                return;
-            }
-        } else if(useTopCache) {
-            updateCacheArea();
-        }
+    const renderTiles = (context,time) => {
+        if(renderer.paused || !renderer.renderTile) return;
+        verifyConfigTileRender();
 
         let renderX = horizontalRenderData.renderPosition;
         const startX = horizontalRenderData.startTile;
@@ -280,42 +278,44 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         const startY = verticalRenderData.startTile;
         const tileYEnd = verticalRenderData.endTile;
 
-        if(!useBottomCache) {
-            if(renderer.render) renderer.render(context,size,time);
-            if(renderer.renderTile && verifyConfigTileRender()) {
-                renderer.configTileRender({
-                    context, tileSize, time, startX, startY, endX: tileXEnd - 1, endY: tileYEnd - 1,
-                    rangeX: tileXEnd - startX, rangeY: tileYEnd - startY
-                });
-                for(let y = startY;y<tileYEnd;y++) {
-                    for(let x = startX;x<tileXEnd;x++) {
-                        renderer.renderTile(x,y,renderX,renderY);
-                        renderX += tileSize;
-                    }
-                    renderX -= horizontalStride;
-                    renderY += tileSize;
-                }
+        renderer.configTileRender({context,tileSize,time});
+        for(let y = startY;y<tileYEnd;y++) {
+            for(let x = startX;x<tileXEnd;x++) {
+                renderer.renderTile(x,y,renderX,renderY);
+                renderX += tileSize;
             }
-        } else {
-            if(renderer.render) renderer.render(context,size,time);
-            if(renderer.renderTileOnCache && verifyConfigTileRender()) {
-                renderer.configTileRender({
-                    context, tileSize, time, startX, startY, endX: tileXEnd - 1, endY: tileYEnd - 1,
-                    rangeX: tileXEnd - startX, rangeY: tileYEnd - startY
-                });
-                for(let y = startY;y<tileYEnd;y++) {
-                    for(let x = startX;x<tileXEnd;x++) {
-                        renderer.renderTileOnCache(x,y,renderX,renderY);
-                        renderX += tileSize;
-                    }
-                    renderX -= horizontalStride;
-                    renderY += tileSize;
-                }
-            }
+            renderX -= horizontalStride;
+            renderY += tileSize;
         }
+    };
 
+    const updateRenderData = () => {
+        horizontalRenderData = getHorizontalRenderData();
+        verticalRenderData = getVerticalRenderData();
+        screenArea = getScreenArea();
+    };
+    
+    this.render = (context,size,time) => {
+        if(renderer.update) renderer.update(context,size,time);
+
+        camera.update(time);
+        updateRenderData();
+
+        if(renderer.background) renderer.background(context,size,time);
+
+        const useBottomCache = bottomCache.isValid;
+        const useTopCache = topCache.isValid;
+
+        if(useBottomCache || useTopCache) updateCacheArea();
+        if(useBottomCache) drawCache(bottomCache,context);
+
+        if(renderer.start) renderer.start(context,size,time);
+
+        renderTiles(context,time);
+        if(renderer.render) renderer.render(context,size,time);
         if(useTopCache) drawCache(topCache,context);
-        if(renderer.renderEnd) renderer.renderEnd(context,size,time);
+
+        if(renderer.finalize) renderer.finalize(context,size,time);
     };
 
     this.bindToFrame = frame => {

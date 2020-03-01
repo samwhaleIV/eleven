@@ -111,7 +111,6 @@ function Camera(grid) {
         const {left,right,top,bottom} = grid.getScreenArea();
         const {width,height} = grid;
 
-
         const leftClip = left < 0;
         const rightClip = right > width;
         

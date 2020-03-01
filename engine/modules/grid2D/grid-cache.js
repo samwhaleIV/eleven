@@ -9,16 +9,16 @@ function GridCache(grid) {
         const gridWidth = grid.width;
         const gridHeight = grid.height;
 
-        const {bufferContext} = this.data;
+        const {bufferContext, width, height} = this.data;
+
+        bufferContext.clearRect(0,0,width,height);
         renderer.configTileRender({
             context: bufferContext,
             tileSize: baseTileSize,
-            time: performance.now(),
-            startX: 0, startY: 0,
-            endX: gridWidth - 1,
-            endY: gridHeight - 1,
-            rangeX: gridWidth,
-            rangeY: gridHeight
+            time: {
+                now: performance.now(),
+                delta: 0
+            }
         });
         for(let y = 0;y<gridHeight;y++) {
             for(let x = 0;x<gridWidth;x++) {
@@ -32,9 +32,6 @@ function GridCache(grid) {
             const gridWidth = grid.width;
             const gridHeight = grid.height;
 
-            const columns = gridWidth;
-            const rows = gridHeight;
-
             const width = gridWidth * baseTileSize;
             const height = gridHeight * baseTileSize;
 
@@ -42,7 +39,7 @@ function GridCache(grid) {
             const bufferContext = buffer.getContext("2d",{alpha:true});
 
             this.isValid = true;
-            this.data = {columns,rows,width,height,buffer,bufferContext};
+            this.data = {width,height,buffer,bufferContext};
         }
         updateCache();
     };

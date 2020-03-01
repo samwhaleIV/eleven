@@ -73,7 +73,7 @@ function TileRenderer(textureSize,data) {
     if(skipZero) {
         this.renderTile = (x,y,renderX,renderY) => {
             const tileIndex = getIdx(x,y);
-            let layer = 0;
+            let layer = renderLayerStart;
             do {
                 const mapValue = renderData[tileIndex + layer * layerSize];
                 if(mapValue !== 0) renderTexture(mapValue,renderX,renderY);
@@ -83,7 +83,7 @@ function TileRenderer(textureSize,data) {
     } else {
         this.renderTile = (x,y,renderX,renderY) => {
             const tileIndex = getIdx(x,y);
-            let layer = 0;
+            let layer = renderLayerStart;
             do {
                 const mapValue = renderData[tileIndex + layer * layerSize];
                 renderTexture(mapValue,renderX,renderY);
@@ -91,11 +91,6 @@ function TileRenderer(textureSize,data) {
             } while(layer < renderLayerEnd);
         };
     }
-
-    this.renderStart = (context,{width,height}) => {
-        context.fillStyle = backgroundColor;
-        context.fillRect(0,0,width,height);
-    };
 
     const refreshTextureCache = () => {
         textureCache.splice(0);
@@ -152,12 +147,12 @@ function TileRenderer(textureSize,data) {
             value: renderData,
             enumerable: true
         },
-        renderLayerStart: {
+        layerStart: {
             get: () => renderLayerStart,
             set: setRenderLayerStart,
             enumerable: true
         },
-        renderLayerCount: {
+        layerCount: {
             get: () => renderLayerCount,
             set: setRenderLayerCount,
             enumerable: true
