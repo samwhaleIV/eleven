@@ -15,6 +15,7 @@ function MultiLayer() {
         return layerID;
     };
     this.remove = ID => {
+        if(!(ID in layers)) return;
         delete layers[ID];
         updateList();
     };

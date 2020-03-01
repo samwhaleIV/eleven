@@ -4,14 +4,14 @@ const DEFAULT_SCALE = 1;
 const DEFAULT_X = 0;
 const DEFAULT_Y = 0;
 
-function Camera(world) {
+function Camera(grid) {
     const setDefaultPosition = () => {
         this.x = DEFAULT_X;
         this.y = DEFAULT_Y;
     };
     this.center = (x=0.5,y=0.5) => {
-        this.x = (world.width - 1) * x;
-        this.y = (world.height - 1) * y;
+        this.x = (grid.width - 1) * x;
+        this.y = (grid.height - 1) * y;
         return this;
     };
 
@@ -23,7 +23,7 @@ function Camera(world) {
         set: value => {
             if(value == scale) return;
             scale = value;
-            world.resize();
+            grid.resize();
             return scale;
         },
         get: () => scale,
@@ -101,8 +101,55 @@ function Camera(world) {
         });
     };
 
+    const postProcessors = new MultiLayer();
+
+    this.addPostProcessor = postProcessors.add;
+    this.removePostProcessor = postProcessors.remove;
+    this.clearPostProcessors = postProcessors.clear;
+
+    const paddingProcessor = () => {
+        const {left,right,top,bottom} = grid.getScreenArea();
+        const {width,height} = grid;
+
+
+        const leftClip = left < 0;
+        const rightClip = right > width;
+        
+        if(!(leftClip && rightClip)) {
+            if(leftClip) {
+                this.x -= left;
+            } else if(rightClip) {
+                this.x += width - right;
+            }
+        }
+
+        const topClip = top < 0;
+        const bottomClip = bottom > height;
+        if(!(topClip && bottomClip)) {
+            if(topClip) {
+                this.y -= top;
+            } else if(bottomClip) {
+                this.y += height - bottom;
+            }
+        }
+        
+    };
+
+    let paddingEnabled = false;
+    this.enablePadding = () => {
+        paddingEnabled = true;
+    };
+    this.disablePadding = () => {
+        paddingEnabled = false;
+    };
+    this.togglePadding = () => {
+        paddingEnabled = !paddingEnabled;
+    };
+
     this.update = time => {
         updateLayers.forEach(updater => updater(time));
+        postProcessors.forEach(processor => processor(this,time));
+        if(paddingEnabled) paddingProcessor();
     };
     Object.seal(this);
 }

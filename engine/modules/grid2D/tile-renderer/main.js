@@ -1,14 +1,33 @@
 import ParseRenderInformation from "./parse.js";
 
 function TileRenderer(textureSize,data) {
+    let includedTileset = data.tileset;
+    data = ParseRenderInformation(data);
     const {
         columns, rows,
         layerCount, layerSize,
-        renderData, backgroundColor,
-        skipZero, renderLayerCount
-    } = ParseRenderInformation(data);
+        renderData, backgroundColor, skipZero,
+    } = data;
 
-    const renderLayerEnd = Math.min(layerCount,renderLayerCount);
+    let renderLayerCount = 0;
+    let renderLayerStart = 0;
+
+    let renderLayerEnd = 0;
+
+    const clamp = (value,min,max) => Math.max(Math.min(value,max),min);
+
+    const setLayerRange = (start,length) => {
+        renderLayerStart = clamp(start,0,layerCount-1);
+        renderLayerCount = clamp(length,1,Math.min(layerCount,length-start));
+        renderLayerEnd = renderLayerStart + renderLayerCount;
+    };
+    const setRenderLayerCount = value => {
+        setLayerRange(renderLayerStart,value);
+    };
+    const setRenderLayerStart = value => {
+        setLayerRange(value,renderLayerCount);
+    };
+    setRenderLayerCount(data.renderLayerCount);
 
     renderData.map = mapper => {
         for(let i = 0;i<renderData.length;i++) {
@@ -100,6 +119,9 @@ function TileRenderer(textureSize,data) {
         refreshTextureCache();
     };
 
+    if(includedTileset) setTileset(includedTileset);
+    includedTileset = null;
+
     Object.defineProperties(this,{
         tileset: {
             get: () => tileset,
@@ -128,6 +150,16 @@ function TileRenderer(textureSize,data) {
         },
         renderData: {
             value: renderData,
+            enumerable: true
+        },
+        renderLayerStart: {
+            get: () => renderLayerStart,
+            set: setRenderLayerStart,
+            enumerable: true
+        },
+        renderLayerCount: {
+            get: () => renderLayerCount,
+            set: setRenderLayerCount,
             enumerable: true
         }
     });
