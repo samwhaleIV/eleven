@@ -1,4 +1,3 @@
-//Used so the gamepad processor can access original, unfiltered key events on the base frame in case a key bind filter is also applied
 const GAMEPAD_INPUT_TARGET = Symbol("GamepadInputTarget");
 
 const DIRECTION_KEY = "Direction";

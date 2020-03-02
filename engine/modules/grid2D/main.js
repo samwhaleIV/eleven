@@ -267,7 +267,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
     const pointOnScreen = (x,y) => {
         const {left, right, top, bottom} = tileArea;
-        return x >= left && x <= right && y >= top && y <= bottom;
+        return x >= left && x < right && y >= top && y < bottom;
     };
     const xInBoundsUpper = (x,left,right) => {
         return x >= left && x < right;

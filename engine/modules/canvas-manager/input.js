@@ -69,7 +69,6 @@ function Input(canvasManager,modules) {
 
     const summariseKeyEvent = event => {
         return {
-            impulse: event.code,
             code: event.code,
             key: event.key,
             ctrlKey: event.ctrlKey,
@@ -109,7 +108,6 @@ function Input(canvasManager,modules) {
         window.addEventListener("keydown",function(event){
             if(event.repeat) {
                 stopBubbling(event);
-                return;
             }
             downKeys[event.code] = summariseKeyEvent(event);
             sendKeyDown(event);
@@ -140,10 +138,7 @@ function Input(canvasManager,modules) {
                 frame[INPUT](downKeys,time);
             }
             const gamepadData = gamepadPoll();
-            if(!gamepadData) {
-                return;
-            }
-            if(frame[INPUT_GAMEPAD]) {
+            if(gamepadData && frame[INPUT_GAMEPAD]) {
                 frame[INPUT_GAMEPAD](gamepadData,time);
             }
         };

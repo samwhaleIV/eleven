@@ -6,6 +6,8 @@ import AudioManager from "./modules/audio-manager/main.js";
 import Frame from "./modules/frame/main.js";
 import Grid2D from "./modules/grid2D/main.js";
 import SpriteLayer from "./modules/sprite-layer/main.js";
+import KeyBind from "./modules/key-bind/main.js";
+import GamepadProcessor from "./modules/gamepad-processor/main.js";
 
 const Eleven = Install([
     Singleton({
@@ -22,7 +24,9 @@ const Eleven = Install([
     }),
     Frame,
     Grid2D,
-    SpriteLayer
+    SpriteLayer,
+    KeyBind,
+    GamepadProcessor
 ]);
 
 export default Eleven;

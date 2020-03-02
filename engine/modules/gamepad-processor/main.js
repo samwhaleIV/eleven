@@ -2,10 +2,12 @@ import Constants from "../../internal/constants.js";
 import GamepadBinds from "./gamepad-binds.js";
 import DeadzoneScale from "./deadzone-scale.js";
 import EncodeAxes from "./axis-code.js";
+import ValidateSettings from "./settings-validator.js";
 
 const inputRoutes = Constants.InputRoutes;
 const KEY_DOWN = inputRoutes.keyDown;
 const KEY_UP = inputRoutes.keyUp;
+const INPUT_GAMEPAD = inputRoutes.inputGamepad;
 
 const CODE_ORDER = GamepadBinds.CodeOrder;
 const KEYS = GamepadBinds.Keys;
@@ -21,8 +23,6 @@ const LEFT_Y_AXIS = 1;
 
 const RIGHT_X_AXIS = 2
 const RIGHT_Y_AXIS = 3;
-
-const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
 
 const getImpulseEvent = (impulse,{code,key}) => {
     return {
@@ -60,6 +60,29 @@ function AxisState(codes) {
 }
 
 function GamepadProcessor(settings) {
+
+    settings = ValidateSettings(settings);
+
+    let keyDown = null;
+    let keyUp = null;
+    let inputGamepad = null;
+    Object.defineProperties(this,{
+        [KEY_DOWN]: {
+            get: () => keyDown,
+            set: value => keyDown = value,
+            enumerable: true
+        },
+        [KEY_UP]: {
+            get: () => keyUp,
+            set: value => keyUp = value,
+            enumerable: true
+        },
+        [INPUT_GAMEPAD]: {
+            get: () => inputGamepad,
+            set: value => inputGamepad = value,
+            enumerable: true
+        }
+    });
 
     const repeatDelay = settings.repeatDelay;
     const repeatRate = settings.repeatRate;
@@ -116,26 +139,14 @@ function GamepadProcessor(settings) {
         return {leftAxisState, rightAxisState};
     })(settings);
 
-    const getFrameTarget = (frame,target) => {
-        return frame[GAMEPAD_INPUT_TARGET][target];
-    };
-
-    const sendKey = (frame,down,buttonState) => {
-        const target = down ? KEY_DOWN : KEY_UP;
-        const code = buttonState.inverseCode;
-        let impulse;
-        if(code in binds) {
-            impulse = binds[code];
-        } else return;
-        const frameTarget = getFrameTarget(frame,target);
-        if(frameTarget) {
-            frameTarget(getImpulseEvent(
-                impulse,buttonState
-            ));
-        }
+    const sendKey = (down,buttonState) => {
+        const target = down ? keyDown : keyUp;
+        if(!target) return;
+        const impulse = binds[buttonState.inverseCode];
+        target(getImpulseEvent(impulse,buttonState));
     };
     
-    const processKeyRepeat = (buttonState,frame,timestamp) => {
+    const processKeyRepeat = (buttonState,timestamp) => {
         let send = false;
         if(buttonState.repeatTime !== null) {
             if(timestamp > buttonState.repeatTime + repeatRate) {
@@ -147,11 +158,11 @@ function GamepadProcessor(settings) {
             send = true;
         }
         if(send) {
-            sendKey(frame,true,buttonState);
+            sendKey(true,buttonState);
         }
     };
 
-    const processButtonState = (buttonState,isPressed,doRepeat,frame,timestamp) => {
+    const processButtonState = (buttonState,isPressed,doRepeat,timestamp) => {
         if(isPressed !== buttonState.pressed) {
             const sendMode = isPressed;
             buttonState.pressed = sendMode;
@@ -162,9 +173,9 @@ function GamepadProcessor(settings) {
             if(!sendMode) {
                 buttonState.repeatTime = null;
             }
-            sendKey(frame,sendMode,buttonState);
+            sendKey(sendMode,buttonState);
         } else if(isPressed && doRepeat) {
-            processKeyRepeat(buttonState,frame,timestamp);
+            processKeyRepeat(buttonState,timestamp);
         }
     };
 
@@ -172,7 +183,7 @@ function GamepadProcessor(settings) {
         return xAxis !== 0 || yAxis !== 0;
     };
 
-    const processAxis = (axisState,xAxis,yAxis,frame,timestamp) => {
+    const processAxis = (axisState,xAxis,yAxis,timestamp) => {
         xAxis = DeadzoneScale(axisDeadzone,xAxis);
         yAxis = DeadzoneScale(axisDeadzone,yAxis);
         let isPressed = nonZeroAxes(xAxis,yAxis);
@@ -180,34 +191,35 @@ function GamepadProcessor(settings) {
         if(newCode !== null) {
             if(axisState.code !== newCode) {
                 if(axisState.pressed) {
-                    sendKey(frame,false,axisState);
+                    sendKey(false,axisState);
                 }
                 axisState.pressed = false;
             }
             axisState.code = newCode;
         }
-        processButtonState(axisState,isPressed,repeatAxes,frame,timestamp);
+        processButtonState(axisState,isPressed,repeatAxes,timestamp);
     };
 
-    const processGamepadAxes = (axes,frame,timestamp) => {
+    const processGamepadAxes = (axes,timestamp) => {
         if(manageLeftAxis) {
             const x = axes[LEFT_X_AXIS];
             const y = axes[LEFT_Y_AXIS];
-            processAxis(leftAxisState,x,y,frame,timestamp);
+            processAxis(leftAxisState,x,y,timestamp);
         }
         if(manageRightAxis) {
             const x = axes[RIGHT_X_AXIS];
             const y = axes[RIGHT_Y_AXIS];
-            processAxis(rightAxisState,x,y,frame,timestamp);
+            processAxis(rightAxisState,x,y,timestamp);
         }
     };
 
     const buttonIsPressed = (button,isTrigger) => {
        return isTrigger ? button.value > triggerThreshold : button.pressed;
     };
-    const process = (frame,{buttons,axes},time) => {
+    const poll = ({buttons,axes},time) => {
         const timestamp = time.now;
         let buttonIndex = 0;
+        const downKeys = {};
         do {
             const button = buttons[buttonIndex];
             const buttonState = buttonStates[buttonIndex];
@@ -215,14 +227,28 @@ function GamepadProcessor(settings) {
             const isTrigger = buttonState.key === TRIGGER_KEY;
             const isPressed = buttonIsPressed(button,isTrigger);
 
-            const doRepeat = isTrigger ? repeatTriggers : repeatButtons;
-
-            processButtonState(buttonState,isPressed,doRepeat,frame,timestamp);
-
+            const code = buttonState.inverseCode;
+            if(code in binds) {
+                const impulse = binds[code];
+                if(isPressed) downKeys[impulse] = getImpulseEvent(impulse,buttonState);
+                const doRepeat = isTrigger ? repeatTriggers : repeatButtons;
+                processButtonState(buttonState,isPressed,doRepeat,timestamp);
+            }
         } while(++buttonIndex < buttonCount);
-        processGamepadAxes(axes,frame,timestamp);
+        processGamepadAxes(axes,timestamp);
+        if(inputGamepad) {
+            if(leftAxisState.pressed && leftAxisState.code !== null) {
+                const impulse = binds[leftAxisState.inverseCode];
+                downKeys[impulse] = getImpulseEvent(impulse,leftAxisState);
+            }
+            if(rightAxisState.pressed && rightAxisState.code !== null) {
+                const impulse = binds[rightAxisState.inverseCode];
+                downKeys[impulse] = getImpulseEvent(impulse,rightAxisState);
+            }
+            inputGamepad(downKeys,time);
+        }
     };
-    this.process = process;
+    this.poll = poll;
     Object.freeze(this);
 };
 

@@ -1,23 +1,9 @@
 import Constants from "../../internal/constants.js";
-import KeyBind from "./key-bind.js";
-import ManagedGamepad from "./managed-gamepad.js";
-import GamepadBinds from "./gamepad-binds.js";
 import InstallFrame from "./loader.js";
 import MissingRender from "./missing-render.js";
 
-const inputRoutes = Constants.InputRoutes;
-
-const KEY_UP = inputRoutes.keyUp;
-const KEY_DOWN = inputRoutes.keyDown;
-const INPUT = inputRoutes.input;
-const INPUT_GAMEPAD = inputRoutes.inputGamepad;
 const FRAME_SIGNATURE = Constants.FrameSignature;
 
-const GAMEPAD_INPUT_TARGET = GamepadBinds.GamepadInputTarget;
-
-const INPUT_GAMEPAD_ALREADY_EXISTS = () => {
-    throw Error("Gamepad input method already exists for base frame, cannot use managed gamepad");
-};
 const INVALID_PARAMETERS = () => {
     throw Error("Frame parameters must be an array, not array-like or data type");
 };
@@ -25,47 +11,6 @@ const BAD_BASE = base => {
     throw Error(`Base '${base}' of type '${typeof base}' is an invalid frame base, must be "function"`);
 };
 
-function DefineProxy(target,propertyName,proxy) {
-    let value = null;
-    const propertyValue = target[propertyName];
-    if(propertyValue) {
-        value = (...parameters) => proxy(propertyValue,...parameters);
-    }
-    Object.defineProperty(target,propertyName,{value:value,enumerable:true});
-}
-
-function installManagedGamepad(gamepadSettings) {
-    const managedGamepad = new ManagedGamepad(gamepadSettings);
-    if(this[INPUT_GAMEPAD]) {
-        INPUT_GAMEPAD_ALREADY_EXISTS();
-    }
-    Object.defineProperty(this,INPUT_GAMEPAD,{
-        value: managedGamepad.pollingFilter.bind(null,this)
-    });
-}
-function getStaticInputs(target) {
-    const getOrNull = property => {
-        const value = target[property];
-        if(value) return value;
-        return null;
-    };
-    return Object.freeze({
-        [KEY_DOWN]: getOrNull(KEY_DOWN),
-        [KEY_UP]: getOrNull(KEY_UP),
-        [INPUT]: getOrNull(INPUT),
-    });
-}
-function defineGamepadInputs(isStatic) {
-    let inputTarget = this;
-    if(isStatic) inputTarget = getStaticInputs(this);
-    Object.defineProperty(this,GAMEPAD_INPUT_TARGET,{value:inputTarget});
-}
-function installKeyBinds(keyBinds) {
-    const keyBind = new KeyBind(keyBinds);
-    DefineProxy(this,KEY_DOWN,keyBind.keyFilter);
-    DefineProxy(this,KEY_UP,keyBind.keyFilter);
-    DefineProxy(this,INPUT,keyBind.keyFilter);
-}
 function validateParameters(parameters) {
     if(!parameters) return;
     if(!Array.isArray(parameters)) INVALID_PARAMETERS();
@@ -87,23 +32,12 @@ function installBase(target,base,parameters) {
     validateFrameData(base,parameters);
     base.apply(target,parameters);
 }
-function installInputManagement(target,gamepad,keyBinds) {
-    const hasKeyBinds = Boolean(keyBinds);
-    if(gamepad) {
-        defineGamepadInputs.call(target,hasKeyBinds);
-        installManagedGamepad.call(target,gamepad);
-    }
-    if(hasKeyBinds) {
-        installKeyBinds.call(target,keyBinds);
-    }
-}
 
 function Frame({
-    base,parameters,gamepad=false,keyBinds=false
+    base,parameters,
 }) {
     setDefaultProperties(this);
     installBase(this,base,parameters);
-    installInputManagement(this,gamepad,keyBinds);
 }
 
 function sendMessage(target,message,data) {

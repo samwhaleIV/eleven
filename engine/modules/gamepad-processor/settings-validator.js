@@ -1,4 +1,3 @@
-import GamepadProcessor from "./gamepad-processor.js";
 import GamepadBinds from "./gamepad-binds.js";
 import Constants from "../../internal/constants.js";
 
@@ -22,7 +21,7 @@ const bufferAssign = (target,schema,values) => coldAssign(
     lockAssign(target,schema),values
 );
 
-function ManagedGamepad(settings) {
+function ValidateSettings(settings) {
     if(typeof settings !== "object") {
         settings = new Object();
     }
@@ -45,9 +44,6 @@ function ManagedGamepad(settings) {
         Object.assign(binds,settingBinds);
     }
     Object.freeze(validateBinds(binds));
-
-    const gamepadProcessor = new GamepadProcessor(safeSettings);
-    this.pollingFilter = gamepadProcessor.process;
-    Object.freeze(this);
+    return safeSettings;
 }
-export default ManagedGamepad;
+export default ValidateSettings;

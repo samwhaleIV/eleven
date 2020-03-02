@@ -2,7 +2,7 @@ function KeyBind(filters) {
     const impulses = Object.freeze(
         Object.assign(new Object(),filters)
     );
-    this.pollingFilter = (target,downKeys) => {
+    const pollingFilter = (target,downKeys,time) => {
         const downKeysList = Object.entries(downKeys);
         const keyData = new Object();
         for(let i = 0;i<downKeysList.length;i++) {
@@ -19,15 +19,22 @@ function KeyBind(filters) {
                 keyData[impulse] = newData;
             }
         }
-        return target(keyData);
+        return target(keyData,time);
     };
-    this.keyFilter = (target,keyEvent) => {
+    const impulseFilter = (target,keyEvent) => {
         const newEvent = Object.assign(new Object(),keyEvent);
         const keyHash = keyEvent.code;
         if(keyHash in impulses) {
             newEvent.impulse = impulses[keyHash];
             return target(newEvent);
         }
+    };
+
+    this.poll = target => {
+        return (downKeys,time) => pollingFilter(target,downKeys,time);
+    };
+    this.impulse = target => {
+        return keyEvent => impulseFilter(target,keyEvent);
     };
 
     Object.freeze(this);
