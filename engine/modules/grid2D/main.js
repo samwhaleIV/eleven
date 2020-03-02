@@ -119,6 +119,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
         tileSize = Math.ceil(width / adjustedScaleFactor / baseTileSize) * baseTileSize;
         tileSize = Math.floor(tileSize * camera.scale);
+        if(tileSize % 2 !== 0) tileSize++;
 
         if(panZoom) resizePanZoom();
 

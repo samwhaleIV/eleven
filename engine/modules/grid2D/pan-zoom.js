@@ -38,15 +38,16 @@ function PanZoom(camera) {
         }
         return this;
     };
+    const refreshPanData = ({x,y}) => {
+        panData = {x,y,cameraX:camera.x,cameraY:camera.y};
+    };
 
     this.resize = size => {
         halfWidth = size.halfWidth;
         halfHeight = size.halfHeight;
         tileSize = size.tileSize;
     };
-    this.panStart = ({x,y}) => {
-        panData = {x,y,cameraX:camera.x,cameraY:camera.y};
-    };
+    this.panStart = refreshPanData;
     this.panEnd = () => {
         panData = null;
     };
@@ -56,6 +57,7 @@ function PanZoom(camera) {
         const yDifference = panData.y - y;
         camera.x = panData.cameraX + xDifference / tileSize;
         camera.y = panData.cameraY + yDifference / tileSize;
+        refreshPanData({x,y});
     };
     this.zoom = ({scrollingUp,x,y}) => {
         const scaleChange = 1 + (scrollingUp?ZOOM_RATE:-ZOOM_RATE);
@@ -78,9 +80,7 @@ function PanZoom(camera) {
 
         camera.x += centerXOffset / tileSize / ZOOM_PAN_DAMPENER;
         camera.y += centerYOffset / tileSize / ZOOM_PAN_DAMPENER;
-        if(panData) {
-            panData = {x,y,cameraX:camera.x,cameraY:camera.y};
-        }
+        if(panData) refreshPanData({x,y});
     };
     this.bindToFrame = frame => {
         frame[clickDown] = this.panStart;
