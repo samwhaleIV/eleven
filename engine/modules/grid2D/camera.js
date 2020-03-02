@@ -113,7 +113,6 @@ function Camera(grid) {
 
         const leftClip = left < 0;
         const rightClip = right > width;
-        
         if(!(leftClip && rightClip)) {
             if(leftClip) {
                 this.x -= left;
@@ -131,7 +130,6 @@ function Camera(grid) {
                 this.y += height - bottom;
             }
         }
-        
     };
 
     let paddingEnabled = false;
@@ -144,6 +142,12 @@ function Camera(grid) {
     this.togglePadding = () => {
         paddingEnabled = !paddingEnabled;
     };
+
+    Object.defineProperty(this,"padding",{
+        get: () => paddingEnabled,
+        set: value => paddingEnabled = Boolean(value),
+        enumerable: true
+    });
 
     this.update = time => {
         updateLayers.forEach(updater => updater(time));

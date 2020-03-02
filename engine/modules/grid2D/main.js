@@ -164,6 +164,24 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return true;
     };
 
+    const drawCacheDiagnostic = (cache,context) => {
+        const cameraX = camera.x + cameraXOffset;
+        const cameraY = camera.y + cameraYOffset;
+
+        const renderX = Math.floor(cameraX * -tileSize + tileXOffset);
+        const renderY = Math.floor(cameraY * -tileSize + tileYOffset);
+
+        const {buffer, width, height, columns, rows} = cache.data;
+
+        const renderWidth = columns * tileSize;
+        const renderHeight = rows * tileSize;
+
+        context.drawImage(
+            buffer,0,0,width,height,
+            renderX,renderY,renderWidth,renderHeight
+        );
+    };
+
     const drawCache = (cache,context) => {
         const area = cacheArea;
         context.drawImage(
@@ -294,7 +312,17 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             y: Math.floor(verticalRenderData.renderLocation + (y - verticalRenderData.startTile) * tileSize)
         };
     };
-    const getArea = () => tileArea;
+
+    const updateRenderData = () => {
+        horizontalRenderData = getHorizontalRenderData();
+        verticalRenderData = getVerticalRenderData();
+        tileArea = getTileArea();
+    };
+
+    const getArea = () => {
+        updateRenderData();
+        return tileArea;
+    };
 
     const renderTiles = (context,time) => {
         if(renderer.paused || !renderer.renderTile) return;
@@ -321,12 +349,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             renderX -= horizontalStride;
             renderY += tileSize;
         }
-    };
-
-    const updateRenderData = () => {
-        horizontalRenderData = getHorizontalRenderData();
-        verticalRenderData = getVerticalRenderData();
-        tileArea = getTileArea();
     };
 
     const render = (context,size,time) => {
