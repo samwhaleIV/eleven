@@ -3,11 +3,11 @@ import PanZoom from "./pan-zoom.js";
 import DebugRenderer from "./debug-renderer.js";
 import TileRenderer from "./tile-renderer/tile-renderer.js";
 import GridCache from "./grid-cache.js";
+import MultiLayer from "../../internal/multi-layer.js";
 
 const DEFAULT_TILE_SIZE = 16;
 
-const DEFAULT_WIDTH = 1;
-const DEFAULT_HEIGHT = 1;
+const DEFAULT_WIDTH = 1; const DEFAULT_HEIGHT = 1;
 
 const NO_RENDER_CONFIG_METHOD = () => {
     throw Error("Missing config tile renderer!");
@@ -106,6 +106,14 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return panZoom;
     };
 
+    const resizeHandlers = new MultiLayer();
+    const processResizeHandler = layer => layer(tileSize);
+    const dispatchResizeHandlers = () => {
+        resizeHandlers.forEach(processResizeHandler);
+    };
+    this.addResizeHandler = resizeHandlers.add;
+    this.removeResizeHandler = resizeHandlers.remove;
+
     let highPrecisionActive = false;
     const resize = data => {
         const hasNewSizeData = data && data.size;
@@ -145,6 +153,8 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
         cameraXOffset = -Math.floor(halfHorizontalTiles);
         cameraYOffset = -Math.floor(halfVerticalTiles);
+
+        dispatchResizeHandlers();
     };
 
     const bottomCache = new GridCache(this);
@@ -310,6 +320,8 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
     const objectOnScreen = (x,y,objectWidth,objectHeight) => {
 
+        //Fails if object is bigger than screen!!
+
         const screenLocation = getScreenLocation(x,y);
         x = screenLocation.x; y = screenLocation.y;
 
@@ -423,6 +435,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.getTileRenderer = getTileRenderer;
     this.getPanZoom = getPanZoom;
     this.getArea = getArea;
+    Object.defineProperty(this,"area",{
+        get: () => tileArea,
+        enumerable: true
+    });
     this.pointOnScreen = pointOnScreen;
     this.tileOnScreen = tileOnScreen;
     this.objectOnScreen = objectOnScreen;

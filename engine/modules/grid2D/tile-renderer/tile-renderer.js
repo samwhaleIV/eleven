@@ -6,7 +6,7 @@ function TileRenderer(textureSize,data) {
     const {
         columns, rows,
         layerCount, layerSize,
-        renderData, backgroundColor, skipZero,
+        renderData, skipZero,
     } = data;
 
     let renderLayerCount = 0;
@@ -117,6 +117,12 @@ function TileRenderer(textureSize,data) {
     if(includedTileset) setTileset(includedTileset);
     includedTileset = null;
 
+    const readLayer = layerIndex => {
+        const start = getLayerIdx(0,0,layerIndex)
+        return renderData.slice(start,start+layerSize);
+    };
+    this.readLayer = readLayer;
+
     let paused = false;
     Object.defineProperties(this,{
         paused: {
@@ -156,6 +162,10 @@ function TileRenderer(textureSize,data) {
         layerStart: {
             get: () => renderLayerStart,
             set: setRenderLayerStart,
+            enumerable: true
+        },
+        maxLayerCount: {
+            get: () => layerCount,
             enumerable: true
         },
         layerCount: {

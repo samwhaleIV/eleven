@@ -9,6 +9,7 @@ import SpriteLayer from "./modules/sprite/sprite-layer.js";
 import KeyBind from "./modules/key-bind/key-bind.js";
 import ManagedGamepad from "./modules/managed-gamepad/managed-gamepad.js";
 import SpriteFollower from "./modules/sprite/sprite-follower.js";
+import UVTCLighting from "./modules/uvtc-lighting/uvtc-lighting.js";
 
 const Eleven = Install([
     Singleton({
@@ -28,7 +29,8 @@ const Eleven = Install([
     SpriteLayer,
     KeyBind,
     ManagedGamepad,
-    SpriteFollower
+    SpriteFollower,
+    UVTCLighting
 ]);
 
 export default Eleven;
