@@ -1,7 +1,6 @@
 import RCData from "./rc-symbol.js";
 import {FadeIn, FadeOut} from "./fader.js";
 import CallbackWrap from "../../internal/callback-wrap.js";
-import ResourceManager from "../resource-manager/main.js";
 const {WrapBind} = CallbackWrap;
 
 function RemoteControl(data) {

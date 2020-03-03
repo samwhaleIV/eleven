@@ -1,5 +1,5 @@
 import Constants from "../../internal/constants.js";
-import Frame from "./main.js";
+import Frame from "./frame.js";
 
 const FRAME_SIGNATURE = Constants.FrameSignature;
 const LOADED_SYMBOL = Symbol("LoadedSymbol");

@@ -59,7 +59,7 @@ function AxisState(codes) {
     Object.seal(this);
 }
 
-function GamepadProcessor(settings) {
+function ManagedGamepad(settings) {
 
     settings = ValidateSettings(settings);
 
@@ -252,4 +252,4 @@ function GamepadProcessor(settings) {
     Object.freeze(this);
 };
 
-export default GamepadProcessor;
+export default ManagedGamepad;

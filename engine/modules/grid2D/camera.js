@@ -5,13 +5,41 @@ const DEFAULT_X = 0;
 const DEFAULT_Y = 0;
 
 function Camera(grid) {
+
+    this.grid = grid;
+
+    let x, y;
+    Object.defineProperties(this,{
+        x: {
+            get: () => x,
+            set: value => x = value,
+            enumerable: true
+        },
+        y: {
+            get: () => y,
+            set: value => y = value,
+            enumerable: true
+        },
+    });
+
     const setDefaultPosition = () => {
-        this.x = DEFAULT_X;
-        this.y = DEFAULT_Y;
+        x = DEFAULT_X;
+        y = DEFAULT_Y;
     };
-    this.center = (x=0.5,y=0.5) => {
-        this.x = (grid.width - 1) * x;
-        this.y = (grid.height - 1) * y;
+
+    const centerX = (centerPoint=0.5) => {
+        x = (grid.width - 1) * centerPoint;
+        return this;
+    };
+    const centerY = (centerPoint=0.5) => {
+        y = (grid.height - 1) * centerPoint;
+        return this;
+    };
+
+    this.centerX = centerX; this.centerY = centerY;
+
+    this.center = (centerPointX,centerPointY) => {
+        centerX(centerPointX); centerY(centerPointY);
         return this;
     };
 
@@ -76,13 +104,13 @@ function Camera(grid) {
     let moving = false;
     this.moveTo = (newX,newY,duration) => {
         if(moving) return;
-        if(newX == this.x && newY == this.y) return;
+        if(newX == x && newY == y) return;
         moving = true;
         return new Promise(resolve => {
             const startTime = performance.now();
 
-            const startX = this.x;
-            const startY = this.y;
+            const startX = x;
+            const startY = y;
 
             const xDifference = newX - startX;
             const yDifference = newY - startY;
@@ -92,15 +120,15 @@ function Camera(grid) {
                 if(delta < 0) {
                     delta = 0;
                 } else if(delta > 1) {
-                    this.x = newX;
-                    this.y = newY;
+                    x = newX;
+                    y = newY;
                     updateLayers.remove(ID);
                     moving = false;
                     resolve();
                     return;
                 }
-                this.x = startX + xDifference * delta;
-                this.y = startY + yDifference * delta;
+                x = startX + xDifference * delta;
+                y = startY + yDifference * delta;
             });
         });
     };
@@ -119,9 +147,9 @@ function Camera(grid) {
         const rightClip = right > width;
         if(!(leftClip && rightClip)) {
             if(leftClip) {
-                this.x -= left;
+                x -= left;
             } else if(rightClip) {
-                this.x += width - right;
+                x += width - right;
             }
         }
 
@@ -129,9 +157,9 @@ function Camera(grid) {
         const bottomClip = bottom > height;
         if(!(topClip && bottomClip)) {
             if(topClip) {
-                this.y -= top;
+                x -= top;
             } else if(bottomClip) {
-                this.y += height - bottom;
+                x += height - bottom;
             }
         }
     };
@@ -158,6 +186,6 @@ function Camera(grid) {
         postProcessors.forEach(processor => processor(time));
         if(paddingEnabled) paddingProcessor();
     };
-    Object.seal(this);
+    Object.freeze(this);
 }
 export default Camera;

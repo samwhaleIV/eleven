@@ -1,7 +1,7 @@
 import Camera from "./camera.js";
 import PanZoom from "./pan-zoom.js";
 import DebugRenderer from "./debug-renderer.js";
-import TileRenderer from "./tile-renderer/main.js";
+import TileRenderer from "./tile-renderer/tile-renderer.js";
 import GridCache from "./grid-cache.js";
 
 const DEFAULT_TILE_SIZE = 16;
