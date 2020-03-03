@@ -117,7 +117,13 @@ function TileRenderer(textureSize,data) {
     if(includedTileset) setTileset(includedTileset);
     includedTileset = null;
 
+    let paused = false;
     Object.defineProperties(this,{
+        paused: {
+            get: () => paused,
+            set: value => paused = Boolean(value),
+            enumerable: true
+        },
         tileset: {
             get: () => tileset,
             set: setTileset,
