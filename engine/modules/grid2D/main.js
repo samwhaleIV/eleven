@@ -303,8 +303,8 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
     const getScreenLocation = (x,y) => {
         return {
-            x: Math.floor(horizontalRenderData.location + (x - horizontalRenderData.startTile) * tileSize),
-            y: Math.floor(verticalRenderData.location + (y - verticalRenderData.startTile) * tileSize)
+            x: horizontalRenderData.location + (x - horizontalRenderData.startTile) * tileSize,
+            y: verticalRenderData.location + (y - verticalRenderData.startTile) * tileSize
         };
     };
 
