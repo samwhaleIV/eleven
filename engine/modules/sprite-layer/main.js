@@ -4,8 +4,8 @@ function SpriteLayer(grid) {
 
     const spriteContainer = new MultiLayer();
 
-    let tileSize = null;
-    const renderHandler = (sprite,context,time) => {
+    let tileSize = null, context = null, time = null;
+    const renderHandler = sprite => {
         let {x, y, width, height} = sprite;
         if(grid.objectOnScreen(x,y,width,height)) {
             const renderPosition = grid.getLocation(x,y);
@@ -14,18 +14,19 @@ function SpriteLayer(grid) {
             sprite.render(context,x,y,width,height,time);
         }
     };
-
-    const update = (context,size,time) => {
-        spriteContainer.forEach(sprite => {
-            if(sprite.update) sprite.update(time);
-        });
+    const updateHandler = sprite => {
+        if(sprite.update) sprite.update(time);
     };
-    const render = (context,size,time) => {
+
+    const update = (context,size,newTime) => {
+        time = newTime;
+        spriteContainer.forEach(updateHandler);
+    };
+    const render = (newContext,size,newTime) => {
+        context = newContext;
+        time = newTime;
         tileSize = grid.tileSize;
-        spriteContainer.forEach(sprite => {
-            if(!sprite.render) return;
-            renderHandler(sprite,context,time);
-        });
+        spriteContainer.forEach(renderHandler);
     };
 
     this.update = update;

@@ -5,7 +5,6 @@ import TileRenderer from "./tile-renderer/main.js";
 import GridCache from "./grid-cache.js";
 
 const DEFAULT_TILE_SIZE = 16;
-const SCALE_FACTOR = 15;
 
 const DEFAULT_WIDTH = 1;
 const DEFAULT_HEIGHT = 1;
@@ -16,7 +15,6 @@ const NO_RENDER_CONFIG_METHOD = () => {
 
 function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.baseTileSize = baseTileSize;
-    const adjustedScaleFactor = SCALE_FACTOR * (DEFAULT_TILE_SIZE / baseTileSize);
 
     let gridWidth = DEFAULT_WIDTH;
     let gridHeight = DEFAULT_HEIGHT;
@@ -53,7 +51,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return tileRenderer;
     };
 
-    let horizontalTiles, verticalTiles, tileSize;
+    let horizontalTiles, verticalTiles, tileSize, pixelSize;
     let halfHorizontalTiles, halfVerticalTiles;
     let tileXOffset, tileYOffset;
     let cameraXOffset, cameraYOffset;
@@ -99,6 +97,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     const resizePanZoom = () => {
         panZoom.resize({halfWidth,halfHeight,tileSize});
     };
+
     const getPanZoom = () => {
         if(!panZoom) {
             panZoom = new PanZoom(camera);
@@ -107,6 +106,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return panZoom;
     };
 
+    let highPrecisionActive = false;
     const resize = data => {
         const hasNewSizeData = data && data.size;
         if(hasNewSizeData) {
@@ -117,11 +117,19 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             halfHeight = size.halfHeight;
         }
 
-        tileSize = Math.ceil(width / adjustedScaleFactor / baseTileSize) * baseTileSize;
-        tileSize = Math.floor(tileSize * camera.scale);
-        if(tileSize % 2 !== 0) tileSize++;
+        let newSize = Math.floor(camera.scale * baseTileSize);
+        if(newSize % 2 !== 0) newSize++;
+
+        if(newSize < baseTileSize) {
+            camera.setScaleUnsafe(1);
+            newSize = baseTileSize;
+        }
+        tileSize = newSize;
+        pixelSize = 1 / tileSize;
 
         if(panZoom) resizePanZoom();
+
+        highPrecisionActive = tileSize % baseTileSize === 0;
 
         horizontalTiles = Math.ceil(width / tileSize);
         verticalTiles = Math.ceil(height / tileSize);
@@ -192,23 +200,25 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         );
     };
 
+    const forceToPixelSpace = value => Math.round(value / pixelSize) * pixelSize;
+
     const getDimensionRenderData = (dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize) => {
         cameraValue += cameraOffset;
 
         let startTile = Math.floor(cameraValue);
-
-        let renderLocation = Math.floor(renderOffset + (startTile - cameraValue) * tileSize);
+        let location = renderOffset + (startTile - cameraValue) * tileSize;
+        if(highPrecisionActive) location = Math.round(location);
 
         let renderStride = tileLength * tileSize;
 
-        if(renderLocation <= -tileSize) {
-            renderLocation += tileSize;
+        if(location <= -tileSize) {
+            location += tileSize;
             tileLength--;
             renderStride -= tileSize;
             startTile++;
         }
 
-        if(renderLocation + renderStride < dimensionSize) {
+        if(location + renderStride < dimensionSize) {
             tileLength++;
             renderStride += tileSize;
         }
@@ -219,7 +229,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             const choppedTiles = -startTile;
             const renderDifference = choppedTiles * tileSize;
             renderStride -= renderDifference;
-            renderLocation += renderDifference;
+            location += renderDifference;
             startTile = 0;
         }
 
@@ -230,7 +240,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             endTile = gridSize;
         }
 
-        return {renderLocation,renderStride,startTile,endTile};   
+        return {location,renderStride,startTile,endTile};   
     };
 
     const getHorizontalRenderData = () => {
@@ -241,10 +251,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const getTileLocation = (pixelX,pixelY) => {
-        const renderX = horizontalRenderData.renderLocation;
+        const renderX = horizontalRenderData.location;
         const startTileX = horizontalRenderData.startTile;
 
-        const renderY = verticalRenderData.renderLocation;
+        const renderY = verticalRenderData.location;
         const startTileY = verticalRenderData.startTile;
 
         pixelX -= renderX; pixelY -= renderY;
@@ -293,8 +303,8 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
     const getScreenLocation = (x,y) => {
         return {
-            x: Math.floor(horizontalRenderData.renderLocation + (x - horizontalRenderData.startTile) * tileSize),
-            y: Math.floor(verticalRenderData.renderLocation + (y - verticalRenderData.startTile) * tileSize)
+            x: Math.floor(horizontalRenderData.location + (x - horizontalRenderData.startTile) * tileSize),
+            y: Math.floor(verticalRenderData.location + (y - verticalRenderData.startTile) * tileSize)
         };
     };
 
@@ -340,12 +350,12 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         if(renderer.paused || !renderer.renderTile) return;
         verifyConfigTileRender();
 
-        let renderX = horizontalRenderData.renderLocation;
+        let renderX = horizontalRenderData.location;
         const startX = horizontalRenderData.startTile;
         const tileXEnd = horizontalRenderData.endTile;
         const horizontalStride = horizontalRenderData.renderStride;
 
-        let renderY = verticalRenderData.renderLocation;
+        let renderY = verticalRenderData.location;
         const startY = verticalRenderData.startTile;
         const tileYEnd = verticalRenderData.endTile;
 
@@ -362,6 +372,16 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             renderY += tileSize;
         }
     };
+
+    const jitterDiagnostic = (()=>{
+        let lastX = 0;
+        return () => {
+            const loc = getScreenLocation(0,0);
+            const dif = loc.x - lastX; lastX = loc.x;
+
+            console.log("x dif",dif,"x ren str",horizontalRenderData.location,"cam x",camera.x);
+        };
+    })();
 
     const render = (context,size,time) => {
         if(renderer.update) renderer.update(context,size,time);
@@ -391,6 +411,11 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         frame.render = render;
     };
 
+    const alignToPixels = object => {
+        object.x = forceToPixelSpace(object.x);
+        object.y = forceToPixelSpace(object.y);
+    };
+
     this.render = render;
     this.resize = resize;
 
@@ -401,6 +426,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.pointOnScreen = pointOnScreen;
     this.tileOnScreen = tileOnScreen;
     this.objectOnScreen = objectOnScreen;
+    this.alignToPixels = alignToPixels;
 
     this.getLocation = getScreenLocation; //Inputs tile space, outputs pixel space
     this.getTileLocation = getTileLocation; //Inputs pixel space, outputs tile space

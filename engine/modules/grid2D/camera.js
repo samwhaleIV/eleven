@@ -32,6 +32,10 @@ function Camera(grid) {
 
     const updateLayers = new MultiLayer();
 
+    this.setScaleUnsafe = value => {
+        scale = value;
+    };
+
     this.reset = () => {
         const fakeTime = {
             now: Infinity, delta: 0
@@ -151,7 +155,7 @@ function Camera(grid) {
 
     this.update = time => {
         updateLayers.forEach(updater => updater(time));
-        postProcessors.forEach(processor => processor(this,time));
+        postProcessors.forEach(processor => processor(time));
         if(paddingEnabled) paddingProcessor();
     };
     Object.seal(this);

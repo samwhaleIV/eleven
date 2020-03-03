@@ -47,18 +47,16 @@ function Render(canvasManager,modules) {
         return internalFrame;
     }
 
-    const time = Object.seal({
-        now: 0, 
-        delta: 0
-    });
+    let now = 0;
+    let delta = 0;
 
     const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
         now: {
-            get: () => time.now,
+            get: () => now,
             enumerable: true
         },
         delta: {
-            get: () => time.delta,
+            get: () => delta,
             enumerable: true
         }
     }));
@@ -75,8 +73,8 @@ function Render(canvasManager,modules) {
     const render = timestamp => {
         if(paused) return;
         tryUpdateSize();
-        time.delta = timestamp - time.now;
-        time.now = timestamp;
+        delta = timestamp - now;
+        now = timestamp;
         pollInput(readonlyTime);
         renderFrame(renderData);
         animationFrame = requestAnimationFrame(render);
