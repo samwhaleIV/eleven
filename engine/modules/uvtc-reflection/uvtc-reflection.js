@@ -3,7 +3,7 @@ import CompositeProcessor from "./composite-processor.js";
 const DEFAULT_WATER_COLOR = "#0E110E";
 const DEFAULT_REFLECTION_ALPHA = 0.15;
 
-function GetBaseReflector(waterColor,reflectionAlpha,tileOffsetDistance,composite) {
+function GetBase(waterColor,reflectionAlpha,tileOffsetDistance,composite) {
     if(!waterColor) {
         waterColor = DEFAULT_WATER_COLOR;
     }
@@ -27,8 +27,8 @@ function GetBaseReflector(waterColor,reflectionAlpha,tileOffsetDistance,composit
     }
     return compositor;
 }
-function GetStaticReflector(grid,waterColor,reflectionAlpha,tileOffsetDistance) {
-    return GetBaseReflector(waterColor,reflectionAlpha,tileOffsetDistance,function(context,buffer,xOffset,yOffset) {
+function GetStatic(grid,waterColor,reflectionAlpha,tileOffsetDistance) {
+    return GetBase(waterColor,reflectionAlpha,tileOffsetDistance,function(context,buffer,xOffset,yOffset) {
         context.fillStyle = this.waterColor;
         const fullWidth = this.width;
         const fullHeight = this.height;
@@ -49,8 +49,8 @@ function GetStaticReflector(grid,waterColor,reflectionAlpha,tileOffsetDistance) 
         );
     });
 }
-function GetScrollableReflector(grid,waterColor,reflectionAlpha,tileOffsetDistance) {
-    return GetBaseReflector(waterColor,reflectionAlpha,tileOffsetDistance,function(context,buffer,xOffset,yOffset) {
+function GetScrollable(grid,waterColor,reflectionAlpha,tileOffsetDistance) {
+    return GetBase(waterColor,reflectionAlpha,tileOffsetDistance,function(context,buffer,xOffset,yOffset) {
         context.fillStyle = this.waterColor;
         const fullWidth = this.width;
         const fullHeight = this.height;
@@ -72,5 +72,9 @@ function GetScrollableReflector(grid,waterColor,reflectionAlpha,tileOffsetDistan
     });
 }
 
-export default GetScrollableReflector;
-export { GetScrollableReflector, GetStaticReflector }
+function UVTCReflection() {
+    this.getScrollable = GetScrollable;
+    this.getStatic = GetStatic;
+    Object.freeze(this);
+}
+export default UVTCReflection;

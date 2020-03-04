@@ -17,6 +17,9 @@ const CANVAS_NOT_IN_DOM = () => {
 const UNEXPECTED_PARAMETERS = () => {
     throw Error("Parameter use is only valid when supplying an uninstantiated frame constructor");
 };
+const SETTING_FRAME_IS_ASYNC = () => {
+    console.warn("Setting a frame using the setter method is not advised because it is an asynchronous operation");
+};
 
 let firstTime = true;
 const LOG_LOOP_STARTED = () => {
@@ -126,21 +129,31 @@ function Render(canvasManager,modules) {
     canvasManager.setFrame = setFrame;
     canvasManager.getFrame = getFrame;
 
-    Object.defineProperty(canvasManager,"paused",{
-        enumerable: true,
-        get: function() {
-            return paused;
+    Object.defineProperties(canvasManager,{
+        frame: {
+            get: getFrame,
+            set: value => {
+                SETTING_FRAME_IS_ASYNC();
+                setFrame(value);
+            },
+            enumerable: true
         },
-        set: value => {
-            value = Boolean(value);
-            if(value) {
-                canvasManager.pause();
-            } else {
-                canvasManager.start();
+        paused: {
+            enumerable: true,
+            get: function() {
+                return paused;
+            },
+            set: value => {
+                value = Boolean(value);
+                if(value) {
+                    canvasManager.pause();
+                } else {
+                    canvasManager.start();
+                }
             }
         }
     });
-    
+
     Object.freeze(this);
 }
 export default Render;

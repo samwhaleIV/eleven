@@ -157,9 +157,9 @@ function Camera(grid) {
         const bottomClip = bottom > height;
         if(!(topClip && bottomClip)) {
             if(topClip) {
-                x -= top;
+                y -= top;
             } else if(bottomClip) {
-                x += height - bottom;
+                y += height - bottom;
             }
         }
     };

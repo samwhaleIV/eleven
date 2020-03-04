@@ -1,7 +1,7 @@
 function LayerCache(columns,rows) {
     const buffer = new OffscreenCanvas(0,0);
     const context = buffer.getContext("2d",{alpha:true});
-    this.tileSize = null;
+    this.tileSize = 0;
     this.tryUpdateSize = tileSize => {
         if(this.tileSize === tileSize) return false;
         buffer.width = columns * tileSize;

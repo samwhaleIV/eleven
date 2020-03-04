@@ -1,5 +1,5 @@
-function CompositeProcessor(alphaContext) {
-    alphaContext = alphaContext ? true : false;
+function CompositeProcessor(transparent) {
+    transparent = transparent ? true : false;
     let width = 0, height = 0;
 
     Object.defineProperties(this,{
@@ -21,12 +21,13 @@ function CompositeProcessor(alphaContext) {
         if(newHeight) height = newHeight;
     };
 
-    const offscreenCanvas = new OffscreenCanvas(width,height);
-    const offscreenContext = offscreenCanvas.getContext("2d",{alpha:alphaContext});
-    const refreshCanvas = () => {
+    const buffer = new OffscreenCanvas(width,height);
+    const bufferContext = buffer.getContext("2d",{alpha:transparent});
+
+    const refreshBuffer = () => {
         resetDimensions();
-        offscreenCanvas.width = width;
-        offscreenCanvas.height = height;
+        buffer.width = width;
+        buffer.height = height;
     };
 
     let enabled = false;
@@ -41,7 +42,7 @@ function CompositeProcessor(alphaContext) {
         xOffset = x; yOffset = y;
     };
 
-    this.resize = refreshCanvas;
+    this.resize = refreshBuffer;
     this.composite = (context,buffer,xOffset,yOffset,mode) => {
         context.save();
         context.globalCompositeOperation = mode;
@@ -52,16 +53,15 @@ function CompositeProcessor(alphaContext) {
         context.restore();
     };
     this.render = context => {
-        if(!enabled) {
-            return;
+        if(!enabled) return;
+
+        if(transparent) {
+            bufferContext.clearRect(0,0,width,height);
         }
-        if(alphaContext) {
-            offscreenContext.clearRect(0,0,width,height);
-        }
-        offscreenContext.drawImage(
+        bufferContext.drawImage(
             context.canvas,0,0,width,height,0,0,width,height
         );
-        this.composite(context,offscreenCanvas,xOffset,yOffset,mode);
+        this.composite(context,buffer,xOffset,yOffset,mode);
     };
 }
 export default CompositeProcessor;

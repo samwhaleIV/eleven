@@ -2,15 +2,16 @@ import LightCache from "./light-cache.js";
 import LayerCache from "./layer-cache.js";
 
 const LIGHTING_LAYER_ID = 4;
+const LIGHTING_TILE_SCALE = 2;
 
-let lightCache = null;
 function UVTCLighting(grid,tileRenderer) {
     if(tileRenderer.maxLayerCount < LIGHTING_LAYER_ID) {
         this.hasLighting = false;
         Object.freeze(this);
+        return;
     }
     this.hasLighting = true;
-    if(!lightCache) lightCache = new LightCache();
+    const lightCache = new LightCache();
     let lightingLayer = null;
     const updateLightingLayer = () => {
         lightingLayer = tileRenderer.readLayer(LIGHTING_LAYER_ID - 1);
@@ -42,11 +43,6 @@ function UVTCLighting(grid,tileRenderer) {
         }
     };
 
-    this.resize = tileSize => {
-        if(!layerCache.tryUpdateSize(tileSize)) return;
-        lightCache.cache(layerCache.tileSize);
-        updateLayerCache();
-    };
     this.refresh = () => {
         updateLightingLayer(); updateLayerCache();
     };
@@ -61,6 +57,11 @@ function UVTCLighting(grid,tileRenderer) {
         );
     };
     Object.freeze(this);
+
+    const tileSize = grid.baseTileSize * LIGHTING_TILE_SCALE;
+    if(!layerCache.tryUpdateSize(tileSize)) return;
+    lightCache.cache(layerCache.tileSize);
+    updateLayerCache();
 }
 
 export default UVTCLighting;

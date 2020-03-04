@@ -105,14 +105,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return panZoom;
     };
 
-    const resizeHandlers = new MultiLayer();
-    const processResizeHandler = layer => layer(tileSize);
-    const dispatchResizeHandlers = () => {
-        resizeHandlers.forEach(processResizeHandler);
-    };
-    this.addResizeHandler = resizeHandlers.add;
-    this.removeResizeHandler = resizeHandlers.remove;
-
     let highPrecisionActive = false;
     const resize = data => {
         const hasNewSizeData = data && data.size;
@@ -153,7 +145,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         cameraXOffset = -Math.floor(halfHorizontalTiles);
         cameraYOffset = -Math.floor(halfVerticalTiles);
 
-        dispatchResizeHandlers();
+        if(renderer.resize) renderer.resize();
     };
 
     const bottomCache = new GridCache(this);
