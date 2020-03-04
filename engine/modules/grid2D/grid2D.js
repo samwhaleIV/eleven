@@ -3,7 +3,6 @@ import PanZoom from "./pan-zoom.js";
 import DebugRenderer from "./debug-renderer.js";
 import TileRenderer from "./tile-renderer/tile-renderer.js";
 import GridCache from "./grid-cache.js";
-import MultiLayer from "../../internal/multi-layer.js";
 
 const DEFAULT_TILE_SIZE = 16;
 const DEFAULT_WIDTH = 1; const DEFAULT_HEIGHT = 1;

@@ -10,8 +10,8 @@ import KeyBind from "./modules/key-bind/key-bind.js";
 import ManagedGamepad from "./modules/managed-gamepad/managed-gamepad.js";
 import SpriteFollower from "./modules/sprite/sprite-follower.js";
 import UVTCLighting from "./modules/uvtc-lighting/uvtc-lighting.js";
-import Dispatcher from "./modules/dispatcher/dispatcher.js";
 import UVTCReflection from "./modules/uvtc-reflection/uvtc-reflection.js";
+import DispatchRenderer from "./modules/dispatch-renderer/dispatch-renderer.js";
 
 const Eleven = Install([
     Singleton({
@@ -37,7 +37,7 @@ const Eleven = Install([
         module: UVTCReflection,
         deferInstantiation: true
     }),
-    Dispatcher
+    DispatchRenderer
 ]);
 
 export default Eleven;

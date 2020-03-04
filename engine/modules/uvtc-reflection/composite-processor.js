@@ -1,3 +1,7 @@
+/*
+  A relic from the ancient times... The time before, that was once, but not of here. Not of now.
+*/
+
 function CompositeProcessor(transparent) {
     transparent = transparent ? true : false;
     let width = 0, height = 0;
@@ -14,6 +18,7 @@ function CompositeProcessor(transparent) {
     });
 
     const resetDimensions = () => {
+        //If you're looking for a render context bug, you're in the right place
         const size = Eleven.CanvasManager.size;
         const newWidth = size.width;
         const newHeight = size.height;
