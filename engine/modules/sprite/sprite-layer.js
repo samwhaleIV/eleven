@@ -7,17 +7,18 @@ function SpriteLayer(grid) {
     let tileSize = null, context = null, time = null;
     const renderHandler = sprite => {
         if(!sprite.render) return;
+
         let {x, y, width, height, xOffset, yOffset} = sprite;
-        if(xOffset) x += xOffset;
-        if(yOffset) y += yOffset;
-        if(grid.objectOnScreen(x,y,width,height)) {
-            const renderPosition = grid.getLocation(x,y);
-            x = renderPosition.x;
-            y = renderPosition.y;
-            width *= tileSize;
-            height *= tileSize;
-            sprite.render(context,x,y,width,height,time);
-        }
+        if(xOffset) x += xOffset; if(yOffset) y += yOffset;
+
+        const screenLocation = grid.getLocation(x,y);
+        x = screenLocation.x; y = screenLocation.y;
+
+        width = Math.floor(width * tileSize);
+        height = Math.floor(height * tileSize);
+        
+        if(!grid.objectOnScreen(x,y,width,height)) return;
+        sprite.render(context,x,y,width,height,time);
     };
     const updateHandler = sprite => {
         if(!sprite.update) return;

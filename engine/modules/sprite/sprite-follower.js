@@ -14,13 +14,15 @@ function SpriteFollower(camera,sprite,active=true) {
         if(!canProcess()) return;
         camera.grid.alignToPixels(target);
         if(followX) {
-            let {x,xOffset} = target;
+            let {x,xOffset,width} = target;
             if(xOffset) x += xOffset;
+            x += width / 2 - 0.5;
             camera.x = x;
         }
         if(followY) {
-            let {y,yOffset} = target;
+            let {y,yOffset,height} = target;
             if(yOffset) y += yOffset;
+            y += height / 2 - 0.5;
             camera.y = y;
         }
     };

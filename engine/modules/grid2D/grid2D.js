@@ -200,7 +200,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         );
     };
 
-    const forceToPixelSpace = value => Math.round(value / pixelSize) * pixelSize;
+    const roundToPixelSpace = value => Math.round(value / pixelSize) * pixelSize;
 
     const getDimensionRenderData = (dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize) => {
         cameraValue += cameraOffset;
@@ -279,18 +279,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         const {left, right, top, bottom} = tileArea;
         return x >= left && x < right && y >= top && y < bottom;
     };
-    const xInBoundsUpper = (x,left,right) => {
-        return x >= left && x < right;
-    };
-    const yInBoundsUpper = (y,top,bottom) => {
-        return y >= top && y < bottom;
-    };
-    const xInBoundsLower = (x,left,right) => {
-        return x > left && x <= right;
-    };
-    const yInBoundsLower = (y,top,bottom) => {
-        return y > top && y <= bottom;
-    };
+
     const tileOnScreen = (x,y) => {
         const xStart = horizontalRenderData.startTile;
         const xEnd = horizontalRenderData.endTile - 1;
@@ -309,32 +298,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const objectOnScreen = (x,y,objectWidth,objectHeight) => {
-
-        //Fails if object is bigger than screen!!
-
-        const screenLocation = getScreenLocation(x,y);
-        x = screenLocation.x; y = screenLocation.y;
-
-        objectWidth = Math.floor(objectWidth * tileSize);
-        objectHeight = Math.floor(objectHeight * tileSize);
-
-        const top = 0;
-        const left = 0;
-        const right = width;
-        const bottom = height;
-
-        let count = 0;
-        const xInUpper = xInBoundsUpper(x,left,right);
-        const yInUpper = yInBoundsUpper(y,top,bottom);
-        const xInLower = xInBoundsLower(x + objectWidth,left,right);
-        const yInLower = yInBoundsLower(y + objectHeight,top,bottom);
-        
-        if(xInLower && yInLower) count++;
-        if(xInUpper && yInLower) count++;
-        if(xInLower && yInUpper) count++;
-        if(xInUpper && yInUpper) count++;
-
-        return count > 0;
+        return !(x + objectWidth <= 0 || y + objectHeight <= 0 || x >= width || y >= height);
     };
 
     const updateRenderData = () => {
@@ -379,9 +343,9 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         let lastX = 0;
         return () => {
             const loc = getScreenLocation(0,0);
-            const dif = loc.x - lastX; lastX = loc.x;
+            const dif = loc.y - lastX; lastX = loc.y;
 
-            console.log("x dif",dif,"x ren str",horizontalRenderData.location,"cam x",camera.x);
+            console.log("y dif",dif,"y ren str",verticalRenderData.location,"cam y",camera.y);
         };
     })();
 
@@ -406,6 +370,8 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         if(useTopCache) drawCache(topCache,context);
 
         if(renderer.finalize) renderer.finalize(context,size,time);
+
+        jitterDiagnostic();
     };
 
     const bindToFrame = frame => {
@@ -414,8 +380,8 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const alignToPixels = object => {
-        object.x = forceToPixelSpace(object.x);
-        object.y = forceToPixelSpace(object.y);
+        object.x = roundToPixelSpace(object.x);
+        object.y = roundToPixelSpace(object.y);
     };
 
     this.render = render;
@@ -433,6 +399,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     this.tileOnScreen = tileOnScreen;
     this.objectOnScreen = objectOnScreen;
     this.alignToPixels = alignToPixels;
+    this.roundToPixels = roundToPixelSpace;
 
     this.getLocation = getScreenLocation; //Inputs tile space, outputs pixel space
     this.getTileLocation = getTileLocation; //Inputs pixel space, outputs tile space

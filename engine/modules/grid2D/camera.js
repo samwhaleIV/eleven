@@ -150,6 +150,7 @@ function Camera(grid) {
                 x -= left;
             } else if(rightClip) {
                 x += width - right;
+                x = grid.roundToPixels(x);
             }
         }
 
@@ -160,6 +161,7 @@ function Camera(grid) {
                 y -= top;
             } else if(bottomClip) {
                 y += height - bottom;
+                y = grid.roundToPixels(y);
             }
         }
     };
