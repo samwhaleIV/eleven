@@ -6,16 +6,22 @@ function SpriteLayer(grid) {
 
     let tileSize = null, context = null, time = null;
     const renderHandler = sprite => {
-        let {x, y, width, height} = sprite;
+        if(!sprite.render) return;
+        let {x, y, width, height, xOffset, yOffset} = sprite;
+        if(xOffset) x += xOffset;
+        if(yOffset) y += yOffset;
         if(grid.objectOnScreen(x,y,width,height)) {
             const renderPosition = grid.getLocation(x,y);
-            x = renderPosition.x; y = renderPosition.y;
-            width *= tileSize; height *= tileSize;
+            x = renderPosition.x;
+            y = renderPosition.y;
+            width *= tileSize;
+            height *= tileSize;
             sprite.render(context,x,y,width,height,time);
         }
     };
     const updateHandler = sprite => {
-        if(sprite.update) sprite.update(time);
+        if(!sprite.update) return;
+        sprite.update(time);
     };
 
     const update = (context,size,newTime) => {

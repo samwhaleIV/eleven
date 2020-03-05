@@ -13,8 +13,16 @@ function SpriteFollower(camera,sprite,active=true) {
     const processor = () => {
         if(!canProcess()) return;
         camera.grid.alignToPixels(target);
-        if(followX) camera.x = target.x;
-        if(followY) camera.y = target.y;
+        if(followX) {
+            let {x,xOffset} = target;
+            if(xOffset) x += xOffset;
+            camera.x = x;
+        }
+        if(followY) {
+            let {y,yOffset} = target;
+            if(yOffset) y += yOffset;
+            camera.y = y;
+        }
     };
 
     let processorID = null;
