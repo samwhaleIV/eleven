@@ -9,10 +9,12 @@ import SpriteLayer from "./modules/sprite/sprite-layer.js";
 import KeyBind from "./modules/key-bind/key-bind.js";
 import ManagedGamepad from "./modules/managed-gamepad/managed-gamepad.js";
 import SpriteFollower from "./modules/sprite/sprite-follower.js";
-import UVTCLighting from "./modules/uvtc-lighting/uvtc-lighting.js";
-import UVTCReflection from "./modules/uvtc-reflection/uvtc-reflection.js";
 import DispatchRenderer from "./modules/dispatch-renderer/dispatch-renderer.js";
 import CollisionLayer from "./modules/sprite/collision-layer.js";
+
+import UVTCLighting from "./modules/uvtc-lighting/uvtc-lighting.js";
+import UVTCReflection from "./modules/uvtc-reflection/uvtc-reflection.js";
+import UVTCCollision from "./modules/sprite/uvtc-collision.js";
 
 const Eleven = Install([
     Singleton({
@@ -39,7 +41,8 @@ const Eleven = Install([
         deferInstantiation: true
     }),
     DispatchRenderer,
-    CollisionLayer
+    CollisionLayer,
+    UVTCCollision
 ]);
 
 export default Eleven;
