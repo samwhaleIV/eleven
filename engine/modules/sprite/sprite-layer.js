@@ -1,4 +1,5 @@
 import MultiLayer from "../../internal/multi-layer.js";
+import CollisionLayer from "./collision-layer.js";
 
 function SpriteLayer(grid) {
 
@@ -44,10 +45,18 @@ function SpriteLayer(grid) {
         renderer.render = render;
     };
 
-    this.add = spriteContainer.add;
+    this.add = sprite => {
+        const ID = spriteContainer.add(sprite);
+        sprite.ID = ID;
+        return ID;
+    };
+
+    this.getCollisionLayer = () => {
+        return new CollisionLayer(grid,spriteContainer);
+    };
+
     this.remove = spriteContainer.remove;
     this.clear = spriteContainer.clear;
-
     Object.freeze(this);
 }
 export default SpriteLayer;

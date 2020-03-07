@@ -370,8 +370,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         if(useTopCache) drawCache(topCache,context);
 
         if(renderer.finalize) renderer.finalize(context,size,time);
-
-        jitterDiagnostic();
     };
 
     const bindToFrame = frame => {

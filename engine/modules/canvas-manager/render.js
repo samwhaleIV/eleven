@@ -1,6 +1,7 @@
 import InstallFrame from "../frame/loader.js";
 
 const LOG_PREFIX = "Canvas manager";
+const MAX_FRAMETIME_DELTA = 1000 / 15; //1 Second (in milliseconds) dividied by minimum FPS
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
     throw Error("Render loop already paused");
@@ -77,6 +78,7 @@ function Render(canvasManager,modules) {
         if(paused) return;
         tryUpdateSize();
         delta = timestamp - now;
+        if(delta > MAX_FRAMETIME_DELTA) delta = MAX_FRAMETIME_DELTA;
         now = timestamp;
         pollInput(readonlyTime);
         renderFrame(renderData);

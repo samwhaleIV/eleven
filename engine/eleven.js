@@ -12,6 +12,7 @@ import SpriteFollower from "./modules/sprite/sprite-follower.js";
 import UVTCLighting from "./modules/uvtc-lighting/uvtc-lighting.js";
 import UVTCReflection from "./modules/uvtc-reflection/uvtc-reflection.js";
 import DispatchRenderer from "./modules/dispatch-renderer/dispatch-renderer.js";
+import CollisionLayer from "./modules/sprite/collision-layer.js";
 
 const Eleven = Install([
     Singleton({
@@ -37,7 +38,8 @@ const Eleven = Install([
         module: UVTCReflection,
         deferInstantiation: true
     }),
-    DispatchRenderer
+    DispatchRenderer,
+    CollisionLayer
 ]);
 
 export default Eleven;
