@@ -1,9 +1,8 @@
 import PlayerDirections from "./player-directions.js";
 import PlayerInput from "./player-input.js";
 
-const MAX_CHANGE_PER_FRAME = 1 / 16;
-
-const DEFAULT_SPEED = 5; //Tiles per second
+const MAX_CHANGE_LIMIT = 4 / 16; //Max position change per frame
+const DEFAULT_SPEED = 4; //Tiles per second
 
 const POLARITY_LOOKUP = [];
 POLARITY_LOOKUP[PlayerDirections.Up] = -1;
@@ -79,7 +78,8 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         const deltaSecond = time.delta / 1000;
         let change = tilesPerSecond * deltaSecond;
 
-        if(change > MAX_CHANGE_PER_FRAME) change = MAX_CHANGE_PER_FRAME;
+        console.log(change);
+        if(change > MAX_CHANGE_LIMIT) change = MAX_CHANGE_LIMIT;
 
         let targetProperty, lengthProperty;
 
