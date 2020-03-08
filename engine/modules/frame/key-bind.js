@@ -33,8 +33,11 @@ function KeyBind(filters) {
     this.poll = target => {
         return (downKeys,time) => pollingFilter(target,downKeys,time);
     };
+
     this.impulse = target => {
-        return keyEvent => impulseFilter(target,keyEvent);
+        return keyEvent => {
+            impulseFilter(target,keyEvent);
+        };
     };
 
     Object.freeze(this);

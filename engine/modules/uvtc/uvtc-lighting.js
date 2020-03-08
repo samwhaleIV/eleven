@@ -1,5 +1,5 @@
-import LightCache from "./light-cache.js";
-import LayerCache from "./layer-cache.js";
+import LightCache from "./lighting/light-cache.js";
+import LayerCache from "./lighting/layer-cache.js";
 
 const LIGHTING_LAYER_ID = 4;
 const LIGHTING_TILE_SCALE = 2;

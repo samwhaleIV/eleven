@@ -18,10 +18,6 @@ function tryPreventDefault(event) {
         event.preventDefault();
     }
 }
-function stopBubbling(event) {
-    tryPreventDefault(event);
-    tryStopPropagation(event);
-}
 function MakeAssociative(array) {
     return Object.freeze(array.reduce((keys,value)=>{
         keys[value] = true; return keys;
@@ -31,7 +27,6 @@ function MakeAssociative(array) {
 const SYSTEM_KEYS = MakeAssociative([
     "F12","F11","F5"
 ]);
-
 
 const ALT_KEYS = ["AltLeft","AltRight"];
 const CTRL_KEYS = ["ControlLeft","ControlRight"];
@@ -70,6 +65,7 @@ function Input(canvasManager,modules) {
     const summariseKeyEvent = event => {
         return {
             code: event.code,
+            repeat: event.repeat,
             key: event.key,
             ctrlKey: event.ctrlKey,
             shiftKey: event.shiftKey,
@@ -106,9 +102,6 @@ function Input(canvasManager,modules) {
 
     this.installDOM = () => {
         window.addEventListener("keydown",function(event){
-            if(event.repeat) {
-                stopBubbling(event);
-            }
             downKeys[event.code] = summariseKeyEvent(event);
             sendKeyDown(event);
         },{

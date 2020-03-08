@@ -1,11 +1,31 @@
 import MultiLayer from "../../internal/multi-layer.js";
-import CollisionLayer from "./collision-layer.js";
+import CollisionLayer from "../collision/collision-layer.js";
+
+const HIT_BOX_COLOR = "rgba(180,0,0,0.5)";
 
 function SpriteLayer(grid) {
 
     const spriteContainer = new MultiLayer();
 
     let tileSize = null, context = null, time = null;
+
+    const renderHitBox = sprite => {
+        const hitBox = sprite.hitBox; if(!hitBox) return;
+
+        let {x, y, width, height} = hitBox;
+
+        const screenLocation = grid.getLocation(x,y);
+        x = screenLocation.x; y = screenLocation.y;
+
+        width = Math.floor(width * tileSize);
+        height = Math.floor(height * tileSize);
+        
+        if(!grid.objectOnScreen(x,y,width,height)) return;
+
+        context.fillStyle = HIT_BOX_COLOR;
+        context.fillRect(x,y,width,height);
+    };
+
     const renderHandler = sprite => {
         if(!sprite.render) return;
 
@@ -20,6 +40,7 @@ function SpriteLayer(grid) {
         
         if(!grid.objectOnScreen(x,y,width,height)) return;
         sprite.render(context,x,y,width,height,time);
+        if(sprite.showHitBox) renderHitBox(sprite);
     };
     const updateHandler = sprite => {
         if(!sprite.update) return;

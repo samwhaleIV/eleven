@@ -24,9 +24,9 @@ const LEFT_Y_AXIS = 1;
 const RIGHT_X_AXIS = 2
 const RIGHT_Y_AXIS = 3;
 
-const getImpulseEvent = (impulse,{code,key}) => {
+const getImpulseEvent = (impulse,{code,key,isRepeating}) => {
     return {
-        impulse: impulse, code, key,
+        impulse: impulse, code, key, repeat: isRepeating,
         ctrlKey: false, shiftKey: false, altKey: false
     };
 };
@@ -43,6 +43,7 @@ function ButtonState(code) {
     this.pressed = false;
     this.pressedTime = null;
     this.repeatTime = null;
+    this.isRepeating = false;
     Object.seal(this);
 }
 
@@ -56,6 +57,7 @@ function AxisState(codes) {
     this.pressed = false;
     this.pressedTime = null;
     this.repeatTime = null;
+    this.isRepeating = false;
     Object.seal(this);
 }
 
@@ -173,8 +175,10 @@ function ManagedGamepad(settings) {
             if(!sendMode) {
                 buttonState.repeatTime = null;
             }
+            buttonState.isRepeating = false;
             sendKey(sendMode,buttonState);
         } else if(isPressed && doRepeat) {
+            buttonState.isRepeating = true;
             processKeyRepeat(buttonState,timestamp);
         }
     };
@@ -219,7 +223,9 @@ function ManagedGamepad(settings) {
     const poll = ({buttons,axes},time) => {
         const timestamp = time.now;
         let buttonIndex = 0;
-        const downKeys = {};
+        let downKeys;
+        const shouldMakeDownKeys = Boolean(inputGamepad);
+        if(shouldMakeDownKeys) downKeys = {};
         do {
             const button = buttons[buttonIndex];
             const buttonState = buttonStates[buttonIndex];
@@ -230,13 +236,17 @@ function ManagedGamepad(settings) {
             const code = buttonState.inverseCode;
             if(code in binds) {
                 const impulse = binds[code];
-                if(isPressed) downKeys[impulse] = getImpulseEvent(impulse,buttonState);
                 const doRepeat = isTrigger ? repeatTriggers : repeatButtons;
+
                 processButtonState(buttonState,isPressed,doRepeat,timestamp);
+
+                if(shouldMakeDownKeys && isPressed) {
+                    downKeys[impulse] = getImpulseEvent(impulse,buttonState);
+                }
             }
         } while(++buttonIndex < buttonCount);
         processGamepadAxes(axes,timestamp);
-        if(inputGamepad) {
+        if(shouldMakeDownKeys) {
             if(leftAxisState.pressed && leftAxisState.code !== null) {
                 const impulse = binds[leftAxisState.inverseCode];
                 downKeys[impulse] = getImpulseEvent(impulse,leftAxisState);
