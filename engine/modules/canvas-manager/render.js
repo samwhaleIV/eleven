@@ -1,7 +1,8 @@
 import InstallFrame from "../frame/loader.js";
 
 const LOG_PREFIX = "Canvas manager";
-const MAX_FRAMETIME_DELTA = 1000 / 15; //1 Second (in milliseconds) dividied by minimum FPS
+const MINIMUM_FPS = 15;
+const MAX_FRAMETIME_DELTA = 1000 / MINIMUM_FPS;
 
 const RENDER_LOOP_ALREADY_PAUSED = () => {
     throw Error("Render loop already paused");
@@ -51,8 +52,7 @@ function Render(canvasManager,modules) {
         return internalFrame;
     }
 
-    let now = 0;
-    let delta = 0;
+    let now = 0, delta = 0;
 
     const readonlyTime = Object.freeze(Object.defineProperties(new Object(),{
         now: {
@@ -113,6 +113,7 @@ function Render(canvasManager,modules) {
         }
 
         paused = false;
+        now = performance.now();
         animationFrame = requestAnimationFrame(render);
         LOG_LOOP_STARTED();
         if(markLoaded) {
