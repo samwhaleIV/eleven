@@ -78,7 +78,6 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         const deltaSecond = time.delta / 1000;
         let change = tilesPerSecond * deltaSecond;
 
-        console.log(change);
         if(change > MAX_CHANGE_LIMIT) change = MAX_CHANGE_LIMIT;
 
         let targetProperty, lengthProperty;
