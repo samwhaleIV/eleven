@@ -104,7 +104,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return panZoom;
     };
 
-    let highPrecisionActive = false;
     const resize = data => {
         const hasNewSizeData = data && data.size;
         if(hasNewSizeData) {
@@ -126,8 +125,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         pixelSize = 1 / tileSize;
 
         if(panZoom) resizePanZoom();
-
-        highPrecisionActive = tileSize % baseTileSize === 0;
 
         horizontalTiles = Math.ceil(width / tileSize);
         verticalTiles = Math.ceil(height / tileSize);
@@ -206,8 +203,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         cameraValue += cameraOffset;
 
         let startTile = Math.floor(cameraValue);
-        let location = renderOffset + (startTile - cameraValue) * tileSize;
-        if(highPrecisionActive) location = Math.round(location);
+        let location = Math.floor(Number((renderOffset + (startTile - cameraValue) * tileSize).toFixed(8)));
 
         let renderStride = tileLength * tileSize;
 
@@ -241,6 +237,12 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         }
 
         return {location,renderStride,startTile,endTile};   
+    };
+
+    this.hitMeWithSomeJitter = () => {
+        const randomRange = (min,max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        Eleven.CanvasManager.frame.sprite.tilesPerSecond = randomRange(1,7);
+        Eleven.CanvasManager.frame.grid.camera.scale = randomRange(1,20);
     };
 
     const getHorizontalRenderData = () => {
@@ -340,12 +342,13 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const jitterDiagnostic = (()=>{
-        let lastX = 0;
+        let lastX = 0, lastY = 0;
         return () => {
             const loc = getScreenLocation(0,0);
-            const dif = loc.y - lastX; lastX = loc.y;
+            const difX = loc.x - lastX; lastX = loc.x;
+            const difY = loc.y - lastY; lastY = loc.y;
 
-            console.log("y dif",dif,"y ren str",verticalRenderData.location,"cam y",camera.y);
+            console.log(`${String(difX).padEnd(10," ")}     ${String(difY).padEnd(10," ")}       ${String(horizontalRenderData.location).padEnd(15," ")}         ${String(verticalRenderData.location).padEnd(15," ")}`);
         };
     })();
 
