@@ -23,6 +23,8 @@ import PlayerController from "./modules/uvtc/player/player-controller.js";
 import InstallHitBox from "./modules/sprite/hitbox.js";
 
 import AnimatedSprite from "./modules/uvtc/animated-sprite.js";
+import WaterBackground from "./modules/uvtc/water-background.js";
+import TileSprite from "./modules/uvtc/tile-sprite.js";
 
 const Eleven = Install([
     Singleton({
@@ -53,7 +55,9 @@ const Eleven = Install([
     TileCollision,
     PlayerController,
     InstallHitBox,
-    AnimatedSprite
+    AnimatedSprite,
+    WaterBackground,
+    TileSprite
 ]);
 
 export default Eleven;

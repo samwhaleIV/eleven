@@ -220,7 +220,6 @@ function Mouse(canvasManager,modules) {
         },captureOptions);
 
         target.addEventListener("wheel",function(event){
-            if(event.ctrlKey) return;
             event.preventDefault();
             event.stopPropagation();
             const delta = event.deltaY;

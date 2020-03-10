@@ -84,9 +84,10 @@ function Render(canvasManager,modules) {
         renderFrame(renderData);
         animationFrame = requestAnimationFrame(render);
     };
-    canvasManager.start = async ({
-        target,frame,parameters,markLoaded=true,markLoading=true
-    }) => {
+    canvasManager.start = async data => {
+        let {
+            target,frame,parameters,markLoaded=true,markLoading=true
+        } = data || {};
         if(!paused) {
             RENDER_LOOP_ALREADY_STARTED();
         }
