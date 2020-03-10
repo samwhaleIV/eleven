@@ -43,7 +43,7 @@ function PlayerInput(playerController,directionImpulses) {
     };
 
     const translateImpulse = target => {
-        return ({impulse,code,repeat}) => {
+        return ({impulse,code}) => {
             if(!(impulse in directionImpulses)) return;
             target(code,directionLookup[directionImpulses[impulse]]);
         };

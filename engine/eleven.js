@@ -22,6 +22,8 @@ import CollisionLayer from "./modules/collision/collision-layer.js";
 import PlayerController from "./modules/uvtc/player/player-controller.js";
 import InstallHitBox from "./modules/sprite/hitbox.js";
 
+import AnimatedSprite from "./modules/uvtc/animated-sprite.js";
+
 const Eleven = Install([
     Singleton({
         module: CanvasManager,
@@ -50,7 +52,8 @@ const Eleven = Install([
     CollisionLayer,
     TileCollision,
     PlayerController,
-    InstallHitBox
+    InstallHitBox,
+    AnimatedSprite
 ]);
 
 export default Eleven;

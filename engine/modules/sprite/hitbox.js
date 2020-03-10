@@ -1,17 +1,25 @@
 function InstallHitBox(target,width,height) {
 
-    const halfHitBoxWidth = width / 2;
-    const halfHitBoxHeight = height / 2;
+    let hitBoxWidth = width;
+    let hitBoxHeight = height;
 
-    const hitBox = {width, height};
+    const hitBox = Object.seal({
+        width: hitBoxWidth,
+        height: hitBoxHeight,
+        x: null, y: null
+    });
 
     const getHitBox = () => {
+        hitBoxWidth = hitBox.width;
+        hitBoxHeight = hitBox.height;
+
         const {x,y,width,height} = target;
+
         const xCenter = width / 2 + x;
         const yCenter = height / 2 + y;
 
-        hitBox.x = xCenter - halfHitBoxWidth;
-        hitBox.y = yCenter - halfHitBoxHeight;
+        hitBox.x = xCenter - (hitBoxWidth / 2);
+        hitBox.y = yCenter - (hitBoxHeight / 2);
         return hitBox;
     };
 

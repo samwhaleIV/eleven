@@ -59,6 +59,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         const hitBoxDifference = (hitBox[lengthProperty] - sprite[lengthProperty]) / 2;
 
         if(collisionResult) {
+            sprite.colliding = true;
             let newValue = collisionResult[targetProperty];
             if(polarity < 0) {
                 newValue += collisionResult[lengthProperty];
@@ -71,6 +72,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
     };
 
     sprite.update = time => {
+        sprite.colliding = false;
         if(locked || !moving) return;
 
         const {tilesPerSecond, direction} = sprite;
