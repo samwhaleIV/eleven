@@ -28,12 +28,8 @@ function* TextGenerator(
     let y = boxPadding, x = boxPadding;
     const maxX = width - boxPadding;
     const rowHeight = scale * GlyphTable.height + rowSpacing;
-    const status = {last:null,current:null,next:null};
     const getStatus = (value,next) => {
-        status.last = status.value;
-        status.current = value;
-        status.next = next;
-        return Object.assign(new Object(),status);
+        return {current:value,next};
     };
     for(let i = 0;i<words.length;i++) {
         const {text,color} = words[i];
