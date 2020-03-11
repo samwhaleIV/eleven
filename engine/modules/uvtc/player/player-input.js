@@ -28,10 +28,10 @@ function PlayerInput(playerController,directionImpulses) {
     };
 
     const setMoving = () => {
-        playerController.moving = true;
+        playerController.inputActive = true;
     };
     const setNotMoving = () => {
-        playerController.moving = false;
+        playerController.inputActive = false;
     };
 
     const updateDirection = () => {

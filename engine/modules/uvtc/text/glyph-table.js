@@ -2,7 +2,6 @@ import FontData from "./font-data.js";
 
 const DEFAULT_COLOR = "black";
 
-let table = null;
 function LoadTable() {
     const metadata = FontData.meta;
     const glyphs = new Object();
@@ -13,44 +12,39 @@ function LoadTable() {
         glyphs[character] = [glpyhX,size];
         glpyhX += size;
     }
-    table = glyphs;
+    return glyphs;
 }
-LoadTable();
 
-let bitmap = null;
 function LoadBitmap() {
-    return new Promise((resolve,reject) => {
-        if(bitmap) resolve(bitmap);
-        const image = new Image();
-        bitmap = image;
-        image.onload = () => {
-            resolve(bitmap);
-        };
-        image.onerror = error => {
-            reject(error);
-        };
-        image.src = FontData.data;
-    });
+    const {width, height, blob} = JSON.parse(FontData.data);
+    const canvas = new OffscreenCanvas(width,height);
+    const context = canvas.getContext("2d",{alpha:true});
+
+    const imageData = context.createImageData(width,height);
+    const pixelData = imageData.data;
+
+    const ALPHA_COMPONENT = 3;
+
+    for(let i = 0;i<pixelData.length;i+=4) {
+        pixelData[i + ALPHA_COMPONENT] = Number(blob[i / 4]) ? 255 : 0;
+    }
+
+    context.putImageData(imageData,0,0);
+    return canvas.transferToImageBitmap();
 }
 
-function GlyphTable() {
-    let bitmap = null, glyphHeight = null;
-    this.load = async () => {
-        bitmap = await LoadBitmap();
-        glyphHeight = bitmap.height;
-        return this;
-    };
+const GlyphTable = new (function() {
+    const table = LoadTable();
+    const bitmap = LoadBitmap();
+    const glyphHeight = bitmap.height;
 
     Object.defineProperty(this,"height",{
         get: () => glyphHeight,
         enumerable: true
     });
+    this.getWidth = character => table[character][1];
 
-    this.getWidth = character => {
-        return table[character][1];
-    };
-
-    this.getRenderer = (context,scale=1) => {
+    this.getRenderer = (context,scale) => {
         const buffer = new OffscreenCanvas(0,0);
         buffer.height = glyphHeight;
         
@@ -83,6 +77,6 @@ function GlyphTable() {
             return renderWidth;
         };
     };
-}
+})();
 
 export default GlyphTable;

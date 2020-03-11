@@ -26,6 +26,9 @@ import AnimatedSprite from "./modules/uvtc/animated-sprite.js";
 import WaterBackground from "./modules/uvtc/water-background.js";
 import TileSprite from "./modules/uvtc/tile-sprite.js";
 
+import TextLayer from "./modules/uvtc/text/text-layer.js";
+import SpeechBox from "./modules/uvtc/text/speech-box.js";
+
 const Eleven = Install([
     Singleton({
         module: CanvasManager,
@@ -57,7 +60,9 @@ const Eleven = Install([
     InstallHitBox,
     AnimatedSprite,
     WaterBackground,
-    TileSprite
+    TileSprite,
+    TextLayer,
+    SpeechBox
 ]);
 
 export default Eleven;

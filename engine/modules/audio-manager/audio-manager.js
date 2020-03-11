@@ -3,6 +3,7 @@ import Constants from "../../internal/constants.js";
 import InstallVolumeControls from "./volume-control.js";
 import Radio from "./radio.js";
 import InstallIntroHelper from "./intro-helper.js";
+import TonePlayer from "./tone-player.js";
 
 const DEFAULT_SOUND_VOLUME = Constants.DefaultSoundVolume;
 const DEFAULT_MUSIC_VOLUME = Constants.DefaultMusicVolume;
@@ -11,13 +12,14 @@ function AudioManager() {
 
     InstallIntroHelper(this);
 
+    const {soundNode, musicNode} = InstallVolumeControls({
+        target: this,
+        output: audioContext.destination,
+        soundVolume: DEFAULT_SOUND_VOLUME,
+        musicVolume: DEFAULT_MUSIC_VOLUME
+    });
+
     const {soundRadio, musicRadio} = (()=>{
-        const {soundNode, musicNode} = InstallVolumeControls({
-            target: this,
-            output: audioContext.destination,
-            soundVolume: DEFAULT_SOUND_VOLUME,
-            musicVolume: DEFAULT_MUSIC_VOLUME
-        });
         const soundRadio = new Radio({
             targetNode: soundNode,
             singleSource: false
@@ -91,6 +93,8 @@ function AudioManager() {
     this.playLooping = function(buffer,loopStart=0,isMusic=true) {
         return (isMusic ? this.playMusicLooping: this.playSoundLooping)({buffer,loopStart});
     };
+
+    TonePlayer(this,soundNode);
 
     Object.freeze(this);
 }

@@ -12,12 +12,12 @@ POLARITY_LOOKUP[PlayerDirections.Right] = 1;
 
 function PlayerController(sprite,collisionLayer,tileCollision) {
 
-    let locked = false, moving = false;
+    let locked = false, inputActive = false, colliding = false;
 
     this.lock = () => locked = true;
     this.unlock = () => locked = false;
 
-    const getMoving = () => moving;
+    const getMoving = () => !locked && inputActive && !colliding;
 
     Object.defineProperties(this,{
         locked: {
@@ -25,9 +25,9 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             set: value => locked = Boolean(value),
             enumerable: true
         },
-        moving: {
-            get: getMoving,
-            set: value => moving = Boolean(value),
+        inputActive: {
+            get: () => inputActive,
+            set: value => inputActive = Boolean(value),
             enumerable: true
         },
         direction: {
@@ -59,7 +59,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         const hitBoxDifference = (hitBox[lengthProperty] - sprite[lengthProperty]) / 2;
 
         if(collisionResult) {
-            sprite.colliding = true;
+            colliding = true;
             let newValue = collisionResult[targetProperty];
             if(polarity < 0) {
                 newValue += collisionResult[lengthProperty];
@@ -72,8 +72,8 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
     };
 
     sprite.update = time => {
-        sprite.colliding = false;
-        if(locked || !moving) return;
+        colliding = false;
+        if(locked || !inputActive) return;
 
         const {tilesPerSecond, direction} = sprite;
 

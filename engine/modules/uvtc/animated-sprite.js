@@ -29,7 +29,7 @@ function AnimatedSprite(texture,x,y) {
 
     this.render = (context,x,y,width,height,time) => {
         const textureX = DIRECTION_MATRIX[this.direction];
-        const textureY = this.moving && !this.colliding ? getAnimationRow(time) : 0;
+        const textureY = this.moving ? getAnimationRow(time) : 0;
 
         context.drawImage(
             texture,
