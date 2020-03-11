@@ -78,12 +78,12 @@ function* TextGenerator(
                     xOffset = 0; y += rowHeight;
                 }
             }
-            renderCharacter(character,x + xOffset,y,color) + textSpacing;
+            renderCharacter(character,x + xOffset,y,color);
             xOffset += width;
             yield getStatus(character,text[c+1]||null);
         }
         if(i !== words.length - 1) yield getStatus(" ",words[i+1].text[0]||null);
-        x += wordSize + wordSpacing;
+        x += xOffset + wordSpacing;
     }
 }
 
