@@ -21,6 +21,13 @@ const FilterEllipsis = words => {
     }
 };
 
+const LONG_WORD_CLIP_JUSTIFICATION = 3 / 4;
+const LONG_WORD_CLIP_CHARACTER = "-";
+
+const IS_ALPHABETICAL = character => {
+    return character.toLowerCase() !== character.toUpperCase();
+};
+
 function* TextGenerator(
     words,renderCharacter,width,scale,
     textSpacing,wordSpacing,rowSpacing,boxPadding
@@ -31,6 +38,16 @@ function* TextGenerator(
     const getStatus = (value,next) => {
         return {current:value,next};
     };
+
+    const clipCharacter = LONG_WORD_CLIP_CHARACTER;
+
+    const getWidth = character => GlyphTable.getWidth(character) * scale + textSpacing;
+    const hyphenWidth = getWidth(clipCharacter);
+
+    const clipJustification = LONG_WORD_CLIP_JUSTIFICATION;
+
+    const widthRange = maxX - boxPadding;
+
     for(let i = 0;i<words.length;i++) {
         const {text,color} = words[i];
         if(text === "\n") {
@@ -38,15 +55,31 @@ function* TextGenerator(
         }
         let wordSize = 0;
         for(const character of text) {
-            wordSize += GlyphTable.getWidth(character) * scale + textSpacing;
+            wordSize += getWidth(character);
         }
-        if(x + wordSize > maxX && !(boxPadding + wordSize > maxX)) {
+        let rowClip = boxPadding + wordSize > maxX;
+        const wordClip = x + wordSize > maxX;
+
+        if(x / widthRange > clipJustification) rowClip = false;
+
+        if(wordClip && !rowClip) {
             y += rowHeight; x = boxPadding;
         }
         let xOffset = 0;
         for(let c = 0;c<text.length;c++) {
             const character = text[c];
-            xOffset += renderCharacter(character,x + xOffset,y,color) + textSpacing;
+            const width = getWidth(character);
+            if(wordClip) {
+                const isAlphabetical = IS_ALPHABETICAL(character);
+                let max = maxX; if(isAlphabetical) max -= hyphenWidth;
+                if(x + xOffset + width >= max) {
+                    if(isAlphabetical) renderCharacter(clipCharacter,x + xOffset,y,color);
+                    x = boxPadding;
+                    xOffset = 0; y += rowHeight;
+                }
+            }
+            renderCharacter(character,x + xOffset,y,color) + textSpacing;
+            xOffset += width;
             yield getStatus(character,text[c+1]||null);
         }
         if(i !== words.length - 1) yield getStatus(" ",words[i+1].text[0]||null);
