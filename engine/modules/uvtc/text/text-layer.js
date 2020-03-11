@@ -72,7 +72,7 @@ function* TextGenerator(
             if(wordClip) {
                 const isAlphabetical = IS_ALPHABETICAL(character);
                 let max = maxX; if(isAlphabetical) max -= hyphenWidth;
-                if(x + xOffset + width >= max) {
+                if(x + xOffset + width > max) {
                     if(isAlphabetical) renderCharacter(clipCharacter,x + xOffset,y,color);
                     x = boxPadding;
                     xOffset = 0; y += rowHeight;
