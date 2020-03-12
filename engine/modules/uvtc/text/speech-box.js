@@ -61,10 +61,6 @@ function SpeechBox(textLayer,playSound) {
         running = false; finished = true;
     };
 
-    const tryPlaySound = () => {
-        if(playSound) playSound();
-    };
-
     this.start = async () => {
         if(finished || running) return;
         running = true;
@@ -73,15 +69,19 @@ function SpeechBox(textLayer,playSound) {
             const {done, value} = textLayer.next();
             if(!done) {
                 const {current, next} = value;
-                const duration = getDuration(current);
+
                 if(playSound) {
                     if(instance % 2 == 0) playSound();
                     instance += 1;
                 };
 
-                if(duration && !(IS_PUNCTUATION(next) && IS_PUNCTUATION(current))) {
-                    await asyncTimeout(duration);
+                if(next !== null) {
+                    const duration = getDuration(current);
+                    if(duration && !(IS_PUNCTUATION(next) && IS_PUNCTUATION(current))) {
+                        await asyncTimeout(duration);
+                    }
                 }
+
             } else {
                 markFinished();
             }
@@ -89,7 +89,7 @@ function SpeechBox(textLayer,playSound) {
     };
 
     this.finish = () => {
-        tryPlaySound(); textLayer.finish(); markFinished();
+        textLayer.finish(); markFinished();
     };
 }
 export default SpeechBox;

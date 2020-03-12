@@ -49,7 +49,9 @@ function* TextGenerator(
     const widthRange = maxX - boxPadding;
 
     for(let i = 0;i<words.length;i++) {
+        const onLastWord = i === words.length - 1;
         const {text,color} = words[i];
+
         if(text === "\n") {
             x = boxPadding; y += rowHeight; continue;
         }
@@ -67,6 +69,8 @@ function* TextGenerator(
         }
         let xOffset = 0;
         for(let c = 0;c<text.length;c++) {
+            const onLastLetter = c === text.length - 1;
+
             const character = text[c];
             const width = getWidth(character);
             if(wordClip) {
@@ -80,9 +84,13 @@ function* TextGenerator(
             }
             renderCharacter(character,x + xOffset,y,color);
             xOffset += width;
-            yield getStatus(character,text[c+1]||null);
+            const next = onLastWord && onLastLetter ? null : onLastLetter ? " " : text[c+1];
+            yield getStatus(character,next);
         }
-        if(i !== words.length - 1) yield getStatus(" ",words[i+1].text[0]||null);
+        if(!onLastWord) {
+            const next = words[i+1].text[0];
+            yield getStatus(" ",next);
+        }
         x += xOffset + wordSpacing;
     }
 }

@@ -19,10 +19,28 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
 
     const getMoving = () => !locked && inputActive && !colliding;
 
+    let pendingDirection = null;
+
+    const trySetDirection = value => {
+        if(locked) {
+            pendingDirection = value;
+            return;
+        }
+        sprite.direction = value;
+    };
+
+    const updateLocked = value => {
+        locked = Boolean(value);
+        if(!locked && pendingDirection) {
+            if(inputActive) sprite.direction = pendingDirection;
+            pendingDirection = null;
+        }
+    };
+
     Object.defineProperties(this,{
         locked: {
             get: () => locked,
-            set: value => locked = Boolean(value),
+            set: updateLocked,
             enumerable: true
         },
         inputActive: {
@@ -32,7 +50,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         },
         direction: {
             get: () => sprite.direction,
-            set: value => sprite.direction = value,
+            set: trySetDirection,
             enumerable: true
         }
     });
