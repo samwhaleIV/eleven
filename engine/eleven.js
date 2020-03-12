@@ -28,6 +28,7 @@ import TileSprite from "./modules/uvtc/tile-sprite.js";
 
 import TextLayer from "./modules/uvtc/text/text-layer.js";
 import SpeechBox from "./modules/uvtc/text/speech-box.js";
+import WorldImpulse from "./modules/uvtc/world-impulse.js";
 
 const Eleven = Install([
     Singleton({
@@ -62,7 +63,8 @@ const Eleven = Install([
     WaterBackground,
     TileSprite,
     TextLayer,
-    SpeechBox
+    SpeechBox,
+    WorldImpulse
 ]);
 
 export default Eleven;

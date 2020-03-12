@@ -3,6 +3,19 @@ import CollisionLayer from "../collision/collision-layer.js";
 
 const HIT_BOX_COLOR = "rgba(180,0,0,0.5)";
 
+function TrackPriority(container,sprite,ID,zIndex) {
+    //This is where the third dimension (Z) is added to the 2D space
+    const getZIndex = () => zIndex;
+    const setZIndex = value => {
+        zIndex = value; container.setPriority(ID,zIndex);
+    };
+    Object.defineProperty(sprite,"zIndex",{
+        get: getZIndex, set: setZIndex,
+        configurable: true,
+        enumerable: true
+    });
+}
+
 function SpriteLayer(grid) {
 
     const spriteContainer = new MultiLayer();
@@ -66,9 +79,10 @@ function SpriteLayer(grid) {
         renderer.render = render;
     };
 
-    this.add = sprite => {
-        const ID = spriteContainer.add(sprite);
+    this.add = (sprite,zIndex=0) => {
+        const ID = spriteContainer.add(sprite,zIndex);
         sprite.ID = ID;
+        TrackPriority(spriteContainer,sprite,ID,zIndex);
         return ID;
     };
 
