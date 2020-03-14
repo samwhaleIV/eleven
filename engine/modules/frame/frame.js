@@ -31,6 +31,12 @@ function setDefaultProperties(target) {
 function installBase(target,base,parameters) {
     validateFrameData(base,parameters);
     base.apply(target,parameters);
+
+    const prototype = new Object();
+    Object.assign(prototype,base.prototype);
+    Object.assign(prototype,Frame.prototype);
+
+    Object.setPrototypeOf(target,prototype);
 }
 
 function Frame({

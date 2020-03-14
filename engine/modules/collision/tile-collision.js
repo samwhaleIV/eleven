@@ -2,16 +2,24 @@ import CollisionBase from "./collision-base.js";
 
 const COLLISION_LAYER = 2;
 
-function TileCollision(grid,tileRenderer,collisionLayer) {
+const fullSquareCollision = (x,y,value) => {
+    return {x,y,width:1,height:1,value};
+};
+
+function TileCollision(grid,tileRenderer,collisionLayer,collisionMaker) {
+
+    if(!collisionMaker) collisionMaker = fullSquareCollision;
+
     if(!collisionLayer) collisionLayer = COLLISION_LAYER;
 
     CollisionBase.call(this,grid,1 / grid.baseTileSize);
     const {width, map, mapSize} = this;
 
-    const getLookupValue = (mapIndex,value) => {return {
-        x: mapIndex % width, y: Math.floor(mapIndex / width),
-        width: 1, height: 1, value: value
-    }};
+    const getLookupValue = (mapIndex,value) => {
+        const x = mapIndex % width;
+        const y = Math.floor(mapIndex / width);
+        return collisionMaker(x,y,value);
+    };
 
     let lookupCounter = 1;
     const lookup = new Array();

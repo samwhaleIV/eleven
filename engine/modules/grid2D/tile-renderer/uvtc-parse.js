@@ -15,14 +15,13 @@ function DecodeMapLayer(layer) {
 }
 
 function DecodeUVTCMap(map) {
-    const {columns, rows, background, foreground, collision, lighting} = map;
+    const {columns, rows, background, foreground, collision, lighting, interaction, superForeground} = map;
     const layerSize = columns * rows;
     const renderData = new Array();
 
-    if(background) renderData.push(...DecodeMapLayer(background));
-    if(foreground) renderData.push(...DecodeMapLayer(foreground));
-    if(collision) renderData.push(...DecodeMapLayer(collision));
-    if(lighting) renderData.push(...DecodeMapLayer(lighting));
+    [background,foreground,superForeground,collision,interaction,lighting].forEach(layer => {
+        if(layer) renderData.push(...DecodeMapLayer(layer));
+    });
 
     return {rows, columns, layerSize, renderData, renderLayerCount: 2, skipZero: true};
 }
