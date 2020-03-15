@@ -27,6 +27,11 @@ function WaterBackground(
         pattern = offscreenContext.createPattern(offscreenCanvas,"repeat");
     }
 
+    this.install = dispatchRenderer => {
+        dispatchRenderer.addResize(this.resize);
+        dispatchRenderer.addBackground(this.render);
+    };
+
     this.render = (context,{width,height},time) => {
         const offset = time.now / this.scrollDuration;// / 1;
 
