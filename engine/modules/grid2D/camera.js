@@ -4,6 +4,8 @@ const DEFAULT_SCALE = 1;
 const DEFAULT_X = 0;
 const DEFAULT_Y = 0;
 
+const DEFAULT_PADDING_SETTING = false;
+
 function Camera(grid) {
 
     this.grid = grid;
@@ -43,6 +45,25 @@ function Camera(grid) {
         return this;
     };
 
+    
+    let paddingEnabled = DEFAULT_PADDING_SETTING;
+
+    this.enablePadding = () => {
+        paddingEnabled = true;
+    };
+    this.disablePadding = () => {
+        paddingEnabled = false;
+    };
+    this.togglePadding = () => {
+        paddingEnabled = !paddingEnabled;
+    };
+
+    Object.defineProperty(this,"padding",{
+        get: () => paddingEnabled,
+        set: value => paddingEnabled = Boolean(value),
+        enumerable: true
+    });
+
     setDefaultPosition();
 
     let scale = DEFAULT_SCALE;
@@ -63,23 +84,45 @@ function Camera(grid) {
     this.setScaleUnsafe = value => {
         scale = value;
     };
+    
+    const postProcessors = new MultiLayer();
+
+    this.addPostProcessor = postProcessors.add;
+    this.removePostProcessor = postProcessors.remove;
+    this.clearPostProcessors = postProcessors.clear;
+
+    let zooming = false; let moving = false;
+    let zoomResolve = null, moveResolve = null;
+
+    const tryCompleteResolver = resolve => {
+        if(resolve === null) return; resolve();
+    };
 
     this.reset = () => {
-        const fakeTime = {
-            now: Infinity, delta: 0
-        };
-        updateLayers.clear(updater => updater(fakeTime));
+        updateLayers.clear();
+
+        moving = false; zooming = false;
+
+        tryCompleteResolver(zoomResolve);
+        tryCompleteResolver(moveResolve);
+
+        zoomResolve = null; moveResolve = null;
+
+        this.clearPostProcessors();
+
+        paddingEnabled = DEFAULT_PADDING_SETTING;
         setDefaultPosition();
         this.scale = DEFAULT_SCALE;
         return this;
     };
 
-    let zooming = false;
     this.zoomTo = (newScale,duration) => {
         if(zooming) return;
         if(newScale == scale) return;
         zooming = true;
         return new Promise(resolve => {
+            zoomResolve = resolve;
+
             const startTime = performance.now();
 
             const startScale = scale;
@@ -101,12 +144,13 @@ function Camera(grid) {
         })
     };
 
-    let moving = false;
     this.moveTo = (newX,newY,duration) => {
         if(moving) return;
         if(newX == x && newY == y) return;
         moving = true;
         return new Promise(resolve => {
+            moveResolve = resolve;
+
             const startTime = performance.now();
 
             const startX = x;
@@ -132,12 +176,6 @@ function Camera(grid) {
             });
         });
     };
-
-    const postProcessors = new MultiLayer();
-
-    this.addPostProcessor = postProcessors.add;
-    this.removePostProcessor = postProcessors.remove;
-    this.clearPostProcessors = postProcessors.clear;
 
     const paddingProcessor = () => {
         const {left,right,top,bottom} = grid.getArea();
@@ -165,23 +203,6 @@ function Camera(grid) {
             }
         }
     };
-
-    let paddingEnabled = false;
-    this.enablePadding = () => {
-        paddingEnabled = true;
-    };
-    this.disablePadding = () => {
-        paddingEnabled = false;
-    };
-    this.togglePadding = () => {
-        paddingEnabled = !paddingEnabled;
-    };
-
-    Object.defineProperty(this,"padding",{
-        get: () => paddingEnabled,
-        set: value => paddingEnabled = Boolean(value),
-        enumerable: true
-    });
 
     this.update = time => {
         updateLayers.forEach(updater => updater(time));

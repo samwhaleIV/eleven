@@ -8,7 +8,7 @@ const RENDER_LOOP_ALREADY_PAUSED = () => {
     throw Error("Render loop already paused");
 };
 const RENDER_LOOP_ALREADY_STARTED = () => {
-    throw Error("Render loop already paused");
+    throw Error("Render loop already started");
 };
 const MISSING_FRAME = () => {
     throw Error("Cannot start rendering, there is no frame to render");
