@@ -45,12 +45,22 @@ function CollisionBase(grid,resolutionScale) {
 }
 CollisionBase.prototype.getCollisionTest = function(valueProcessor) {
     return sprite => {
-        const value = this.checkSprite(sprite);
-        if(!value) return null;
-        let target = valueProcessor(value);
-        target = spriteReturnFilter(target);
-        if(!narrowBand(spriteHitBoxFilter(sprite),target)) return null;
-        return target;
+        const hitList = this.checkSprite(sprite);
+        if(!hitList.length) return null;
+
+        sprite = spriteHitBoxFilter(sprite);
+        
+        let hitListIndex = 0;
+
+        do {
+            const hitValue = valueProcessor(hitList[hitListIndex]);
+            const target = spriteReturnFilter(hitValue);
+
+            if(narrowBand(sprite,target)) return target;
+
+        } while(++hitListIndex < hitList.length);
+
+        return null;
     };
 }
 
@@ -72,19 +82,23 @@ CollisionBase.prototype.write = function(startX,y,endX,endY,value) {
         y++;
     }
 }
-CollisionBase.prototype.check = function(startX,y,endX,endY) {
+CollisionBase.prototype.getHitList = function(startX,y,endX,endY) {
     const {map, width} = this;
+    const hitValues = {}, hitList = [];
     while(y<endY) {
         let x = startX;
         while(x<endX) {
             const index = x + y * width;
             const value = map[index];
-            if(value) return value;
+            if(value && !(value in hitValues)) {
+                hitValues[value] = true;
+                hitList.push(value);
+            }
             x++;
         }
         y++;
     }
-    return 0;
+    return hitList;
 }
 CollisionBase.prototype.spriteResMap = function(sprite) {
     const hitBox = spriteHitBoxFilter(sprite);
@@ -102,8 +116,7 @@ CollisionBase.prototype.spriteResMap = function(sprite) {
 }
 CollisionBase.prototype.checkSprite = function(sprite) {
     const {x,y,endX,endY} = this.spriteResMap(sprite);
-    const checkResult = this.check(x,y,endX,endY);
-    return checkResult;
+    return this.getHitList(x,y,endX,endY);
 }
 CollisionBase.prototype.mapSprite = function(sprite) {
     const {x,y,endX,endY} = this.spriteResMap(sprite);
