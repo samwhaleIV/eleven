@@ -32,6 +32,20 @@ import WorldImpulse from "./modules/uvtc/world-impulse.js";
 
 import MultiLayer from "./internal/multi-layer.js";
 import FrameBoundTimeout from "./internal/frame-timeout.js";
+import CollisionTypes from "./modules/collision/collision-types.js";
+import Singleton from "./packer/singleton.js";
+
+const NamespaceTable = (name,sourceTable) => {
+    return Singleton({
+        name: name,
+        module: function() {
+            Object.entries(sourceTable).forEach(([property,value]) => {
+                this[property] = value;
+            });
+            Object.freeze(this);
+        }
+    });
+};
 
 const Eleven = Install([
     Singleton({
@@ -69,7 +83,8 @@ const Eleven = Install([
     TextLayer,
     SpeechBox,
     WorldImpulse,
-    FrameBoundTimeout
+    FrameBoundTimeout,
+    NamespaceTable("CollisionTypes",CollisionTypes)
 ]);
 
 export default Eleven;

@@ -93,10 +93,10 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         colliding = false;
         if(locked || !inputActive) return;
 
-        const {tilesPerSecond, direction} = sprite;
+        const {velocity, direction} = sprite;
 
         const deltaSecond = time.delta / 1000;
-        let change = tilesPerSecond * deltaSecond;
+        let change = velocity * deltaSecond;
 
         if(change > MAX_CHANGE_LIMIT) change = MAX_CHANGE_LIMIT;
 
@@ -118,8 +118,8 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         sprite.update = update;
     }
 
-    if(!sprite.tilesPerSecond) {
-        sprite.tilesPerSecond = DEFAULT_SPEED;
+    if(!sprite.velocity) {
+        sprite.velocity = DEFAULT_SPEED;
     }
     this.sprite = sprite;
 

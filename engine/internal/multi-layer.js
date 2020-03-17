@@ -83,9 +83,9 @@ function MultiLayer() {
         updateList();
     };
     this.forEach = handler => {
-        for(let i = 0;i<layerCount;i++) {
-            const {layer,ID} = layersList[i];
-            handler(layer,ID);
+        const list = layersList, size = layerCount;
+        for(let i = 0;i<size;i++) {
+            const {layer,ID} = list[i]; handler(layer,ID);
         }
     };
 }

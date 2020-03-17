@@ -1,3 +1,5 @@
+import CollisionTypes from "./collision-types.js";
+
 const WARN_FLOATING_TILE_SIZE = baseTileSize => {
     console.warn(`Tile size ${baseTileSize} cannot be even multiple of resolution scale ${RESOLUTION_SCALE}`);
 };
@@ -15,13 +17,26 @@ const spriteHitBoxFilter = sprite => {
     return hitBox;
 };
 
-const spriteReturnFilter = sprite => {
-    let hitBox = spriteHitBoxFilter(sprite);
-    if(sprite !== hitBox) {
-        hitBox.target = sprite;
-        hitBox.isHitBox = true;
-    }
-    return hitBox;
+const getCollisionType = source => {
+    if(source.isHitBox) source = source.target;
+
+    let type = CollisionTypes.Default;
+    let noCollide = null;
+
+    if(source.collisionType) type = source.collisionType;
+    if(source.noCollide) noCollide = source.noCollide;
+
+    return {type, noCollide};
+}
+
+const meetsNoCollision = (a,b) => {
+
+    a = getCollisionType(a); b = getCollisionType(b);
+
+    if(a.noCollide && a.noCollide[b.type]) return true;
+    if(b.noCollide && b.noCollide[a.type]) return true;
+
+    return false;
 };
 
 function CollisionBase(grid,resolutionScale) {
@@ -53,8 +68,11 @@ CollisionBase.prototype.getCollisionTest = function(valueProcessor) {
         let hitListIndex = 0;
 
         do {
-            const hitValue = valueProcessor(hitList[hitListIndex]);
-            const target = spriteReturnFilter(hitValue);
+            let target = valueProcessor(hitList[hitListIndex]);
+            if(!target) continue;
+            target = spriteHitBoxFilter(target);
+
+            if(sprite === target || meetsNoCollision(sprite,target)) continue;
 
             if(narrowBand(sprite,target)) return target;
 

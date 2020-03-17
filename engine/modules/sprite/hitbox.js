@@ -6,6 +6,7 @@ function InstallHitBox(target,width,height) {
     const hitBox = Object.seal({
         width: hitBoxWidth,
         height: hitBoxHeight,
+        target, isHitBox: true,
         x: null, y: null
     });
 

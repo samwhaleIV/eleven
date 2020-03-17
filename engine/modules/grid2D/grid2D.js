@@ -241,7 +241,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
     this.hitMeWithSomeJitter = () => {
         const randomRange = (min,max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        Eleven.CanvasManager.frame.sprite.tilesPerSecond = randomRange(1,7);
+        Eleven.CanvasManager.frame.sprite.velocity = randomRange(1,7);
         Eleven.CanvasManager.frame.grid.camera.scale = randomRange(1,20);
     };
 

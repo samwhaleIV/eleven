@@ -77,6 +77,7 @@ function parseManualModule(moduleSet,module,isSingleton) {
 
 function parseModule(module) {
     if(typeof module !== "function") {
+        
         MODULE_IS_NOT_A_FUNCTION(module);
     }
     if(module.name in this) {
