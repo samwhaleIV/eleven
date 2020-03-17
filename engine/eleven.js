@@ -30,6 +30,9 @@ import TextLayer from "./modules/uvtc/text/text-layer.js";
 import SpeechBox from "./modules/uvtc/text/speech-box.js";
 import WorldImpulse from "./modules/uvtc/world-impulse.js";
 
+import MultiLayer from "./internal/multi-layer.js";
+import FrameBoundTimeout from "./internal/frame-timeout.js";
+
 const Eleven = Install([
     Singleton({
         module: CanvasManager,
@@ -44,6 +47,7 @@ const Eleven = Install([
         deferInstantiation: true
     }),
     Frame,
+    MultiLayer,
     Grid2D,
     SpriteLayer,
     KeyBind,
@@ -64,7 +68,8 @@ const Eleven = Install([
     TileSprite,
     TextLayer,
     SpeechBox,
-    WorldImpulse
+    WorldImpulse,
+    FrameBoundTimeout
 ]);
 
 export default Eleven;

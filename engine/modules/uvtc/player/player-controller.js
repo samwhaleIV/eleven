@@ -89,7 +89,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         }
     };
 
-    sprite.update = time => {
+    const update = time => {
         colliding = false;
         if(locked || !inputActive) return;
 
@@ -112,6 +112,11 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             change,direction,targetProperty,lengthProperty
         );
     };
+    if(sprite.addUpdate) {
+        sprite.addUpdate(update);
+    } else {
+        sprite.update = update;
+    }
 
     if(!sprite.tilesPerSecond) {
         sprite.tilesPerSecond = DEFAULT_SPEED;

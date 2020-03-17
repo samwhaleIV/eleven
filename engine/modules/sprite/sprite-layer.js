@@ -80,6 +80,9 @@ function SpriteLayer(grid) {
     };
 
     this.add = (sprite,zIndex=0) => {
+        if(typeof sprite === "function") {
+            sprite = new sprite();
+        }
         const ID = spriteContainer.add(sprite,zIndex);
         sprite.ID = ID;
         TrackPriority(spriteContainer,sprite,ID,zIndex);

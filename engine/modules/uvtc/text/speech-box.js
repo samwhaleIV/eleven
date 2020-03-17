@@ -1,3 +1,5 @@
+import FrameBoundTimeout from "../../../internal/frame-timeout.js";
+
 const CHARACTER_DELAY = 1000 / 60;
 const SPACE_DELAY = 10;
 const HYPHEN_DELAY = 0;
@@ -31,18 +33,7 @@ const PUNCTUATION = Object.freeze([".","!","?",",",ELLIPSIS,"\"","'"].reduce((ta
 
 const IS_PUNCTUATION = character => character in PUNCTUATION;
 
-const asyncTimeout = duration => {
-    return new Promise(resolve=>{
-        const start = performance.now();
-        const frameTimeBind = timestamp => {
-            if(timestamp - start > duration) {
-                resolve(); return;
-            }
-            requestAnimationFrame(frameTimeBind);
-        };
-        requestAnimationFrame(frameTimeBind);
-    });
-};
+
 const getDuration = character => {
     return character in DELAYS ? DELAYS[character] : CHARACTER_DELAY;
 };
@@ -78,7 +69,7 @@ function SpeechBox(textLayer,playSound) {
                 if(next !== null) {
                     const duration = getDuration(current);
                     if(duration && !(IS_PUNCTUATION(next) && IS_PUNCTUATION(current))) {
-                        await asyncTimeout(duration);
+                        await FrameBoundTimeout(duration);
                     }
                 }
 

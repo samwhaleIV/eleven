@@ -7,13 +7,20 @@ const ANIMATION_ROW_COUNT = 4;
 const FRAME_TIME = 100;
 
 //Direction matrix conforms to specification of './player/player-directions.js'
-const DIRECTION_MATRIX = [SPRITE_WIDTH,SPRITE_WIDTH*2,0,SPRITE_WIDTH*3];
+const DIRECTION_MATRIX = Object.freeze([
+    SPRITE_WIDTH,SPRITE_WIDTH*2,0,SPRITE_WIDTH*3
+]);
 
 const DEFAULT_DIRECTION = 2;
 
 function AnimatedSprite(texture,x,y) {
 
     if(!x) x = 0; if(!y) y = 0;
+
+    Object.defineProperty(this,"directionMatrix",{
+        value: DIRECTION_MATRIX,
+        enumerable: true
+    });
 
     this.x = x, this.y = y;
     this.width = 1, this.height = 1;
@@ -28,7 +35,7 @@ function AnimatedSprite(texture,x,y) {
     };
 
     this.render = (context,x,y,width,height,time) => {
-        const textureX = DIRECTION_MATRIX[this.direction];
+        const textureX = this.directionMatrix[this.direction];
         const textureY = this.moving ? getAnimationRow(time) : 0;
 
         context.drawImage(

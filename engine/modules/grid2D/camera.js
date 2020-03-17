@@ -25,8 +25,7 @@ function Camera(grid) {
     });
 
     const setDefaultPosition = () => {
-        x = DEFAULT_X;
-        y = DEFAULT_Y;
+        x = DEFAULT_X; y = DEFAULT_Y;
     };
 
     const centerX = (centerPoint=0.5) => {
@@ -44,7 +43,6 @@ function Camera(grid) {
         centerX(centerPointX); centerY(centerPointY);
         return this;
     };
-
     
     let paddingEnabled = DEFAULT_PADDING_SETTING;
 
