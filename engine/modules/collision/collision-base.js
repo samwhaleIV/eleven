@@ -1,4 +1,8 @@
 import CollisionTypes from "./collision-types.js";
+import Relationships from "./relationships.js";
+
+const DEFAULT_TYPE = CollisionTypes.Default;
+const PROJECTILE_TYPE = CollisionTypes.Projectile;
 
 const WARN_FLOATING_TILE_SIZE = (baseTileSize,resolutionScale) => {
     console.warn(`Tile size ${baseTileSize} cannot be even multiple of resolution scale ${resolutionScale}`);
@@ -18,24 +22,24 @@ const spriteHitBoxFilter = sprite => {
 };
 
 const getCollisionType = source => {
-    if(source.isHitBox) source = source.target;
+    if(source.collisionType >= 0) return source.collisionType;
+    return DEFAULT_TYPE;
+};
 
-    let type = CollisionTypes.Default;
-    let noCollide = null;
+const canCollide = (a,b) => {
+    if(a.isHitBox) a = a.target;
+    if(b.isHitBox) b = b.target;
 
-    if(source.collisionType) type = source.collisionType;
-    if(source.noCollide) noCollide = source.noCollide;
+    const aType = getCollisionType(a);
+    const bType = getCollisionType(b);
 
-    return {type, noCollide};
-}
+    if(a.collisionType === PROJECTILE_TYPE) {
+        if(a.owner === b) return false;
+    } else if(b.collisionType === PROJECTILE_TYPE) {
+        if(b.owner === a) return false;
+    }
 
-const meetsNoCollision = (a,b) => {
-
-    a = getCollisionType(a); b = getCollisionType(b);
-
-    if(a.noCollide && a.noCollide[b.type]) return true;
-
-    return false;
+    return aType in Relationships && Relationships[aType][bType];
 };
 
 function CollisionBase(grid,resolutionScale) {
@@ -71,7 +75,7 @@ CollisionBase.prototype.getCollisionTest = function(valueProcessor) {
             if(!target) continue;
             target = spriteHitBoxFilter(target);
 
-            if(sprite === target || meetsNoCollision(sprite,target)) continue;
+            if(sprite === target || !canCollide(sprite,target)) continue;
 
             if(narrowBand(sprite,target)) return target;
 

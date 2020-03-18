@@ -1,5 +1,6 @@
 import PlayerDirections from "./player-directions.js";
 import PlayerInput from "./player-input.js";
+import CollisionTypes from "../../collision/collision-types.js";
 
 const MAX_CHANGE_LIMIT = 4 / 16; //Max position change per frame
 const DEFAULT_SPEED = 4; //Tiles per second
@@ -9,6 +10,8 @@ POLARITY_LOOKUP[PlayerDirections.Up] = -1;
 POLARITY_LOOKUP[PlayerDirections.Down] = 1;
 POLARITY_LOOKUP[PlayerDirections.Left] = -1;
 POLARITY_LOOKUP[PlayerDirections.Right] = 1;
+
+const TRIGGER_TYPE = CollisionTypes.Trigger;
 
 function PlayerController(sprite,collisionLayer,tileCollision) {
 
@@ -71,26 +74,48 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         return result;
     };
 
+    const roundingBase = 1 / 16;
+
+    const roundToNearestLow = value => {
+        return Math.floor(value / roundingBase) * roundingBase;
+    };
+    const roundToNearestHigh = value => {
+        return Math.ceil(value / roundingBase) * roundingBase;
+    };
+
     const handlePositionUpdate = (change,direction,targetProperty,lengthProperty) => {
         const polarity = POLARITY_LOOKUP[direction];
 
         sprite[targetProperty] += change * polarity;
         const collisionResult = collides();
 
+        if(!collisionResult) return;
+
+        let collidedWith = collisionResult;
+        if(collidedWith.isHitBox) collidedWith = collidedWith.target;
+
+        if(collidedWith.collisionType === TRIGGER_TYPE) {
+            if(collidedWith.onTrigger) collidedWith.onTrigger(sprite);
+            return;
+        }
+
         const hitBox = sprite.hitBox || sprite;
         const hitBoxDifference = (hitBox[lengthProperty] - sprite[lengthProperty]) / 2;
 
-        if(collisionResult) {
-            colliding = true;
-            let newValue = collisionResult[targetProperty];
-            if(polarity < 0) {
-                newValue += collisionResult[lengthProperty];
-            } else {
-                newValue -= sprite[lengthProperty];
-            }
-            newValue -= hitBoxDifference * polarity;
-            sprite[targetProperty] = newValue;
+        colliding = true;
+        let newValue = collisionResult[targetProperty];
+
+        if(polarity < 0) {
+            newValue += collisionResult[lengthProperty];
+            newValue = roundToNearestHigh(newValue);
+        } else {
+            newValue -= sprite[lengthProperty];
+            newValue = roundToNearestLow(newValue);
         }
+
+        newValue -= hitBoxDifference * polarity;
+        sprite[targetProperty] = newValue;
+        
     };
 
     const update = time => {
