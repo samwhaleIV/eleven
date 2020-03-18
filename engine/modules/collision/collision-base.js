@@ -1,7 +1,7 @@
 import CollisionTypes from "./collision-types.js";
 
-const WARN_FLOATING_TILE_SIZE = baseTileSize => {
-    console.warn(`Tile size ${baseTileSize} cannot be even multiple of resolution scale ${RESOLUTION_SCALE}`);
+const WARN_FLOATING_TILE_SIZE = (baseTileSize,resolutionScale) => {
+    console.warn(`Tile size ${baseTileSize} cannot be even multiple of resolution scale ${resolutionScale}`);
 };
 
 const narrowBand = (a,b) => {
@@ -34,7 +34,6 @@ const meetsNoCollision = (a,b) => {
     a = getCollisionType(a); b = getCollisionType(b);
 
     if(a.noCollide && a.noCollide[b.type]) return true;
-    if(b.noCollide && b.noCollide[a.type]) return true;
 
     return false;
 };
@@ -43,7 +42,7 @@ function CollisionBase(grid,resolutionScale) {
     const baseTileSize = grid.baseTileSize;
 
     const tileSize = baseTileSize * resolutionScale;
-    if(tileSize % 1 !== 0) WARN_FLOATING_TILE_SIZE(baseTileSize);
+    if(tileSize % 1 !== 0) WARN_FLOATING_TILE_SIZE(baseTileSize,resolutionScale);
 
     const width = Math.floor(grid.width * tileSize);
     const height = Math.floor(grid.height * tileSize);

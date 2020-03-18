@@ -38,6 +38,10 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
     };
 
     Object.defineProperties(this,{
+        colliding: {
+            get: () => colliding,
+            enumerable: true
+        },
         locked: {
             get: () => locked,
             set: updateLocked,

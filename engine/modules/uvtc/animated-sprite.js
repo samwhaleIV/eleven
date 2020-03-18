@@ -1,5 +1,3 @@
-import InstallHitBox from "../sprite/hitbox.js";
-
 const SPRITE_WIDTH = 16;
 const SPRITE_HEIGHT = 16;
 
@@ -26,9 +24,6 @@ function AnimatedSprite(texture,x,y) {
     this.width = 1, this.height = 1;
 
     this.direction = DEFAULT_DIRECTION;
-
-    InstallHitBox(this,12/16,12/16);
-    this.yOffset = -(2 / 16);
 
     const getAnimationRow = time => {
         return Math.floor(time.now / FRAME_TIME) % ANIMATION_ROW_COUNT * SPRITE_HEIGHT;

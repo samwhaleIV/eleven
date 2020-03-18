@@ -1,6 +1,6 @@
 import CollisionBase from "./collision-base.js";
 
-const RESOLUTION_SCALE = 1 / 4; //Lower numbers are slower
+const RESOLUTION_SCALE = 1; //Greater than 1 is pointless, exactly 1 is deadly.
 
 function CollisionLayer(grid,layer) {
     CollisionBase.call(this,grid,RESOLUTION_SCALE);
