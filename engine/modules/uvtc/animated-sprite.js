@@ -25,13 +25,41 @@ function AnimatedSprite(texture,x,y) {
 
     this.direction = DEFAULT_DIRECTION;
 
+    let animationStart = 0;
+
     const getAnimationRow = time => {
-        return Math.floor(time.now / FRAME_TIME) % ANIMATION_ROW_COUNT * SPRITE_HEIGHT;
+        const t = time.now - animationStart;
+        const row = Math.floor(t / FRAME_TIME);
+        return row % ANIMATION_ROW_COUNT * SPRITE_HEIGHT;
+    };
+
+    const getTextureY = time => {
+        if(this.moving) {
+            if(animationStart === 0) {
+                animationStart = time.now - FRAME_TIME;
+                console.log(animationStart-time.now);
+            }
+            return getAnimationRow(time);
+        } else {
+            if(animationStart !== 0) {
+                const row = getAnimationRow(time);
+
+                if((row / SPRITE_HEIGHT) % 2 === 0) animationStart = 0;
+
+                return row;
+            }
+            return 0;
+        }
     };
 
     this.render = (context,x,y,width,height,time) => {
         const textureX = this.directionMatrix[this.direction];
-        const textureY = this.moving ? getAnimationRow(time) : 0;
+        const textureY = getTextureY(time);
+        if(textureY < 0) {
+            console.log(textureY);
+            const result = getAnimationRow(time);
+            console.log(textureY);
+        }
 
         context.drawImage(
             texture,

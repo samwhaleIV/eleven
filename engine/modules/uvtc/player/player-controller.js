@@ -13,6 +13,10 @@ POLARITY_LOOKUP[PlayerDirections.Right] = 1;
 
 const TRIGGER_TYPE = CollisionTypes.Trigger;
 
+const roundingBase = 1 / 32;
+const roundToNearestLow = value => Math.floor(value / roundingBase) * roundingBase;
+const roundToNearestHigh = value => Math.ceil(value / roundingBase) * roundingBase;
+
 function PlayerController(sprite,collisionLayer,tileCollision) {
 
     let locked = false, inputActive = false, colliding = false;
@@ -41,10 +45,6 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
     };
 
     Object.defineProperties(this,{
-        colliding: {
-            get: () => colliding,
-            enumerable: true
-        },
         locked: {
             get: () => locked,
             set: updateLocked,
@@ -61,9 +61,15 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             enumerable: true
         }
     });
-    Object.defineProperty(sprite,"moving",{
-        get: getMoving,
-        enumerable: true
+    Object.defineProperties(sprite,{
+        colliding: {
+            get: () => colliding,
+            enumerable: true
+        },
+        moving: {
+            get: getMoving,
+            enumerable: true
+        }
     });
 
     const collides = () => {
@@ -72,15 +78,6 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             result = tileCollision.collides(sprite);
         }
         return result;
-    };
-
-    const roundingBase = 1 / 16;
-
-    const roundToNearestLow = value => {
-        return Math.floor(value / roundingBase) * roundingBase;
-    };
-    const roundToNearestHigh = value => {
-        return Math.ceil(value / roundingBase) * roundingBase;
     };
 
     const handlePositionUpdate = (change,direction,targetProperty,lengthProperty) => {
@@ -99,10 +96,16 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             return;
         }
 
+        if(polarity < 0) {
+            if(collidedWith[targetProperty] > sprite[targetProperty]) return;
+        } else {
+            if(sprite[targetProperty] > collidedWith[targetProperty]) return;
+        }
+
         const hitBox = sprite.hitBox || sprite;
         const hitBoxDifference = (hitBox[lengthProperty] - sprite[lengthProperty]) / 2;
 
-        colliding = true;
+        colliding = collidedWith;
         let newValue = collisionResult[targetProperty];
 
         if(polarity < 0) {
@@ -120,6 +123,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
 
     const update = time => {
         colliding = false;
+
         if(locked || !inputActive) return;
 
         const {velocity, direction} = sprite;
@@ -157,8 +161,6 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         if(!inputHandler) inputHandler = new PlayerInput(this,directionImpulses);
         return inputHandler;
     };
-
-    Object.freeze(this);
 }
 
 export default PlayerController;
