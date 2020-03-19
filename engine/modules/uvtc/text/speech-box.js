@@ -1,4 +1,4 @@
-import FrameBoundTimeout from "../../../internal/frame-timeout.js";
+const {FrameTimeout} = Eleven;
 
 const CHARACTER_DELAY = 1000 / 60;
 const SPACE_DELAY = 10;
@@ -69,7 +69,7 @@ function SpeechBox(textLayer,playSound) {
                 if(next !== null) {
                     const duration = getDuration(current);
                     if(duration && !(IS_PUNCTUATION(next) && IS_PUNCTUATION(current))) {
-                        await FrameBoundTimeout(duration);
+                        await FrameTimeout(duration);
                     }
                 }
 

@@ -31,15 +31,28 @@ function AudioManager() {
         return {soundRadio, musicRadio};
     })();
 
+    const target = this;
+
+    this.canPlaySound = function() {
+        if(audioContext.state === "running") {
+            return true;
+        } else {
+            audioContext.resume();
+            return false;
+        }
+    };
+
     this.playSound = function({
-        buffer,volume,playbackRate,detune,loop=false
+        buffer,volume,playbackRate,detune,loop,usePanning
     }) {
+        const noStart = !target.canPlaySound();
         return soundRadio.play({
-            buffer,loop,volume,playbackRate,detune
+            buffer,loop,volume,playbackRate,detune,usePanning,noStart
         });
     };
+
     this.playMusic = function({
-        buffer,volume,playbackRate,detune,loop=false
+        buffer,volume,playbackRate,detune,loop
     }) {
         return musicRadio.play({
             buffer,loop,volume,playbackRate,detune
@@ -47,10 +60,11 @@ function AudioManager() {
     };
 
     this.playSoundLooping = function({
-        buffer,volume,playbackRate,detune
+        buffer,volume,playbackRate,detune,usePanning
     }) {
+        const noStart = !target.canPlaySound();
         return soundRadio.play({
-            buffer,loop:true,volume,playbackRate,detune
+            buffer,loop:true,volume,playbackRate,detune,usePanning,noStart
         });
     };
     this.playMusicLooping = function({

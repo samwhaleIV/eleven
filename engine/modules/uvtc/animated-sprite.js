@@ -37,7 +37,6 @@ function AnimatedSprite(texture,x,y) {
         if(this.moving) {
             if(animationStart === 0) {
                 animationStart = time.now - FRAME_TIME;
-                console.log(animationStart-time.now);
             }
             return getAnimationRow(time);
         } else {
@@ -55,11 +54,6 @@ function AnimatedSprite(texture,x,y) {
     this.render = (context,x,y,width,height,time) => {
         const textureX = this.directionMatrix[this.direction];
         const textureY = getTextureY(time);
-        if(textureY < 0) {
-            console.log(textureY);
-            const result = getAnimationRow(time);
-            console.log(textureY);
-        }
 
         context.drawImage(
             texture,

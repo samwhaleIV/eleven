@@ -8,7 +8,11 @@ function TonePlayer(target,soundNode) {
         if(!lastTone) return;
         lastTone.stop(audioContext.currentTime); lastTone = null;
     };
-    const playTone = function(frequency,duration) {
+    const playTone = function(frequency,duration,volume) {
+        if(!target.canPlaySound()) return;
+
+        if(isNaN(volume)) volume = 1;
+
         const oscillator = audioContext.createOscillator();
         oscillator.type = "square";
         const oscillatorGain = audioContext.createGain();
@@ -19,7 +23,7 @@ function TonePlayer(target,soundNode) {
         const startTime = audioContext.currentTime;
         const endTime = startTime + duration;
     
-        oscillatorGain.gain.setValueAtTime(OSCILLATOR_VOLUME,startTime);
+        oscillatorGain.gain.setValueAtTime(OSCILLATOR_VOLUME * volume,startTime);
         oscillatorGain.gain.exponentialRampToValueAtTime(0.00000001,endTime);
         oscillator.frequency.setValueAtTime(frequency,startTime);
         oscillator.start(startTime);

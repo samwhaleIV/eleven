@@ -31,7 +31,7 @@ import SpeechBox from "./modules/uvtc/text/speech-box.js";
 import WorldImpulse from "./modules/uvtc/world-impulse.js";
 
 import MultiLayer from "./internal/multi-layer.js";
-import FrameBoundTimeout from "./internal/frame-timeout.js";
+import FrameTimeout from "./internal/frame-timeout.js";
 import CollisionTypes from "./modules/collision/collision-types.js";
 import Singleton from "./packer/singleton.js";
 
@@ -83,7 +83,7 @@ const Eleven = Install([
     TextLayer,
     SpeechBox,
     WorldImpulse,
-    FrameBoundTimeout,
+    FrameTimeout,
     NamespaceTable("CollisionTypes",CollisionTypes)
 ]);
 

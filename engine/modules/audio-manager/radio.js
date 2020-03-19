@@ -37,6 +37,8 @@ const getSourceNode = data => {
     return sourceNode;
 };
 
+const getPanner = () => audioContext.createStereoPanner();
+
 function Radio({
     targetNode = null,
     singleSource = false
@@ -91,19 +93,24 @@ Radio.prototype.fadeInAsync = function(duration) {
 }
 
 Radio.prototype.play = function({
-    buffer,loop,callback,
+    buffer,loop,callback,usePanning,noStart,
     loopStart = DEFAULT_LOOP_START,
     volume = DEFAULT_VOLUME,
     playbackRate = DEFAULT_PLAYBACK_RATE,
-    detune = DEFAULT_DETUNE,
+    detune = DEFAULT_DETUNE
 }){
     loop = Boolean(loop);
+    usePanning = Boolean(usePanning);
+    noStart = Boolean(noStart);
+
     if(!buffer) MISSING_AUDIO_BUFFER();
     if(!callback) callback = null;
+
     if(this.singleSource) this.smartCache.clear();
 
     const destination = this.targetNode;
     const gainNode = getGainNode(volume);
+
     gainNode.connect(destination);
 
     const sourceNode = getSourceNode({
@@ -118,19 +125,31 @@ Radio.prototype.play = function({
 
     sourceNode.connect(gainNode);
 
+    let pannerNode = null;
+    if(usePanning) {
+        pannerNode = getPanner();
+        sourceNode.connect(pannerNode);
+        pannerNode.connect(gainNode);
+    } else {
+        sourceNode.connect(gainNode);
+    }
+
     cacheID = this.smartCache.add(()=>{
         sourceNode.stop();
         gainNode.disconnect(destination);
+
         if(callback !== null) callback;
+
         const remoteCallback = remoteControl.onended;
         if(remoteCallback !== null) remoteCallback();
         remoteControl[RCData].sendEndHandlers();
     });
+
     remoteControl = new RemoteControl({
-        radio:this,sourceNode,gainNode,cacheID
+        radio:this,sourceNode,gainNode,cacheID,pannerNode
     });
 
-    sourceNode.start(audioContext.currentTime);
+    if(!noStart) sourceNode.start(audioContext.currentTime);
 
     return remoteControl;
 }

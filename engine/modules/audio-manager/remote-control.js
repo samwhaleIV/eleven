@@ -1,6 +1,8 @@
 import RCData from "./rc-symbol.js";
 import {FadeIn, FadeOut} from "./fader.js";
 import CallbackWrap from "../../internal/callback-wrap.js";
+import InstallPannerExtension from "./panner-extension.js";
+import audioContext from "../../internal/audio-context.js";
 const {WrapBind} = CallbackWrap;
 
 function RemoteControl(data) {
@@ -48,6 +50,11 @@ function RemoteControl(data) {
 
     Object.freeze(this);
 }
+RemoteControl.prototype.setVolume = function(volume) {
+    const gainNode = this[RCData].gainNode;
+    gainNode.gain.setValueAtTime(volume,audioContext.currentTime);
+    return this;
+}
 RemoteControl.prototype.fadeOut = function(duration,callback,...parameters) {
     const {gainNode, addEndHandler, removeEndHandler} = this[RCData];
     const wrapBind = WrapBind(callback,parameters);
@@ -86,6 +93,8 @@ RemoteControl.prototype.addEndHandler = function(handler) {
     this[RCData].addEndHandler(handler);
     return this;
 }
+
+InstallPannerExtension(RemoteControl.prototype);
 Object.freeze(RemoteControl.prototype); //Don't fuck with this one either
 
 export default RemoteControl;

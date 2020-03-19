@@ -1,8 +1,9 @@
-const FrameBoundTimeout = duration => {
+const FrameTimeout = duration => {
+    if(isNaN(duration)) duration = 0;
     return new Promise(resolve=>{
         const start = performance.now();
         const frameTimeBind = timestamp => {
-            if(timestamp - start > duration) {
+            if(timestamp - start >= duration) {
                 resolve(); return;
             }
             requestAnimationFrame(frameTimeBind);
@@ -10,4 +11,4 @@ const FrameBoundTimeout = duration => {
         requestAnimationFrame(frameTimeBind);
     });
 };
-export default FrameBoundTimeout;
+export default FrameTimeout;
