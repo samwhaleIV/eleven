@@ -239,12 +239,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return {location,renderStride,startTile,endTile};   
     };
 
-    this.hitMeWithSomeJitter = () => {
-        const randomRange = (min,max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        Eleven.CanvasManager.frame.sprite.velocity = randomRange(1,7);
-        Eleven.CanvasManager.frame.grid.camera.scale = randomRange(1,20);
-    };
-
     const getHorizontalRenderData = () => {
         return getDimensionRenderData(width,camera.x,cameraXOffset,tileXOffset,horizontalTiles,gridWidth);
     };
