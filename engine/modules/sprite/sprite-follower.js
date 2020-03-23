@@ -1,8 +1,6 @@
 function SpriteFollower(camera,sprite,active=true) {
-
     if(!sprite) sprite = null;
     let target = sprite;
-    sprite = null;
 
     let enabled = false;
     let followX = true;
@@ -72,6 +70,15 @@ function SpriteFollower(camera,sprite,active=true) {
     });
     this.enable = enable;
     this.disable = disable;
+
+    const reset = () => {
+        this.enabled = active;
+        target = sprite;
+        followX = true;
+        followY = true;
+    };
+
+    this.reset = reset;
 
     if(active) enable();
 }
