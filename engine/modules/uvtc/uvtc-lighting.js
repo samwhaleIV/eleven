@@ -2,7 +2,7 @@ import LightCache from "./lighting/light-cache.js";
 import LayerCache from "./lighting/layer-cache.js";
 
 const LIGHTING_LAYER_INDEX = 3;
-const LIGHTING_TILE_SCALE = 2;
+const LIGHTING_TILE_SCALE = 4;
 
 function UVTCLighting(grid,tileRenderer,tileLayer) {
     if(!tileLayer) tileLayer = LIGHTING_LAYER_INDEX;

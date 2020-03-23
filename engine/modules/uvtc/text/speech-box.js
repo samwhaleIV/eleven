@@ -1,4 +1,4 @@
-const {FrameTimeout} = Eleven;
+import FrameTimeout from "../../../internal/frame-timeout.js";
 
 const CHARACTER_DELAY = 1000 / 60;
 const SPACE_DELAY = 10;
