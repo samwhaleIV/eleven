@@ -4,8 +4,7 @@ const CIPHER_LOOKUP = Object.freeze((function(inverse=false){
     {const c=o[Math.floor(e/n)],f=o[e%n];inverse?r[e]=c+f:r[c+f]=e}return r;
 })());
 
-function DecodeMapLayer(layer) {
-    if(typeof layer !== "string") return layer;
+function DecodeStringLayer(layer) {
     const layerData = [];
     for(let i = 0;i<layer.length;i+=2) {
         const characterSet = layer.substring(i,i+2);
@@ -14,13 +13,57 @@ function DecodeMapLayer(layer) {
     return layerData;
 }
 
-function DecodeUVTCMap(map) {
+function DecodeTableLayer(data,layerSize) {
+    const layer = new Array(layerSize); layer.fill(0);
+    Object.entries(data).forEach(([value,indicies])=>{
+        value = CIPHER_LOOKUP[value];
+        if(typeof indicies === "number") {
+            layer[indicies] = value;
+        } else {
+            indicies.forEach(index => {
+                layer[index] = value;
+            });
+        }
+    });
+    return layer;
+}
+
+function DecodeStrideLayer(layer) {
+    const decodedLayer = new Array();
+    for(let i = 0;i<layer.length;i+=2) {
+        const type = CIPHER_LOOKUP[layer[i]];
+        const length = layer[i+1];
+        for(let x = 0;x<length;x++) {
+            decodedLayer.push(type);
+        }
+    }
+    return decodedLayer;
+}
+
+function DecodeUVTCMap(map,fillEmpty) {
     const {columns, rows, background, foreground, collision, lighting, interaction, superForeground} = map;
     const layerSize = columns * rows;
     const renderData = new Array();
 
+    let emptyData = null;
+    if(fillEmpty) {
+        emptyData = new Array(layerSize); emptyData.fill(0);
+    }
+
     [background,foreground,superForeground,collision,interaction,lighting].forEach(layer => {
-        if(layer) renderData.push(...DecodeMapLayer(layer));
+        let data = emptyData ? emptyData : null;
+
+        if(layer) {
+            if(Array.isArray(layer)) {
+                data = DecodeStrideLayer(layer);
+            } else if(typeof layer === "object") {
+                data = DecodeTableLayer(layer,layerSize);
+            } else if(typeof layer === "string") {
+                data = DecodeStringLayer(layer);
+            }
+        }
+
+        if(data !== null) renderData.push(...data);
     });
 
     return {rows, columns, layerSize, renderData, renderLayerCount: 2, skipZero: true};

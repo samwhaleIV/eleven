@@ -19,7 +19,8 @@ const MISSING_MAP_UVTC = () => {
 function UVTCMapPrelude(data) {
     const mapData = data.map;
     if(!mapData) MISSING_MAP_UVTC();
-    const decodedMapData = DecodeUVTCMap(mapData)
+    const fillEmpty = Boolean(data.fillEmpty);
+    const decodedMapData = DecodeUVTCMap(mapData,fillEmpty)
     return ParseRenderInformation(decodedMapData);
 }
 function ParseRenderInformation(data={}) {
