@@ -15,16 +15,19 @@ function DecodeStringLayer(layer) {
 
 function DecodeTableLayer(data,layerSize) {
     const layer = new Array(layerSize); layer.fill(0);
-    Object.entries(data).forEach(([value,indicies])=>{
+    const entries = Object.entries(data);
+
+    for(let i = 0;i<entries.length;i++) {
+        let [value,indices] = entries[i];
         value = CIPHER_LOOKUP[value];
-        if(typeof indicies === "number") {
-            layer[indicies] = value;
+        if(typeof indices === "number") {
+            layer[indices] = value;
         } else {
-            indicies.forEach(index => {
-                layer[index] = value;
-            });
+            for(let x = 0;x<indices.length;x++) {
+                layer[indices[x]] = value;
+            }
         }
-    });
+    }
     return layer;
 }
 
