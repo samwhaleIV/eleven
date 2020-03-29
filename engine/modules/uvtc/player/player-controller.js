@@ -118,7 +118,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
 
         newValue -= hitBoxDifference * polarity;
         sprite[targetProperty] = newValue;
-        
+
     };
 
     const update = time => {

@@ -64,6 +64,10 @@ function PlayerInput(playerController,directionImpulses) {
         }
     });
 
+    this.refresh = () => {
+        inputStack.splice(0); setNotMoving();
+    };
+
     Object.freeze(this);
 }
 
