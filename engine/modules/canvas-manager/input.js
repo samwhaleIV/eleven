@@ -104,14 +104,10 @@ function Input(canvasManager,modules) {
         window.addEventListener("keydown",function(event){
             downKeys[event.code] = summariseKeyEvent(event);
             sendKeyDown(event);
-        },{
-            capture: true
         });
         window.addEventListener("keyup",function(event){
             delete downKeys[event.code];
             sendKeyUp(event);
-        },{
-            capture: true
         });
         window.addEventListener("blur",function(){
             Object.values(downKeys).forEach(event => {
