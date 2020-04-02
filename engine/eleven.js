@@ -24,7 +24,7 @@ import InstallHitBox from "./modules/sprite/hitbox.js";
 
 import AnimatedSprite from "./modules/uvtc/animated-sprite.js";
 import WaterBackground from "./modules/uvtc/water-background.js";
-import TileSprite from "./modules/uvtc/tile-sprite.js";
+import TileSprite from "./modules/sprite/tile-sprite.js";
 
 import TextLayer from "./modules/uvtc/text/text-layer.js";
 import SpeechBox from "./modules/uvtc/text/speech-box.js";
@@ -34,6 +34,8 @@ import MultiLayer from "./internal/multi-layer.js";
 import FrameTimeout from "./internal/frame-timeout.js";
 import CollisionTypes from "./modules/collision/collision-types.js";
 import Singleton from "./packer/singleton.js";
+
+import TextSprite from "./modules/uvtc/text-sprite.js";
 
 const NamespaceTable = (name,sourceTable) => {
     return Singleton({
@@ -80,6 +82,7 @@ const Eleven = Install([
     AnimatedSprite,
     WaterBackground,
     TileSprite,
+    TextSprite,
     TextLayer,
     SpeechBox,
     WorldImpulse,

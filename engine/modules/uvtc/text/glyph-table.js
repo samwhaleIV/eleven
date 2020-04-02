@@ -44,14 +44,14 @@ const GlyphTable = new (function() {
     });
     this.getWidth = character => table[character][1];
 
-    this.getRenderer = (context,scale) => {
+    this.getRenderer = (context,scale,color) => {
         const buffer = new OffscreenCanvas(0,0);
         buffer.height = glyphHeight;
         
         const bufferContext = buffer.getContext("2d",{alpha:true});
         const renderHeight = glyphHeight * scale;
 
-        let currentColor = DEFAULT_COLOR;
+        let currentColor = color || DEFAULT_COLOR;
 
         return (character,x,y,color) => {
             if(color) currentColor = color;

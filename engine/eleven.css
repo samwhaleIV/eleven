@@ -9,7 +9,7 @@ body, html {
 body:not(.loaded)::after {
     content: "";
     color: #fff;
-    margin: 8px;
+    margin: 6px;
     font-size: 22px;
     font-family: sans-serif;
     user-select: none;
@@ -21,13 +21,20 @@ body:not(.loaded)::after {
     left: 0;
     z-index: 100;
     background-color: black;
-    padding: 8px;
+    padding: 6px;
 }
 @keyframes loading {
-    0% {content:   "Loading.";}
+    0% {content:   "Loading...";}
+
+    24% {content:  "Loading...";}
     25% {content:  "Loading.";}
+
+    49% {content:  "Loading.";}
     50% {content:  "Loading..";}
+
+    74%{content:  "Loading..";}
     75% {content:  "Loading...";}
+
     100% {content: "Loading...";}
 }
 canvas {
