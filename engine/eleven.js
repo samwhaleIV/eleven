@@ -61,7 +61,7 @@ const Eleven = Install([
     }),
     Singleton({
         module: AudioManager,
-        deferInstantiation: true
+        deferInstantiation: false
     }),
     Singleton({
         module: DOMInterface,

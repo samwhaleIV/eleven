@@ -1,3 +1,5 @@
+import Constants from "../../internal/constants.js";
+
 const INTERFACE_CLASS = "interface";
 const INTERFACE_CONTAINER_CLASS = "interface-container";
 
@@ -8,7 +10,7 @@ function MenuController() {
 }
 
 function DOMInterface() {
-    const {CanvasManager} = Eleven;
+    const {CanvasManager} = globalThis[Constants.EngineNamespace];
 
     const layers = new Array();
 

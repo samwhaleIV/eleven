@@ -1,4 +1,6 @@
 import FrameTimeout from "../../../internal/frame-timeout.js";
+import Constants from "../../../internal/constants.js";
+const ENGINE_NAMESPACE = Constants.EngineNamespace;
 
 const CHARACTER_DELAY = 1000 / 60;
 const SPACE_DELAY = 10;
@@ -39,7 +41,8 @@ const getDuration = character => {
 };
 
 const textTone = () => {
-    Eleven.AudioManager.playTone(587.3295,0.3);
+    const engineNamespace = globalThis[ENGINE_NAMESPACE];
+    engineNamespace.AudioManager.playTone(587.3295,0.3);
 };
 
 function SpeechBox(textLayer,playSound) {
