@@ -36,6 +36,7 @@ import CollisionTypes from "./modules/collision/collision-types.js";
 import Singleton from "./packer/singleton.js";
 
 import TextSprite from "./modules/uvtc/text-sprite.js";
+import DOMInterface from "./modules/dom-interface/dom-interface.js";
 
 const NamespaceTable = (name,sourceTable) => {
     return Singleton({
@@ -52,15 +53,19 @@ const NamespaceTable = (name,sourceTable) => {
 const Eleven = Install([
     Singleton({
         module: CanvasManager,
-        deferInstantiation: true
+        deferInstantiation: false
     }),
     Singleton({
         module: ResourceManager,
-        deferInstantiation: true
+        deferInstantiation: false
     }),
     Singleton({
         module: AudioManager,
         deferInstantiation: true
+    }),
+    Singleton({
+        module: DOMInterface,
+        deferInstantiation: true,
     }),
     Frame,
     MultiLayer,

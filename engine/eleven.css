@@ -37,6 +37,7 @@ body:not(.loaded)::after {
 
     100% {content: "Loading...";}
 }
+
 canvas {
     position: relative;
     top: 0;
@@ -49,4 +50,27 @@ canvas {
 canvas.full-size {
     width: 100%;
     height: 100%;
+}
+
+div.interface-container {
+    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+}
+div.interface {
+    position: fixed;
+    box-sizing: border-box;
+    background-color: #ffffffd9;
+    font-family: sans-serif;
+    padding: 8px;
+    user-select: none;
+    cursor: default;
+}
+div.center {
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
 }
