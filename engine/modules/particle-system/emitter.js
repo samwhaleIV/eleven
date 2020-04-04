@@ -1,43 +1,34 @@
-import ParticleTypes from "./particle-types.js";
-import EvalulationHelper from "./evalulation-helper.js";
-const {Default} = ParticleTypes;
-const {EvaulationTable} = EvalulationHelper;
-
-const DEFAULT_SIZE = Default.size;
-const DEFAULT_COLOR = Default.color;
-const DEFAULT_COUNT = Default.count;
-const DEFAULT_SCALE = Default.scale;
-const DEFAULT_START = Default.start;
-const DEFAULT_DRIFT = Default.drift;
-const DEFAULT_DURATION = Default.duration;
-const PARTICLE_BUFFER_SIZE = Default.bufferSize;
+import EvaulationTable from "./evaluation-table.js";
 
 const BAD_BUFFER_SIZE = size => {
     throw Error(`Buffer size must be at least 2! ${size} is too small.`);
 };
 
+const getParticleCount = evalTable => {
+    let particleCount = evalTable.count();
+    if(particleCount < 1) particleCount = 1;
+    return particleCount;
+};
+
+const getBufferSize = evalTable => {
+    const bufferSize = evalTable.bufferSize();
+    if(bufferSize < 2) BAD_BUFFER_SIZE(bufferSize);
+    return bufferSize;
+};
+
 function Emitter({
-    size = DEFAULT_SIZE,
-    color = DEFAULT_COLOR,
-    count = DEFAULT_COUNT,
-    scale = DEFAULT_SCALE,
-    start = DEFAULT_START,
-    drift = DEFAULT_DRIFT,
-    duration = DEFAULT_DURATION,
-    bufferSize = PARTICLE_BUFFER_SIZE
+    size,color,count,scale,start,drift,duration,bufferSize
 }) {
     const evalTable = new EvaulationTable(
         size,color,count,scale,start,drift,duration,bufferSize
     );
 
-    let particleCount = evalTable.count();
-    if(particleCount < 1) particleCount = 1;
+    const particleCount = getParticleCount(evalTable);
+    bufferSize = getBufferSize(evalTable);
 
-    const bufferStride = evalTable.bufferSize();
-    if(bufferStride < 2) BAD_BUFFER_SIZE(bufferStride);
-
-    const bufferArraySize = bufferStride * particleCount;
+    const bufferArraySize = bufferSize * particleCount;
     const particles = new Array(bufferArraySize);
+
     let particleTime, particleColor, particleSize
 
     const reset = () => {
@@ -49,11 +40,12 @@ function Emitter({
 
         let i = 0;
         do {
-            start(particles,i); i += bufferStride;
+            start(particles,i); i += bufferSize;
         } while(i < bufferArraySize);
     };
     reset();
 
+    //Emitter state variables...
     let firing = false, startTime = null, fireCallback = null, finished = false;
 
     const sendCallback = async () => {
@@ -76,7 +68,7 @@ function Emitter({
         context.fillStyle = particleColor;
         context.beginPath();
 
-        delta /= 1000;
+        delta /= 1000; //Converts frame time delta to a delta second (zero to one)
 
         const size = particleSize * particleScale;
         const halfSize = size / 2;
@@ -90,7 +82,7 @@ function Emitter({
                 y+particles[i+1],
             size,size);
 
-            i += bufferStride;
+            i += bufferSize;
         } while(i < bufferArraySize);
 
         context.fill();
