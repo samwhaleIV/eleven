@@ -38,14 +38,16 @@ import Singleton from "./packer/singleton.js";
 import TextSprite from "./modules/uvtc/text-sprite.js";
 import DOMInterface from "./modules/dom-interface/dom-interface.js";
 
-const NamespaceTable = (name,sourceTable) => {
+import ParticleSystem from "./modules/particle-system/particle-system.js";
+
+const NamespaceTable = (name,sourceTable,readOnly=true) => {
     return Singleton({
         name: name,
         module: function() {
             Object.entries(sourceTable).forEach(([property,value]) => {
                 this[property] = value;
             });
-            Object.freeze(this);
+            if(readOnly) Object.freeze(this);
         }
     });
 };
@@ -92,7 +94,11 @@ const Eleven = Install([
     SpeechBox,
     WorldImpulse,
     FrameTimeout,
-    NamespaceTable("CollisionTypes",CollisionTypes)
+    NamespaceTable("CollisionTypes",CollisionTypes),
+    Singleton({
+        module: ParticleSystem,
+        deferInstantiation: false
+    })
 ]);
 
 export default Eleven;
