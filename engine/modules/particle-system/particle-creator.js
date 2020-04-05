@@ -4,7 +4,7 @@ const VELOCITY_BUFFER_SIZE = 4;
 const GRAVITY_ACCEL_RATE = 0.05;
 
 const typeDefaults = {
-    duration: 750, count: 100, color: "white", size: 8, bufferSize: 2, scale: tInverse
+    duration: 750, count: 20, color: "white", size: 8, bufferSize: 2, scale: tInverse
 };
 const customProperties = Object.keys(typeDefaults);
 
