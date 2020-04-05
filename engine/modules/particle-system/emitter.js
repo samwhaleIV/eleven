@@ -97,5 +97,7 @@ function Emitter({
         firing = true;
         startTime = performance.now();
     };
+
+    Object.freeze(this);
 }
 export default Emitter;

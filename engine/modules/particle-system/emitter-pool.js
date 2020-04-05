@@ -36,7 +36,7 @@ function EmitterPool(data,count) {
 
     let streaming = false;
 
-    this.stream = (fireRate,pauseTime) => {
+    let stream = (fireRate,pauseTime) => {
         if(isNaN(fireRate)) {
             fireRate = DEFAULT_FIRE_RATE;
         }
@@ -54,6 +54,12 @@ function EmitterPool(data,count) {
             }
         })();
     };
+
+    Object.defineProperty(this,"stream",{
+        get: () => stream,
+        set: value => stream = value,
+        enumerable: true
+    });
 
     this.stopStream = () => {
         const wasStreaming = streaming;
