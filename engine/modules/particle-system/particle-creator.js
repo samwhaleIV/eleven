@@ -122,9 +122,9 @@ function tInverse(t) {
     return 1 - t;
 }
 
-function TypeBase(size,color,count,duration,start,drift) {
+function TypeBase(size,color,count,duration,scale,start,drift) {
     return {
-        size, color, count, duration, drift, start,
+        size, color, count, duration, drift, start, scale,
         bufferSize: VELOCITY_BUFFER_SIZE, scale: tInverse
     };
 }
@@ -132,20 +132,20 @@ function TypeBase(size,color,count,duration,start,drift) {
 const types = Object.freeze({
 
     Base: function BaseType({
-        x=0,y=0,xv=100,yv=100,size,color,count,duration
+        x=0,y=0,xv=100,yv=100,size,color,count,duration,scale
     }) {
         return TypeBase(
-            size,color,count,duration,
+            size,color,count,duration,scale,
         velocityStart(x,y,xv,yv),driftBase);
     },
 
     Gravity: function GravityType({
         x=100,y=50,xv=200,size=9,color,count,duration=1500,
-        rate=0.05,gravity=100,jitter=500
+        rate=0.05,gravity=100,jitter=500,scale
     }) {
         if(!rate) rate = GRAVITY_ACCEL_RATE;
         return TypeBase(
-            size,color,count,duration,
+            size,color,count,duration,scale,
         gravityStart(x,y,xv,gravity,jitter),gravityDrift(rate));
     }
 
