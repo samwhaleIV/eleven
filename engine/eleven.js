@@ -39,6 +39,8 @@ import TextSprite from "./modules/uvtc/text-sprite.js";
 import DOMInterface from "./modules/dom-interface/dom-interface.js";
 
 import ParticleSystem from "./modules/particle-system/particle-system.js";
+import Fader from "./modules/fader/fader.js";
+import Faders from "./modules/fader/faders.js";
 
 const NamespaceTable = (name,sourceTable,readOnly=true) => {
     return Singleton({
@@ -98,6 +100,10 @@ const Eleven = Install([
     Singleton({
         module: ParticleSystem,
         deferInstantiation: false
+    }),
+    Fader,
+    Singleton({
+        module: Faders
     })
 ]);
 

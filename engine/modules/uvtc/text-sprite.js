@@ -40,7 +40,7 @@ function Line(text,letterSpacing,wordSpacing,scale) {
 }
 
 function TextSprite({
-    lines, x, y, color, world, followTarget = null, text,
+    lines, x, y, color, world, target = null, text,
     lineSpacing = DEFAULT_LINE_SPACING,
     letterSpacing = DEFAULT_LETTER_SPACING,
     scale = DEFAULT_SCALE,
@@ -64,11 +64,11 @@ function TextSprite({
             },
             enumerable: true
         },
-        followTarget: {
-            get: () => followTarget,
+        target: {
+            get: () => target,
             set: value => {
                 if(!value) value = null;
-                return followTarget = value;
+                return target = value;
             },
             enumerable: true
         }
@@ -122,13 +122,13 @@ function TextSprite({
 
         let renderX = x, renderY = y;
 
-        if(followTarget) {
-            let followX = followTarget.x, followY = followTarget.y;
-            if(followTarget.xOffset) followX += followTarget.xOffset;
-            if(followTarget.yOffset) followY += followTarget.yOffset;
+        if(target) {
+            let followX = target.x, followY = target.y;
+            if(target.xOffset) followX += target.xOffset;
+            if(target.yOffset) followY += target.yOffset;
 
-            renderX += followX + followTarget.width / 2;
-            renderY += followY + followTarget.height / 2;
+            renderX += followX + target.width / 2;
+            renderY += followY + target.height / 2;
         }
 
         const {tileSize} = world.grid;
@@ -144,7 +144,7 @@ function TextSprite({
     };
 
     this.render = (context,x,y,width,height) => {
-        if(followTarget) y = Math.ceil(y);
+        if(target) y = Math.ceil(y);
         if(backgroundColor) {
             context.fillStyle = backgroundColor;
             context.fillRect(x-renderXOffset,y-renderYOffset,width,height);
