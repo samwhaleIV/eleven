@@ -42,6 +42,8 @@ import ParticleSystem from "./modules/particle-system/particle-system.js";
 import Fader from "./modules/fader/fader.js";
 import Faders from "./modules/fader/faders.js";
 
+import {GlyphTable} from "./modules/uvtc/text/glyph-table.js";
+
 const NamespaceTable = (name,sourceTable,readOnly=true) => {
     return Singleton({
         name: name,
@@ -104,6 +106,9 @@ const Eleven = Install([
     Fader,
     Singleton({
         module: Faders
+    }),
+    Singleton({
+        module: GlyphTable
     })
 ]);
 

@@ -33,7 +33,7 @@ function LoadBitmap() {
     return canvas.transferToImageBitmap();
 }
 
-const GlyphTable = new (function() {
+function GlyphTable() {
     const table = LoadTable();
     const bitmap = LoadBitmap();
     const glyphHeight = bitmap.height;
@@ -77,6 +77,6 @@ const GlyphTable = new (function() {
             return renderWidth;
         };
     };
-})();
-
-export default GlyphTable;
+}
+export default new GlyphTable();
+export {GlyphTable};

@@ -80,11 +80,16 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         return result;
     };
 
+    this.triggerHandler = null;
+
     const handlePositionUpdate = (change,direction,targetProperty,lengthProperty) => {
         const polarity = POLARITY_LOOKUP[direction];
 
         sprite[targetProperty] += change * polarity;
-        const collisionResult = collides();
+
+        if(this.triggerHandler) this.triggerHandler(sprite);
+
+        const collisionResult = collides(sprite);
 
         if(!collisionResult) return;
 
@@ -92,7 +97,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
         if(collidedWith.isHitBox) collidedWith = collidedWith.target;
 
         if(collidedWith.collisionType === TRIGGER_TYPE) {
-            if(collidedWith.onTrigger) collidedWith.onTrigger(sprite);
+            if(collidedWith.trigger) collidedWith.trigger(sprite);
             return;
         }
 
