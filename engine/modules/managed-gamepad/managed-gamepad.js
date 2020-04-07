@@ -68,6 +68,7 @@ function ManagedGamepad(settings) {
     let keyDown = null;
     let keyUp = null;
     let inputGamepad = null;
+
     Object.defineProperties(this,{
         [KEY_DOWN]: {
             get: () => keyDown,
@@ -85,6 +86,39 @@ function ManagedGamepad(settings) {
             enumerable: true
         }
     });
+
+    const resetInputRoutes = () => {
+        this[KEY_DOWN] = null;
+        this[KEY_UP] = null;
+        this[INPUT_GAMEPAD] = null;
+    };
+
+    const inputRouteStack = new Array();
+    this.save = () => {
+        inputRouteStack.push([
+            this[KEY_DOWN],
+            this[KEY_UP],
+            this[INPUT_GAMEPAD]
+        ]);
+        resetInputRoutes();
+    };
+    this.restore = () => {
+        if(!inputRouteStack.length) {
+            resetInputRoutes(); return;
+        }
+
+        const [
+            keyDown,keyUp,inputGamepad
+        ] = inputRouteStack.pop();
+
+        this[KEY_DOWN] = keyDown;
+        this[KEY_UP] = keyUp;
+        this[INPUT_GAMEPAD] = inputGamepad;
+    };
+    this.reset = () => {
+        inputRouteStack.splice(0);
+        resetInputRoutes();
+    };
 
     const repeatDelay = settings.repeatDelay;
     const repeatRate = settings.repeatRate;

@@ -63,7 +63,7 @@ div.interface-container {
 div.interface {
     position: fixed;
     box-sizing: border-box;
-    background-color: #ffffffd9;
+    background-color: hsla(0, 0%, 95%, 1);
     font-family: sans-serif;
     padding: 8px;
     user-select: none;

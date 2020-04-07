@@ -1,12 +1,36 @@
 import Constants from "../../internal/constants.js";
+const INPUT_ROUTES = Constants.InputRoutes;
+
+const INPUT_METHODS = [
+    INPUT_ROUTES.keyDown,
+    INPUT_ROUTES.keyUp,
+    INPUT_ROUTES.input,
+    INPUT_ROUTES.inputGamepad
+];
 
 const INTERFACE_CLASS = "interface";
 const INTERFACE_CONTAINER_CLASS = "interface-container";
-
-const DUMMY_FRAME = {render:()=>{}};
+const REFRESH_INPUT = Constants.InputRoutes.refreshInput;
 
 function MenuController() {
     this.show = null; this.close = null;
+}
+
+function ProxyFrame() {
+    this.opaque = false;
+    this.render = () => {};
+    INPUT_METHODS.forEach(method => {
+        let value = null;
+        Object.defineProperty(this,method,{
+            get: () => value,
+            set: newValue => {
+                if(!newValue) newValue = null;
+                value = newValue
+            },
+            enumerable: true
+        });
+    });
+    Object.seal(this);
 }
 
 function DOMInterface() {
@@ -33,23 +57,31 @@ function DOMInterface() {
         activeLayerID = null;
     };
 
-    const setActiveLayer = (layer,ID) => {
+    const updateProxyFrame = proxyFrame => {
+        if(!frameTargetOverride) return;
+        frameTargetOverride.child = proxyFrame;
+    };
+
+    const setActiveLayer = (layer,ID,proxyFrame) => {
         if(ID === activeLayerID) return;
         clearActiveLayer(); activeLayerID = ID;
 
+        updateProxyFrame(proxyFrame);
         layer.classList.add(INTERFACE_CLASS);
         layerContainer.appendChild(layer);
     };
 
     const tryRefreshInput = frame => {
-        if(frame && frame.refreshInput) frame.refreshInput();
+        if(!frame) return;
+        const refreshInput = frame[REFRESH_INPUT];
+        if(refreshInput) refreshInput();
     };
 
-    const openDOM = () => {
+    const openDOM = proxyFrame => {
         const {frame} = CanvasManager; if(!frame) return;
         const target = frame.getDeepest();
         frameTargetOverride = target;
-        target.child = DUMMY_FRAME;
+        updateProxyFrame(proxyFrame);
         tryRefreshInput(frame);
     };
 
@@ -63,8 +95,8 @@ function DOMInterface() {
 
     const deleteLayer = deleteID => {
         for(let i = layers.length-1;i>=0;i--) {
-            const {layer,ID} = layers[i];
-            if(ID === deleteID) { layers.splice(i,1); return layer; }
+            const layer = layers[i];
+            if(layer.ID === deleteID) { layers.splice(i,1); return layer; }
         }
         return null;
     };
@@ -72,8 +104,8 @@ function DOMInterface() {
     const hasLayer = () => layers.length >= 1;
 
     const activateTopLayer = () => {
-        const {layer,ID} = layers[layers.length-1];
-        setActiveLayer(layer,ID);
+        const {layer,ID,proxyFrame} = layers[layers.length-1];
+        setActiveLayer(layer,ID,proxyFrame);
     };
 
     const postLayerRemoval = () => {
@@ -87,7 +119,7 @@ function DOMInterface() {
     const removeLayer = ID => {
         const removedLayer = deleteLayer(ID);
         postLayerRemoval();
-        return removedLayer || null;
+        return removedLayer.layer || null;
     };
 
     let IDGenerator = 1;
@@ -104,14 +136,20 @@ function DOMInterface() {
         } else {
             ID = getID();
         }
-        layer = layer({ID,terminate:()=>removeLayer(ID)},...parameters);
+
+        const proxyFrame = new ProxyFrame();
+        layer = layer({
+            ID,proxyFrame,terminate:()=>removeLayer(ID)
+        },...parameters);
+
         if(!hasLayer()) {
-            openDOM();
+            openDOM(proxyFrame);
         } else {
             deleteLayer(ID);
         }
-        layers.push({layer,ID});
-        setActiveLayer(layer,ID);
+
+        layers.push({layer,ID,proxyFrame});
+        setActiveLayer(layer,ID,proxyFrame);
         return ID;
     };
 
@@ -131,7 +169,7 @@ function DOMInterface() {
 
     const bringToFront = ID => {
         const layer = deleteLayer(ID);
-        layers.push({layer,ID});
+        layers.push(layer);
         activateTopLayer();
     };
 
