@@ -17,7 +17,7 @@ const noRelations = () => new Object();
 const Relationships = Object.freeze({
     [None]: noRelations(),
     [Trigger]: noRelations(),
-    [Default]: getRelations(Default),
+    [Default]: getRelations(Default,Avatar),
     [Avatar]: getRelations(Default,Avatar,Trigger),
     [Projectile]: getRelations(Avatar),
 });

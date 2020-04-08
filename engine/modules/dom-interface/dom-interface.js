@@ -19,17 +19,7 @@ function MenuController() {
 function ProxyFrame() {
     this.opaque = false;
     this.render = () => {};
-    INPUT_METHODS.forEach(method => {
-        let value = null;
-        Object.defineProperty(this,method,{
-            get: () => value,
-            set: newValue => {
-                if(!newValue) newValue = null;
-                value = newValue
-            },
-            enumerable: true
-        });
-    });
+    INPUT_METHODS.forEach(method => this[method] = null);
     Object.seal(this);
 }
 
@@ -118,6 +108,7 @@ function DOMInterface() {
 
     const removeLayer = ID => {
         const removedLayer = deleteLayer(ID);
+        if(!removedLayer) return;
         postLayerRemoval();
         return removedLayer.layer || null;
     };

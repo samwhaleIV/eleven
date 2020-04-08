@@ -1,4 +1,5 @@
-function TileSprite(x,y,texture,textureX,textureY,tileSize) {
+function TileSprite(x,y,texture,textureColumn,textureRow,tileSize) {
+    const textureX = textureColumn * tileSize, textureY = textureRow * tileSize;
 
     this.x = x, this.y = y;
 
