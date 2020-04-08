@@ -8,6 +8,16 @@ import TonePlayer from "./tone-player.js";
 const DEFAULT_SOUND_VOLUME = Constants.DefaultSoundVolume;
 const DEFAULT_MUSIC_VOLUME = Constants.DefaultMusicVolume;
 
+const AggressiveAntiWebAudioPolicyLoop = () => {
+    let interval = null;
+    interval = setInterval(()=>{
+        if(audioContext.state === "running") {
+            clearInterval(interval); return;
+        }
+        audioContext.resume();
+    },500);
+};
+
 function AudioManager() {
 
     InstallIntroHelper(this);
@@ -111,5 +121,7 @@ function AudioManager() {
     TonePlayer(this,soundNode);
 
     Object.freeze(this);
+
+    AggressiveAntiWebAudioPolicyLoop();
 }
 export default AudioManager;

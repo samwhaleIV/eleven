@@ -54,6 +54,13 @@ function Emitter({
 
     drift = evalTable.drift;
 
+    scale = 1;
+    Object.defineProperty(this,"scale",{
+        get: () => scale,
+        set: value => scale = value,
+        enumerable: true
+    });
+
     this.render = (context,x,y,{now,delta}) => {
         if(!firing || finished) return;
         let t = (now - startTime) / particleTime;
@@ -62,6 +69,10 @@ function Emitter({
         } else if(t > 1) {
             finished = true; sendCallback(); return;
         }
+
+        context.save();
+        context.translate(x,y);
+        context.scale(scale,scale);
 
         const particleScale = evalTable.scale(t);
 
@@ -78,14 +89,15 @@ function Emitter({
         do {
             drift(particles,i,delta,t);
             context.rect(
-                x+particles[i],
-                y+particles[i+1],
+                particles[i],
+                particles[i+1],
             size,size);
 
             i += bufferSize;
         } while(i < bufferArraySize);
 
         context.fill();
+        context.restore();
     };
 
     this.fire = callback => {

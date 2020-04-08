@@ -21,9 +21,6 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
 
     let locked = false, inputActive = false, colliding = false;
 
-    this.lock = () => locked = true;
-    this.unlock = () => locked = false;
-
     const getMoving = () => !locked && inputActive && !colliding;
 
     let pendingDirection = null;
@@ -39,7 +36,9 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
     const updateLocked = value => {
         locked = Boolean(value);
         if(!locked && pendingDirection) {
-            if(inputActive) sprite.direction = pendingDirection;
+            if(inputActive) {
+                sprite.direction = pendingDirection;
+            }
             pendingDirection = null;
         }
     };
@@ -71,6 +70,9 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             enumerable: true
         }
     });
+    
+    this.lock = () => updateLocked(true);
+    this.unlock = () => updateLocked(false);
 
     const collides = () => {
         let result = collisionLayer.collides(sprite);

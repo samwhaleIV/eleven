@@ -55,10 +55,22 @@ function EmitterPool(data,count) {
         })();
     };
 
-    Object.defineProperty(this,"stream",{
-        get: () => stream,
-        set: value => stream = value,
-        enumerable: true
+    let scale = 1;
+    Object.defineProperties(this,{
+        stream: {
+            get: () => stream,
+            set: value => stream = value,
+            enumerable: true
+        },
+        scale: {
+            get: () => scale,
+            set: value => {
+                for(let i = 0;i<count;i++) {
+                    emitters[i].scale = value;
+                }
+                scale = value;
+            }
+        }
     });
 
     this.stopStream = () => {
