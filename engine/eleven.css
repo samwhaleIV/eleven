@@ -63,11 +63,12 @@ div.interface-container {
 div.interface {
     position: fixed;
     box-sizing: border-box;
-    background-color: hsla(0, 0%, 95%, 1);
+    background-color: #0b0b0beb;
     font-family: sans-serif;
     padding: 8px;
     user-select: none;
     cursor: default;
+    color: white;
 }
 div.center {
     transform: translate(-50%,-50%);

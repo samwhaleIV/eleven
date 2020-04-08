@@ -3,8 +3,7 @@ import PlayerDirections from "./player/player-directions.js";
 const IMPULSE_BOX_SIZE = 0.25;
 
 const getImpulseObject = source => {
-    let {x, y, xOffset, yOffset, direction, width, height} = source;
-    if(xOffset) x += xOffset; if(yOffset) y += yOffset;
+    let {x, y, direction, width, height} = source;
     
     switch(direction) {
         case PlayerDirections.Up:
