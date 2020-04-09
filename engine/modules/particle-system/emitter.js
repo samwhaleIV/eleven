@@ -71,8 +71,6 @@ function Emitter({
         }
 
         context.save();
-        context.translate(x,y);
-        context.scale(scale,scale);
 
         const particleScale = evalTable.scale(t);
 
@@ -83,7 +81,9 @@ function Emitter({
 
         const size = particleSize * particleScale;
         const halfSize = size / 2;
-        x -= halfSize; y -= halfSize;
+
+        context.translate(x-halfSize,y-halfSize);
+        context.scale(scale,scale);
 
         let i = 0;
         do {
