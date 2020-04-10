@@ -29,24 +29,33 @@ function WorldImpulse(source,collisionLayer,tileCollision) {
 
     this.source = source; source = null;
 
-    const impulse = () => {
+    const impulse = (tileHandler,layerHandler) => {
         const object = getImpulseObject(this.source);
         let result = collisionLayer.collides(object);
 
         if(!result) {
-    
             result = tileCollision.collides(object);
-            if(result && this.tileHandler) {
-                this.tileHandler(result);
+            if(result && tileHandler) {
+                tileHandler(result);
             }
-
-        } else if(this.layerHandler) {
-            this.layerHandler(result);
+        } else if(layerHandler) {
+            layerHandler(result);
         }
 
         return result;
     };
-    this.impulse = impulse;
+    this.impulse = data => {
+        let tileHandler, layerHandler;
+        if(data) {
+            tileHandler = data.tileHandler;
+            layerHandler = data.layerHandler;
+        }
+        if(tileHandler || layerHandler) {
+            return impulse(tileHandler,layerHandler);
+        } else {
+            return impulse(this.tileHandler,this.layerHandler);
+        }
+    }
     Object.seal(this);
 }
 export default WorldImpulse;

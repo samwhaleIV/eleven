@@ -9,6 +9,14 @@ const DIRECTION_MATRIX = Object.freeze([
     SPRITE_WIDTH,SPRITE_WIDTH*2,0,SPRITE_WIDTH*3
 ]);
 
+
+const DIRECTION_LOOKUP = {
+    "up": 0,
+    "right": 1,
+    "down": 2,
+    "left": 3
+};
+
 const DEFAULT_DIRECTION = 2;
 
 function AnimatedSprite(texture,x,y) {
@@ -23,7 +31,17 @@ function AnimatedSprite(texture,x,y) {
     this.x = x, this.y = y;
     this.width = 1, this.height = 1;
 
-    this.direction = DEFAULT_DIRECTION;
+    let direction = DEFAULT_DIRECTION;
+
+    Object.defineProperty(this,"direction",{
+        get: () => direction,
+        set: value => {
+            if(typeof value === "string") {
+                value = DIRECTION_LOOKUP[value] || 2;
+            }
+            direction = value;
+        }
+    });
 
     let animationStart = 0;
 
@@ -52,7 +70,7 @@ function AnimatedSprite(texture,x,y) {
     };
 
     this.render = (context,x,y,width,height,time) => {
-        const textureX = this.directionMatrix[this.direction];
+        const textureX = this.directionMatrix[direction];
         const textureY = getTextureY(time);
 
         context.drawImage(

@@ -11,23 +11,13 @@ function TileRenderer(textureSize,data) {
 
     let renderLayerCount = 0;
     let renderLayerStart = 0;
-
     let renderLayerEnd = 0;
 
-    const clamp = (value,min,max) => Math.max(Math.min(value,max),min);
-
-    const setLayerRange = (start,length) => {
-        renderLayerStart = clamp(start,0,layerCount-1);
-        renderLayerCount = clamp(length,1,Math.min(layerCount,length-start));
+    this.setLayerRange = (start,length) => {
+        renderLayerCount = length;
+        renderLayerStart = start;
         renderLayerEnd = renderLayerStart + renderLayerCount;
     };
-    const setRenderLayerCount = value => {
-        setLayerRange(renderLayerStart,value);
-    };
-    const setRenderLayerStart = value => {
-        setLayerRange(value,renderLayerCount);
-    };
-    setRenderLayerCount(data.renderLayerCount);
 
     renderData.map = mapper => {
         for(let i = 0;i<renderData.length;i++) {
@@ -161,7 +151,6 @@ function TileRenderer(textureSize,data) {
         },
         layerStart: {
             get: () => renderLayerStart,
-            set: setRenderLayerStart,
             enumerable: true
         },
         maxLayerCount: {
@@ -170,7 +159,6 @@ function TileRenderer(textureSize,data) {
         },
         layerCount: {
             get: () => renderLayerCount,
-            set: setRenderLayerCount,
             enumerable: true
         }
     });
