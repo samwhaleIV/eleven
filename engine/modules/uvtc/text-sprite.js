@@ -46,33 +46,13 @@ function TextSprite({
     scale = DEFAULT_SCALE,
     backgroundColor = null,
     backgroundPadding = DEFAULT_BACKGROUND_PADDING,
-    wordSpacing = DEFAULT_WORD_SPACING
+    wordSpacing = DEFAULT_WORD_SPACING,
+    absolutePositioning = false
 }) {
     if(!lines && text) {
         lines = text.split("\n");
     }
     text = null;
-
-    if(!x) x = 0; if(!y) y = 0;
-
-    Object.defineProperties(this,{
-        backgroundColor: {
-            get: () => backgroundColor,
-            set: value => {
-                if(!value) value = null;
-                return backgroundColor = value;
-            },
-            enumerable: true
-        },
-        target: {
-            get: () => target,
-            set: value => {
-                if(!value) value = null;
-                return target = value;
-            },
-            enumerable: true
-        }
-    });
 
     let width = 0;
     const lineCount = lines.length;
@@ -98,58 +78,98 @@ function TextSprite({
         lines[i].render(width,0,lineHeight*i,renderer);
     }
 
-    this.width = 0; this.height = 0;
-    this.x = x; this.y = y;
+    backgroundPadding *= scale;
 
-    let renderWidth = width, renderHeight = height;
-    let renderXOffset = 0, renderYOffset = 0;
+    if(absolutePositioning) {
+        let totalWidth = width + backgroundPadding * 2;
+        let totalHeight = height + backgroundPadding * 2;
 
-    if(renderWidth % 2 !== 0) renderWidth++;
-    if(renderHeight % 2 !== 0) renderHeight++;
+        if(totalWidth % 2 !== 0) totalWidth++;
+        if(totalHeight % 2 !== 0) totalHeight++;
 
-    if(backgroundColor) {
-        backgroundPadding *= scale;
-        const newLength = backgroundPadding * 2;
+        const xOffset = -totalWidth / 2;
+        const yOffset = -totalHeight / 2;
 
-        renderWidth += newLength;
-        renderHeight += newLength;
+        const bufferXOffset = xOffset + backgroundPadding;
+        const bufferYOffset = yOffset + backgroundPadding;
 
-        renderXOffset = backgroundPadding;
-        renderYOffset = backgroundPadding;
+        this.height = totalHeight;
+        this.halfHeight = this.height / 2;
+
+        this.render = (context,x,y) => {
+            if(backgroundColor) {
+                context.fillStyle = backgroundColor;
+                context.fillRect(
+                    x+xOffset,y+yOffset,
+                    totalWidth,totalHeight
+                );
+            }
+            context.drawImage(buffer,x+bufferXOffset,y+bufferYOffset);
+        };
+    } else {
+        Object.defineProperty(this,"target",{
+            get: () => target,
+            set: value => {
+                if(!value) value = null;
+                return target = value;
+            },
+            enumerable: true
+        });
+
+        if(!x) x = 0; if(!y) y = 0;
+
+        this.width = 0; this.height = 0;
+        this.x = x; this.y = y;
+
+        let renderWidth = width, renderHeight = height;
+        let renderXOffset = 0, renderYOffset = 0;
+    
+        if(renderWidth % 2 !== 0) renderWidth++;
+        if(renderHeight % 2 !== 0) renderHeight++;
+    
+        if(backgroundColor) {
+            const newLength = backgroundPadding * 2;
+    
+            renderWidth += newLength;
+            renderHeight += newLength;
+    
+            renderXOffset = backgroundPadding;
+            renderYOffset = backgroundPadding;
+        }
+
+        this.update = () => {
+
+            let renderX = x, renderY = y;
+    
+            if(target) {
+                let followX = target.x, followY = target.y;
+                if(target.xOffset) followX += target.xOffset;
+                if(target.yOffset) followY += target.yOffset;
+    
+                renderX += followX + target.width / 2;
+                renderY += followY + target.height / 2;
+            }
+    
+            const {tileSize} = world.grid;
+    
+            const worldWidth = renderWidth / tileSize;
+            const worldHeight = renderHeight / tileSize;
+    
+            this.width = worldWidth;
+            this.height = worldHeight;
+    
+            this.x = renderX - worldWidth / 2;
+            this.y = renderY - worldHeight / 2;
+        };
+        this.render = (context,x,y,width,height) => {
+            if(target) y = Math.ceil(y);
+            if(backgroundColor) {
+                context.fillStyle = backgroundColor;
+                context.fillRect(x-renderXOffset,y-renderYOffset,width,height);
+            }
+            context.drawImage(buffer,x,y);
+        };
     }
 
-    this.update = () => {
-
-        let renderX = x, renderY = y;
-
-        if(target) {
-            let followX = target.x, followY = target.y;
-            if(target.xOffset) followX += target.xOffset;
-            if(target.yOffset) followY += target.yOffset;
-
-            renderX += followX + target.width / 2;
-            renderY += followY + target.height / 2;
-        }
-
-        const {tileSize} = world.grid;
-
-        const worldWidth = renderWidth / tileSize;
-        const worldHeight = renderHeight / tileSize;
-
-        this.width = worldWidth;
-        this.height = worldHeight;
-
-        this.x = renderX - worldWidth / 2;
-        this.y = renderY - worldHeight / 2;
-    };
-
-    this.render = (context,x,y,width,height) => {
-        if(target) y = Math.ceil(y);
-        if(backgroundColor) {
-            context.fillStyle = backgroundColor;
-            context.fillRect(x-renderXOffset,y-renderYOffset,width,height);
-        }
-        context.drawImage(buffer,x,y);
-    };
 }
 export default TextSprite;

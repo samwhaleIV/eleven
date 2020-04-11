@@ -22,6 +22,25 @@ const getImpulseObject = source => {
     }
 };
 
+const getTileHandler = (source,data) => result => {
+    let didHandle = false;
+    if(data && data.tileHandler) {
+        didHandle = data.tileHandler(result);
+    }
+    if(!didHandle && source.tileHandler) {
+        source.tileHandler(result);
+    }
+};
+const getLayerHandler = (source,data) => result => {
+    let didHandle = false;
+    if(data && data.layerHandler) {
+        didHandle = data.layerHandler(result);
+    }
+    if(!didHandle && this.tileHandler) {
+        source.tileHandler(result);
+    }
+};
+
 function WorldImpulse(source,collisionLayer,tileCollision) {
 
     this.layerHandler = null;
@@ -45,17 +64,10 @@ function WorldImpulse(source,collisionLayer,tileCollision) {
         return result;
     };
     this.impulse = data => {
-        let tileHandler, layerHandler;
-        if(data) {
-            tileHandler = data.tileHandler;
-            layerHandler = data.layerHandler;
-        }
-        if(tileHandler || layerHandler) {
-            return impulse(tileHandler,layerHandler);
-        } else {
-            return impulse(this.tileHandler,this.layerHandler);
-        }
-    }
+        const tileHandler = getTileHandler(this,data);
+        const layerHandler = getLayerHandler(this,data);
+        impulse(tileHandler,layerHandler);
+    };
     Object.seal(this);
 }
 export default WorldImpulse;
