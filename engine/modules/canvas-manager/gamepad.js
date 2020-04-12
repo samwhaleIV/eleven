@@ -1,7 +1,5 @@
 function Gamepad() {
-    let gamepad = null;
     this.poll = () => {
-        gamepad = null;
         const gamepads = navigator.getGamepads();
         let i = 0;
         while(i < gamepads.length) {
