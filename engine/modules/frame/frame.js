@@ -99,13 +99,13 @@ Frame.prototype.setChild = async function(frame,...parameters) {
     this.child = frame;
     return frame;
 }
-Frame.prototype.message = function(message,...data) {
+Frame.prototype.messageFrame = function(message,...data) {
     sendMessage(this,message,data);
 }
-Frame.prototype.messageDeepest = function(message,...data) {
+Frame.prototype.messageDeepestFrame = function(message,...data) {
     sendMessage(this.getDeepest(),message,data);
 }
-Frame.prototype.messageAll = function(message,...data) {
+Frame.prototype.messageAllFrames = function(message,...data) {
     let frame = this;
     let child = frame.child;
 
