@@ -1,21 +1,16 @@
 function Gamepad() {
-    const isValidGamepad = gamepad => {
-        return gamepad && gamepad.mapping === "standard";
-    };
-    const getGamepadData = gamepad => {
-        return {
-            axes: gamepad.axes,
-            buttons: gamepad.buttons
-        };
-    };
+    let gamepad = null;
     this.poll = () => {
-        let gamepad = null;
+        gamepad = null;
         const gamepads = navigator.getGamepads();
         let i = 0;
         while(i < gamepads.length) {
-            gamepad = gamepads[i];
-            if(isValidGamepad(gamepad)) {
-                return getGamepadData(gamepad);
+            let gamepad = gamepads[i];
+            if(gamepad && gamepad.mapping === "standard") {
+                return {
+                    axes: gamepad.axes,
+                    buttons: gamepad.buttons
+                }
             }
             i++;
         }
