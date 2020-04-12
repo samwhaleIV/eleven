@@ -203,7 +203,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         cameraValue += cameraOffset;
 
         let startTile = Math.floor(cameraValue);
-        let location = Math.floor(Number((renderOffset + (startTile - cameraValue) * tileSize).toFixed(8)));
+        let location = Math.round(renderOffset + (startTile - cameraValue) * tileSize - 0.011);
 
         let renderStride = tileLength * tileSize;
 
