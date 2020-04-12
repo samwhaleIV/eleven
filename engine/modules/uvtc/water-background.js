@@ -32,10 +32,16 @@ function WaterBackground(
         dispatchRenderer.addBackground(this.render);
     };
 
-    this.render = (context,{width,height},time) => {
-        const offset = time.now / this.scrollDuration;// / 1;
+    this.useCameraOffset = true;
 
-        const cameraX = grid.camera.x, cameraY = grid.camera.y;
+    this.render = (context,{width,height},time) => {
+        const offset = time.now / this.scrollDuration;
+
+        let cameraX = 0, cameraY = 0;
+        if(this.useCameraOffset) {
+            cameraX = grid.camera.x;
+            cameraY = grid.camera.y;
+        }
 
         const xOffsetDistance = offset + cameraX;
         const yOffsetDistance = offset + cameraY;
