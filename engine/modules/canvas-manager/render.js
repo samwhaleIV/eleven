@@ -70,6 +70,9 @@ function Render(canvasManager,modules) {
         canvasManager.size,
         readonlyTime
     ];
+
+    canvasManager.time = readonlyTime;
+
     const pollInput = modules.input.poll;
     const tryUpdateSize = modules.resize.tryUpdateSize;
 

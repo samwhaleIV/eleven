@@ -1,10 +1,21 @@
 import MultiLayer from "../../internal/multi-layer.js";
+import Constants from "../../internal/constants.js";
 
 const DISPATCHER_SET = ["Resize","Update","Background","Render","Finalize"];
 
 function Dispatcher() {
     MultiLayer.call(this);
-    this.target = (...data) => this.forEach(handler => handler(...data));
+
+    const {size,context,time} = globalThis[
+        Constants.EngineNamespace
+    ].CanvasManager;
+
+    const handler = layer => {
+        layer(context,size,time);
+    };
+    this.target = () => {
+        this.forEach(handler);
+    };
 }
 
 function DispatchRenderer() {

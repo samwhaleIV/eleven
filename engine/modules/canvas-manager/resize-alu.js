@@ -9,21 +9,14 @@ const SIZE_VALUES = [
     "equalDimensions", "unequalDimensions"
 ];
 
-function GetContainers() {
+function GetContainer() {
     const sizeValues = new Object();
-    const sizeValuesReadonly = new Object();
 
-    SIZE_VALUES.forEach(valueType => {
-        sizeValues[valueType] = null;
-        Object.defineProperty(sizeValuesReadonly,valueType,{
-            get: function(){return sizeValues[valueType]}
-        });
-    });
+    SIZE_VALUES.forEach(valueType => sizeValues[valueType] = null);
 
     Object.seal(sizeValues);
-    Object.freeze(sizeValuesReadonly);
 
-    return {sizeValues,sizeValuesReadonly};
+    return sizeValues;
 }
 function GetResizeALU(target,sizeValues) {
     return (width,height) => {
@@ -65,8 +58,7 @@ function GetResizeALU(target,sizeValues) {
 }
 
 const ResizeALU = Object.freeze({
-    GetResizer: GetResizeALU,
-    GetContainers: GetContainers
+    GetResizer: GetResizeALU, GetContainer
 });
 
 export default ResizeALU;

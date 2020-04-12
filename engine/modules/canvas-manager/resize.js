@@ -13,10 +13,10 @@ const INVALID_SIZE_SCALE = scale => {
 
 function Resize(canvasManager,modules) {
 
-    const {sizeValues, sizeValuesReadonly} = ResizeALU.GetContainers();
+    const sizeValues = ResizeALU.GetContainer();
     const canvas = modules.internal.canvas;
     const resize = ResizeALU.GetResizer(canvas,sizeValues);
-    canvasManager.size = sizeValuesReadonly;
+    canvasManager.size = sizeValues;
 
     let deferred = false;
     const setDeferred = () => {
@@ -43,8 +43,7 @@ function Resize(canvasManager,modules) {
 
     const context = modules.internal.context;
     const sizeChangeData = Object.freeze({
-        context: context,
-        size: sizeValuesReadonly
+        context, size: sizeValues
     });
 
     const notifySizeUpdate = () => {

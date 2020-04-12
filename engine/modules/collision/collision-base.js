@@ -53,6 +53,9 @@ function CollisionBase(grid,resolutionScale) {
 
     const mapSize = width * height;
     const map = new Array(mapSize);
+
+    const resetBuffer = new Array();
+    this.resetBuffer = resetBuffer;
     
     this.tileSize = tileSize;
     this.width = width; this.height = height;
@@ -86,17 +89,23 @@ CollisionBase.prototype.getCollisionTest = function(valueProcessor) {
 }
 
 CollisionBase.prototype.reset = function() {
-    const {map, mapSize} = this;
-    for(let i = 0;i<mapSize;i++) map[i] = 0;
+    const {map, resetBuffer} = this;
+
+    for(let i = resetBuffer.length-1;i>-1;i--) {
+        map[resetBuffer[i]] = 0;
+    }
+
+    resetBuffer.length = 0;
 }
 CollisionBase.prototype.write = function(startX,y,endX,endY,value) {
-    const {map, mapSize, width} = this;
+    const {map, mapSize, width, resetBuffer} = this;
     while(y<endY) {
         let x = startX;
         while(x<endX) {
             const index = x + y * width;
             if(index >= 0 && index < mapSize) {
                 map[index] = value;
+                resetBuffer.push(index);
             }
             x++;
         }
