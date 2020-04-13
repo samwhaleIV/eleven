@@ -34,6 +34,8 @@ function WaterBackground(
 
     this.useCameraOffset = true;
 
+    this.blendMode = "lighter";
+
     this.render = (context,{width,height},time) => {
         const offset = time.now / this.scrollDuration;
 
@@ -65,7 +67,7 @@ function WaterBackground(
             (offset - cameraX) * size + xOffset,
             -cameraY * size + yOffset
         );
-        context.globalCompositeOperation = "lighter";
+        context.globalCompositeOperation = this.blendMode;
         context.scale(-1,-1);
         context.fill();
         context.restore();

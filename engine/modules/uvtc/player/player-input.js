@@ -68,6 +68,28 @@ function PlayerInput(playerController,directionImpulses) {
         inputStack.splice(0); setNotMoving();
     };
 
+    this.copyState = () => {
+        const copyStack = inputStack.slice(0);
+        const {inputActive,pendingDirection,direction} = playerController;
+        return {copyStack,inputActive,direction,pendingDirection};
+    };
+
+    this.setState = ({
+        copyStack,inputActive,direction,pendingDirection
+    }) => {
+        inputStack.splice(0);
+        if(inputActive) {
+            setMoving();
+        } else {
+            setNotMoving();
+        }
+        playerController.pendingDirection = pendingDirection;
+        playerController.direction = direction;
+        copyStack.forEach(input=>{
+            inputStack.push(input);
+        });
+    };
+
     Object.freeze(this);
 }
 

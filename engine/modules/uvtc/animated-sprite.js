@@ -33,11 +33,16 @@ function AnimatedSprite(texture,x,y) {
 
     let direction = DEFAULT_DIRECTION;
 
+    this.getPosition = () => [this.x,this.y];
+    this.setPosition = (x,y) => (this.x = x, this.y = y);
+
     Object.defineProperty(this,"direction",{
         get: () => direction,
         set: value => {
             if(typeof value === "string") {
-                value = DIRECTION_LOOKUP[value] || 2;
+                const lookupResult = DIRECTION_LOOKUP[value];
+                if(isNaN(lookupResult)) return;
+                value = lookupResult;
             }
             direction = value;
         }

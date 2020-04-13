@@ -43,6 +43,11 @@ function TileRenderer(textureSize,data) {
         const idx = getLayerIdx(x,y,layer);
         return renderData[idx];
     };
+    this.getXY = idx => {
+        const x = idx % columns;
+        const y = Math.floor(idx / columns);
+        return [x,y];
+    };
 
     let context, tileSize;
     this.configTileRender = data => {
@@ -108,7 +113,7 @@ function TileRenderer(textureSize,data) {
     includedTileset = null;
 
     const readLayer = layerIndex => {
-        const start = getLayerIdx(0,0,layerIndex)
+        const start = getLayerIdx(0,0,layerIndex);
         return renderData.slice(start,start+layerSize);
     };
     this.readLayer = readLayer;

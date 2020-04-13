@@ -35,7 +35,7 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
 
     const updateLocked = value => {
         locked = Boolean(value);
-        if(!locked && pendingDirection) {
+        if(!locked && pendingDirection !== null) {
             if(inputActive) {
                 sprite.direction = pendingDirection;
             }
@@ -58,6 +58,11 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
             get: () => sprite.direction,
             set: trySetDirection,
             enumerable: true
+        },
+        pendingDirection: {
+            //For serious serialization business only! Seriousailization?
+            get: () => pendingDirection,
+            set: value => pendingDirection = value
         }
     });
     Object.defineProperties(sprite,{

@@ -66,7 +66,7 @@ function WorldImpulse(source,collisionLayer,tileCollision) {
     this.impulse = data => {
         const tileHandler = getTileHandler(this,data);
         const layerHandler = getLayerHandler(this,data);
-        impulse(tileHandler,layerHandler);
+        return impulse(tileHandler,layerHandler);
     };
     Object.seal(this);
 }
