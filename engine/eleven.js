@@ -44,6 +44,9 @@ import Faders from "./modules/fader/faders.js";
 
 import {GlyphTable} from "./modules/uvtc/text/glyph-table.js";
 
+globalThis.delay = duration => new Promise(resolve => setTimeout(resolve,duration));
+globalThis.frameDelay = FrameTimeout;
+
 const NamespaceTable = (name,sourceTable,readOnly=true) => {
     return Singleton({
         name: name,

@@ -1,5 +1,4 @@
 import Emitter from "./emitter.js";
-import FrameTimeout from "../../internal/frame-timeout.js";
 
 const DEFAULT_FIRE_RATE = 500;
 
@@ -50,7 +49,7 @@ function EmitterPool(data,count) {
                 if(!streaming) return;
                 this.fire(fireRate);
                 const delay = fireRate * count + pauseTime;
-                await FrameTimeout(delay);
+                await frameDelay(delay);
             }
         })();
     };

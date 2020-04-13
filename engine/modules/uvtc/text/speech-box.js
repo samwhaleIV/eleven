@@ -1,8 +1,7 @@
-import FrameTimeout from "../../../internal/frame-timeout.js";
 import Constants from "../../../internal/constants.js";
 const ENGINE_NAMESPACE = Constants.EngineNamespace;
 
-const CHARACTER_DELAY = 1000 / 60;
+const CHARACTER_DELAY = 20;
 const SPACE_DELAY = 10;
 const HYPHEN_DELAY = 0;
 const COMMA_DELAY = 400;
@@ -65,14 +64,14 @@ function SpeechBox(textLayer,playSound) {
                 const {current, next} = value;
 
                 if(playSound) {
-                    if(instance % 2 == 0) playSound();
+                    if(instance % 2 === 0) playSound();
                     instance += 1;
                 };
 
                 if(next !== null) {
                     const duration = getDuration(current);
                     if(duration && !(IS_PUNCTUATION(next) && IS_PUNCTUATION(current))) {
-                        await FrameTimeout(duration);
+                        await delay(duration);
                     }
                 }
 
