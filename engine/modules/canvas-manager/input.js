@@ -51,6 +51,7 @@ const getModifierData = downKeys => {
 function Input(canvasManager,modules) {
 
     const downKeys = {};
+    canvasManager.downKeys = downKeys;
 
     const getFrameSafe = () => {
         let frame = canvasManager.getFrame();
