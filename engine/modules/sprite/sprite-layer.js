@@ -58,6 +58,9 @@ function SpriteLayer(grid) {
     const updateHandler = sprite => {
         if(!sprite.update) return;
         sprite.update(time);
+        if(sprite.alignToPixels) {
+            grid.alignToPixels(sprite);
+        }
     };
 
     const update = (context,size,newTime) => {

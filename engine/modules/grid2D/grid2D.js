@@ -197,7 +197,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         );
     };
 
-    const roundToPixelSpace = value => Math.round(value / pixelSize) * pixelSize;
+    const roundToPixelSpace = value => Math.round(value / pixelSize) / tileSize;
 
     const getDimensionRenderData = (dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize) => {
         cameraValue += cameraOffset;

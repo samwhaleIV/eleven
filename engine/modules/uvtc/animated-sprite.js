@@ -74,6 +74,8 @@ function AnimatedSprite(texture,x,y) {
         }
     };
 
+    this.alignToPixels = true;
+
     this.render = (context,x,y,width,height,time) => {
         const textureX = this.directionMatrix[direction];
         const textureY = getTextureY(time);
