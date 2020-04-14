@@ -114,6 +114,8 @@ function Camera(grid) {
         return this;
     };
 
+    this.getPosition = () => [x,y,scale];
+
     this.zoomTo = (newScale,duration) => {
         if(zooming) return;
         if(newScale == scale) return;
