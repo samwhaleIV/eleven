@@ -42,6 +42,8 @@ import ParticleSystem from "./modules/particle-system/particle-system.js";
 import Fader from "./modules/fader/fader.js";
 import Faders from "./modules/fader/faders.js";
 
+import ParseGrid2DMap from "./modules/grid2D/tile-renderer/parse.js";
+
 import {GlyphTable} from "./modules/uvtc/text/glyph-table.js";
 
 globalThis.delay = duration => new Promise(resolve => setTimeout(resolve,duration));
@@ -100,6 +102,7 @@ const Eleven = Install([
     TextLayer,
     SpeechBox,
     WorldImpulse,
+    ParseGrid2DMap,
     FrameTimeout,
     NamespaceTable("CollisionTypes",CollisionTypes),
     Singleton({

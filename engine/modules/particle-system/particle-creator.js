@@ -124,8 +124,8 @@ function tInverse(t) {
 
 function TypeBase(size,color,count,duration,scale,start,drift) {
     return {
-        size, color, count, duration, drift, start, scale,
-        bufferSize: VELOCITY_BUFFER_SIZE, scale: tInverse
+        size,color,count,duration,start,scale,drift,
+        bufferSize: VELOCITY_BUFFER_SIZE
     };
 }
 

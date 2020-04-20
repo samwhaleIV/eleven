@@ -307,6 +307,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         updateRenderData();
         return tileArea;
     };
+    this.updateRenderData = updateRenderData;
 
     const renderTiles = (context,time) => {
         if(renderer.paused || !renderer.renderTile) return;

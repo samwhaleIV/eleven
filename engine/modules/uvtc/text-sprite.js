@@ -40,7 +40,7 @@ function Line(text,letterSpacing,wordSpacing,scale) {
 }
 
 function TextSprite({
-    lines, x, y, color, world, target = null, text,
+    lines, x, y, color, grid, target = null, text,
     lineSpacing = DEFAULT_LINE_SPACING,
     letterSpacing = DEFAULT_LETTER_SPACING,
     scale = DEFAULT_SCALE,
@@ -150,7 +150,7 @@ function TextSprite({
                 renderY += followY + target.height / 2;
             }
     
-            const {tileSize} = world.grid;
+            const {tileSize} = grid;
     
             const worldWidth = renderWidth / tileSize;
             const worldHeight = renderHeight / tileSize;
@@ -162,7 +162,6 @@ function TextSprite({
             this.y = renderY - worldHeight / 2;
         };
         this.render = (context,x,y,width,height) => {
-            if(target) y = Math.ceil(y);
             if(backgroundColor) {
                 context.fillStyle = backgroundColor;
                 context.fillRect(x-renderXOffset,y-renderYOffset,width,height);

@@ -176,9 +176,10 @@ function Mouse(canvasManager,modules) {
         if(!delta) return;
         if(!canSendEvent()) return;
         const scrollingUp = delta < 0;
-        const {x,y} = sendDataContainer;
+        const {x,y,shiftKey,altKey,ctrlKey} = sendDataContainer;
         const sendData = {
-            delta,x,y,scrollingUp
+            delta,x,y,scrollingUp,
+            shiftKey,altKey,ctrlKey
         };
         sendPointerScroll(sendData);
     };

@@ -21,9 +21,9 @@ function UVTCMapPrelude(data) {
     if(!mapData) MISSING_MAP_UVTC();
     const fillEmpty = Boolean(data.fillEmpty);
     const decodedMapData = DecodeUVTCMap(mapData,fillEmpty)
-    return ParseRenderInformation(decodedMapData);
+    return ParseGrid2DMap(decodedMapData);
 }
-function ParseRenderInformation(data={}) {
+function ParseGrid2DMap(data={}) {
     if(data.uvtcDecoding) return UVTCMapPrelude(data);
 
     let width = 0;
@@ -77,7 +77,8 @@ function ParseRenderInformation(data={}) {
     } else if(data.width && data.height) {
         width = data.width;
         height = data.height;
-        renderData = new Array(width * height).fill(0);
+        const layerCount = data.layerCount || 1;
+        renderData = new Array(width * height * layerCount).fill(0);
     } else {
         renderData = new Array(0);
     }
@@ -98,4 +99,4 @@ function ParseRenderInformation(data={}) {
     };
 }
 
-export default ParseRenderInformation;
+export default ParseGrid2DMap;

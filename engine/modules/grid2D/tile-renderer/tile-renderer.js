@@ -1,13 +1,14 @@
-import ParseRenderInformation from "./parse.js";
+import ParseGrid2DMap from "./parse.js";
 
 function TileRenderer(textureSize,data) {
     let includedTileset = data.tileset;
-    data = ParseRenderInformation(data);
+    data = ParseGrid2DMap(data);
     const {
         columns, rows,
         layerCount, layerSize,
         renderData, skipZero,
     } = data;
+    Object.seal(renderData);
 
     let renderLayerCount = 0;
     let renderLayerStart = 0;
@@ -17,12 +18,6 @@ function TileRenderer(textureSize,data) {
         renderLayerCount = length;
         renderLayerStart = start;
         renderLayerEnd = renderLayerStart + renderLayerCount;
-    };
-
-    renderData.map = mapper => {
-        for(let i = 0;i<renderData.length;i++) {
-            renderData[i] = mapper(renderData[i],i);
-        }
     };
 
     let textureColumns = 0, textureRows = 0, textureCount = 0;

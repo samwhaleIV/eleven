@@ -10,7 +10,7 @@ function EmitterPool(data,count) {
         emitters[i] = new Emitter(data);
     }
 
-    this.fire = interval => {
+    const fire = interval => {
         let i = 0;
         if(interval) {
             do {
@@ -22,6 +22,15 @@ function EmitterPool(data,count) {
                 emitters[i].fire();
                 i++;
             } while(i < count);
+        }
+    };
+
+    this.fire = callback => {
+        let i = count - 1;
+        emitters[i--].fire(callback);
+        while(i >= 0) {
+            emitters[i].fire();
+            i--;
         }
     };
 
@@ -47,7 +56,7 @@ function EmitterPool(data,count) {
         (async () => {
             while(true) {
                 if(!streaming) return;
-                this.fire(fireRate);
+                fire(fireRate);
                 const delay = fireRate * count + pauseTime;
                 await frameDelay(delay);
             }
