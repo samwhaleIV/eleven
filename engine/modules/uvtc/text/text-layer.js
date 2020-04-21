@@ -1,4 +1,5 @@
 import GlyphTable from "./glyph-table.js";
+import ColorCodes from "./color-codes.js";
 
 const DEFAULT_SCALE = 4;
 const DEFAULT_TEXT_SPACING = 1;
@@ -6,13 +7,32 @@ const DEFAULT_WORD_SPACING = 2;
 const DEFAULT_ROW_SPACING = 1;
 const DEFAULT_BOX_PADDING = 4;
 
-const ELLIPSIS = "…";
+const LONG_WORD_CLIP_JUSTIFICATION = 3 / 4;
+const LONG_WORD_CLIP_CHARACTER = "-";
 
-const MapNewLinesAbleString = text => {
-    return text.replace(/\n/g, " \n ").split(" ");
-};
+const ELLIPSIS = "…";
+const COLOR_START = "%";
+const INSTANT_FLAG = "&";
+
+const MapNewLinesAbleString = text => text.replace(/\n/g, " \n ").split(" ");
+
 const MapStringsList = words => {
-    for(let i = 0;i<words.length;i++) words[i] = {text:words[i],color:undefined};
+    for(let i = 0;i<words.length;i++) {
+        let text = words[i], color, backgroundColor, instant = false;
+        if(i === 0 && text[0] === INSTANT_FLAG) {
+            instant = true;
+            text = text.substring(1);
+        }
+        if(text[0] === COLOR_START) {
+            color = ColorCodes[text[1]];
+            text = text.substring(2);
+        }
+        if(text[0] === COLOR_START) {
+            backgroundColor = ColorCodes[text[1]];
+            text = text.substring(2);
+        }
+        words[i] = {text,color,backgroundColor,instant};
+    }
     return words;
 };
 const FilterEllipsis = words => {
@@ -20,9 +40,6 @@ const FilterEllipsis = words => {
         words[i].text = words[i].text.replace(/\.\.\./gi,ELLIPSIS);
     }
 };
-
-const LONG_WORD_CLIP_JUSTIFICATION = 3 / 4;
-const LONG_WORD_CLIP_CHARACTER = "-";
 
 const IS_ALPHABETICAL = character => {
     return character.toLowerCase() !== character.toUpperCase();
@@ -50,7 +67,7 @@ function* TextGenerator(
 
     for(let i = 0;i<words.length;i++) {
         const onLastWord = i === words.length - 1;
-        const {text,color} = words[i];
+        const {text,color,backgroundColor,instant} = words[i];
 
         if(text === "\n") {
             x = boxPadding; y += rowHeight; continue;
@@ -82,14 +99,20 @@ function* TextGenerator(
                     xOffset = 0; y += rowHeight;
                 }
             }
-            renderCharacter(character,x + xOffset,y,color);
+
+            renderCharacter(character,x + xOffset,y,color,backgroundColor?{
+                color: backgroundColor,
+                widthOffset: textSpacing, heightOffset: 2,
+                xOffset: 0, yOffset: -1
+            }:null);
+
             xOffset += width;
             const next = onLastWord && onLastLetter ? null : onLastLetter ? " " : text[c+1];
-            yield getStatus(character,next);
+            if(!instant) yield getStatus(character,next);
         }
         if(!onLastWord) {
             const next = words[i+1].text[0];
-            yield getStatus(" ",next);
+            getStatus(" ",next);
         }
         x += xOffset + wordSpacing;
     }

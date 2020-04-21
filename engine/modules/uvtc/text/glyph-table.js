@@ -1,6 +1,10 @@
 import FontData from "./font-data.js";
 
 const DEFAULT_COLOR = "black";
+const SPACE_WIDTH = 3;
+
+const PADDING_CHARACTER = "|";
+const PADDING_WIDTH = 1;
 
 function LoadTable() {
     const metadata = FontData.meta;
@@ -12,6 +16,8 @@ function LoadTable() {
         glyphs[character] = [glpyhX,size];
         glpyhX += size;
     }
+    glyphs[" "] = [-1,SPACE_WIDTH];
+    glyphs[PADDING_CHARACTER] = [-1,PADDING_WIDTH];
     return glyphs;
 }
 
@@ -53,10 +59,27 @@ function GlyphTable() {
 
         let currentColor = color || DEFAULT_COLOR;
 
-        return (character,x,y,color) => {
+        const renderBackground = (background,x,y,renderWidth,renderHeight) => {
+            const {
+                color, xOffset,yOffset,widthOffset,heightOffset
+            } = background;
+            context.fillStyle = color;
+            context.fillRect(
+                x + scale * xOffset,
+                y + scale * yOffset,
+                renderWidth + widthOffset * scale,
+                renderHeight + heightOffset * scale
+            );
+        };
+
+        return (character,x,y,color,background) => {
             if(color) currentColor = color;
             const [column, glpyhWidth] = table[character];
             const renderWidth = glpyhWidth * scale;
+            if(column < 0) {
+                if(background) renderBackground(background,x,y,renderWidth,renderHeight);
+                return renderWidth;
+            }
 
             buffer.width = glpyhWidth;
 
@@ -67,6 +90,8 @@ function GlyphTable() {
             bufferContext.globalCompositeOperation = "source-in";
             bufferContext.fillStyle = currentColor;
             bufferContext.fillRect(0,0,glpyhWidth,glyphHeight);
+
+            if(background) renderBackground(background,x,y,renderWidth,renderHeight);
 
             context.drawImage(
                 buffer,
