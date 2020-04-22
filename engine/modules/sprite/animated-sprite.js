@@ -1,20 +1,21 @@
+import PlayerDirections from "../world2d/player/player-directions.js";
+
 const SPRITE_WIDTH = 16;
 const SPRITE_HEIGHT = 16;
 
 const ANIMATION_ROW_COUNT = 4;
 const FRAME_TIME = 100;
 
-//Direction matrix conforms to specification of './player/player-directions.js'
+//Conforms to PlayerDirections
 const DIRECTION_MATRIX = Object.freeze([
     SPRITE_WIDTH,SPRITE_WIDTH*2,0,SPRITE_WIDTH*3
 ]);
 
-
 const DIRECTION_LOOKUP = {
-    "up": 0,
-    "right": 1,
-    "down": 2,
-    "left": 3
+    "up": PlayerDirections.Up,
+    "right": PlayerDirections.Right,
+    "down": PlayerDirections.Down,
+    "left": PlayerDirections.Left
 };
 
 const DEFAULT_DIRECTION = 2;

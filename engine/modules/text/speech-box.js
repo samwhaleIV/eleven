@@ -1,4 +1,4 @@
-import Constants from "../../../internal/constants.js";
+import Constants from "../../internal/constants.js";
 const ENGINE_NAMESPACE = Constants.EngineNamespace;
 
 const CHARACTER_DELAY = 30;

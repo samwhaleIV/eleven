@@ -6,12 +6,13 @@ const {
     pointerScroll
 } = Constants.InputRoutes;
 
-const ZOOM_RATE = 0.1;
-const ZOOM_PAN_DAMPENER = 10;
 const DEFAULT_MIN_SCALE = 1;
 const DEFAULT_MAX_SCALE = 10;
+const ZOOM_RATE = 0.075;
 
 function PanZoom(camera) {
+    const {grid} = camera;
+
     let panData = null;
     let halfWidth = 0, halfHeight = 0, tileSize = 0;
 
@@ -60,29 +61,38 @@ function PanZoom(camera) {
         refreshPanData({x,y});
     };
     this.zoom = ({scrollingUp,x,y}) => {
-        const scaleChange = 1 + (scrollingUp?ZOOM_RATE:-ZOOM_RATE);
-        let startScale = camera.scale;
-        startScale *= scaleChange;
+        const startPosition = grid.getTileLocation(x,y);
+        let zoomInTarget = startPosition;
 
-        if(startScale < minScale) {
-            camera.scale = minScale;
-            return;
-        } else if(startScale > maxScale) {
-            camera.scale = maxScale;
-            return;
+        let worldCenter = grid.getTileLocation(halfWidth,halfHeight);
+
+        const distanceToTarget = {
+            x: worldCenter.x - zoomInTarget.x,
+            y: worldCenter.y - zoomInTarget.y
+        };
+
+        const scaleChange = 1 + (scrollingUp ? ZOOM_RATE : -ZOOM_RATE);
+        const startScale = camera.scale;
+        let newScale = startScale;
+
+        newScale *= scaleChange;
+        if(newScale < minScale) {
+            newScale = minScale;
+        } else if(newScale > maxScale) {
+            newScale = maxScale;
         }
-        camera.scale = startScale;
+        camera.scale = newScale;
 
-        let centerXOffset = x - halfWidth;
-        let centerYOffset = y - halfHeight;
+        zoomInTarget = grid.getTileLocation(x,y);
+        worldCenter = grid.getTileLocation(halfWidth,halfHeight);
 
-        if(!scrollingUp) {
-            centerXOffset = -centerXOffset;
-            centerYOffset = -centerYOffset;
-        }
+        const newDistanceToTarget = {
+            x: worldCenter.x - zoomInTarget.x,
+            y: worldCenter.y - zoomInTarget.y
+        };
 
-        camera.x += centerXOffset / tileSize / ZOOM_PAN_DAMPENER;
-        camera.y += centerYOffset / tileSize / ZOOM_PAN_DAMPENER;
+        camera.x += newDistanceToTarget.x - distanceToTarget.x;
+        camera.y += newDistanceToTarget.y - distanceToTarget.y;
         if(panData) refreshPanData({x,y});
     };
     this.bindToFrame = frame => {

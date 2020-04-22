@@ -1,4 +1,4 @@
-import GlyphTable from "./text/glyph-table.js";
+import GlyphTable from "../text/glyph-table.js";
 
 const DEFAULT_LINE_SPACING = 1;
 const DEFAULT_SCALE = 3;

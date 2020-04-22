@@ -1,5 +1,6 @@
 import CollisionTypes from "./collision-types.js";
 import Relationships from "./relationships.js";
+import {RoundNear} from "./fpe-modulator.js";
 
 const DEFAULT_TYPE = CollisionTypes.Default;
 const PROJECTILE_TYPE = CollisionTypes.Projectile;
@@ -8,11 +9,22 @@ const WARN_FLOATING_TILE_SIZE = (baseTileSize,resolutionScale) => {
     console.warn(`Tile size ${baseTileSize} cannot be even multiple of resolution scale ${resolutionScale}`);
 };
 
+const getTargetPosition = target => {
+    return {
+        x: RoundNear(target.x),
+        y: RoundNear(target.y),
+        width: RoundNear(target.width),
+        height: RoundNear(target.height)
+    };
+};
+
 const narrowBand = (a,b) => {
- return !(a.x + a.width <= b.x  ||
-          a.y + a.height <= b.y ||
-          a.x >= b.x + b.width  ||
-          a.y >= b.y + b.height
+    a = getTargetPosition(a);
+    b = getTargetPosition(b);
+    return !(a.x + a.width <= b.x  ||
+            a.y + a.height <= b.y ||
+            a.x >= b.x + b.width  ||
+            a.y >= b.y + b.height
 )};
 
 const spriteHitBoxFilter = sprite => {

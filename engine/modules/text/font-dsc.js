@@ -1,4 +1,4 @@
-const IMAGE_SOURCE = "../eleven/engine/modules/uvtc/text/elven-font.png";
+const IMAGE_SOURCE = "../eleven/engine/modules/text/elven-font.png";
 const ALPHA_COMPONENT = 3;
 
 function FontDSC(image) {

@@ -13,29 +13,29 @@ import SpriteLayer from "./modules/sprite/sprite-layer.js";
 import SpriteFollower from "./modules/sprite/sprite-follower.js";
 import DispatchRenderer from "./modules/grid2D/dispatch-renderer.js";
 
-import UVTCLighting from "./modules/uvtc/uvtc-lighting.js";
-import UVTCReflection from "./modules/uvtc/uvtc-reflection.js";
+import UVTCLighting from "./modules/world2d/uvtc-lighting.js";
+import UVTCReflection from "./modules/world2d/uvtc-reflection.js";
 
 import TileCollision from "./modules/collision/tile-collision.js";
 import CollisionLayer from "./modules/collision/collision-layer.js";
 
-import PlayerController from "./modules/uvtc/player/player-controller.js";
+import PlayerController from "./modules/world2d/player/player-controller.js";
 import InstallHitBox from "./modules/sprite/hitbox.js";
 
-import AnimatedSprite from "./modules/uvtc/animated-sprite.js";
-import WaterBackground from "./modules/uvtc/water-background.js";
+import AnimatedSprite from "./modules/sprite/animated-sprite.js";
+import WaterBackground from "./modules/world2d/water-background.js";
 import TileSprite from "./modules/sprite/tile-sprite.js";
 
-import TextLayer from "./modules/uvtc/text/text-layer.js";
-import SpeechBox from "./modules/uvtc/text/speech-box.js";
-import WorldImpulse from "./modules/uvtc/world-impulse.js";
+import TextLayer from "./modules/text/text-layer.js";
+import SpeechBox from "./modules/text/speech-box.js";
+import WorldImpulse from "./modules/world2d/world-impulse.js";
 
 import MultiLayer from "./internal/multi-layer.js";
 import FrameTimeout from "./internal/frame-timeout.js";
 import CollisionTypes from "./modules/collision/collision-types.js";
 import Singleton from "./packer/singleton.js";
 
-import TextSprite from "./modules/uvtc/text-sprite.js";
+import TextSprite from "./modules/sprite/text-sprite.js";
 import DOMInterface from "./modules/dom-interface/dom-interface.js";
 
 import ParticleSystem from "./modules/particle-system/particle-system.js";
@@ -44,7 +44,7 @@ import Faders from "./modules/fader/faders.js";
 
 import ParseGrid2DMap from "./modules/grid2D/tile-renderer/parse.js";
 
-import {GlyphTable} from "./modules/uvtc/text/glyph-table.js";
+import {GlyphTable} from "./modules/text/glyph-table.js";
 
 globalThis.delay = duration => new Promise(resolve => setTimeout(resolve,duration));
 globalThis.frameDelay = FrameTimeout;
