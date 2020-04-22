@@ -19,7 +19,7 @@ const MapNewLinesAbleString = text => text.replace(/\n/g, " \n ").split(" ");
 const MapStringsList = words => {
     for(let i = 0;i<words.length;i++) {
         let text = words[i], color, backgroundColor, instant = false;
-        if(i === 0 && text[0] === INSTANT_FLAG) {
+        if(text[0] === INSTANT_FLAG) {
             instant = true;
             text = text.substring(1);
         }
