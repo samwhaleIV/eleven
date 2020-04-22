@@ -16,6 +16,8 @@ function TrackPriority(container,sprite,ID,zIndex) {
     });
 }
 
+const roundPosition = position => Math.floor(Math.round(position * 2) / 2);
+
 function SpriteLayer(grid) {
 
     const spriteContainer = new MultiLayer();
@@ -46,7 +48,11 @@ function SpriteLayer(grid) {
         if(xOffset) x += xOffset; if(yOffset) y += yOffset;
 
         const screenLocation = grid.getLocation(x,y);
-        x = screenLocation.x; y = screenLocation.y;
+        x = screenLocation.x, y = screenLocation.y;
+
+        if(sprite.roundRenderPosition) {
+            x = roundPosition(x), y = roundPosition(y);
+        }
 
         width = Math.floor(width * tileSize);
         height = Math.floor(height * tileSize);

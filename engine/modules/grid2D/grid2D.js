@@ -169,24 +169,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return true;
     };
 
-    const drawCacheDiagnostic = (cache,context) => {
-        const cameraX = camera.x + cameraXOffset;
-        const cameraY = camera.y + cameraYOffset;
-
-        const renderX = Math.floor(cameraX * -tileSize + tileXOffset);
-        const renderY = Math.floor(cameraY * -tileSize + tileYOffset);
-
-        const {buffer, width, height, columns, rows} = cache.data;
-
-        const renderWidth = columns * tileSize;
-        const renderHeight = rows * tileSize;
-
-        context.drawImage(
-            buffer,0,0,width,height,
-            renderX,renderY,renderWidth,renderHeight
-        );
-    };
-
     const drawCache = (cache,context) => {
         const area = cacheArea;
         context.drawImage(
