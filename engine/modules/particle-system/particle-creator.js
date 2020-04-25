@@ -3,6 +3,10 @@
 const VELOCITY_BUFFER_SIZE = 4;
 const GRAVITY_ACCEL_RATE = 0.05;
 
+const directionLookup = Object.freeze({
+    0: "up", 1: "right", 2: "down", 3: "left"
+});
+
 const typeDefaults = {
     duration: 750, count: 20, color: "white", size: 8, bufferSize: 2, scale: tInverse
 };
@@ -36,18 +40,17 @@ const rangePositive = max => {
 
 const getRange = max => {
     const double = max * 2;
-    return () => {
-        return double * Math.random() - max;
-    };
+    return () => double * Math.random() - max;
 };
-
+const getRangePositive = max => {
+    return () => rangePositive(max);
+};
 const getRangeJitter = (base,jitter) => {
     const double = jitter * 2;
     return () => {
         return base + Math.random() * double - jitter;
     };
 };
-
 const getRangeJitterPositive = (base,jitter) => {
     return () => {
         return base + Math.random() * jitter;
@@ -72,6 +75,18 @@ const gravityStart = (x,y,xv,base,jitter) => {
         getRange(x),getRange(y),getRange(xv),
         getRangeJitterPositive(base,jitter)
     );
+};
+
+const directionalStart = (direction,x,y,xv,yv) => {
+    switch(direction) {
+        default:
+        case "up":    xv = getRange(xv), yv = getRangePositive(-yv); break;
+        case "down":  xv = getRange(xv), yv = getRangePositive(yv);  break;
+
+        case "left":  xv = getRangePositive(-xv), yv = getRange(yv); break;
+        case "right": xv = getRangePositive(xv),  yv = getRange(yv); break;
+    }
+    return velocityStartCustom(getRange(x),getRange(y),xv,yv);
 };
 
 const driftBase = (p,i,d) => {
@@ -147,6 +162,17 @@ const types = Object.freeze({
         return TypeBase(
             size,color,count,duration,scale,
         gravityStart(x,y,xv,gravity,jitter),gravityDrift(rate));
+    },
+
+    Directional: function DirectionalType({
+        direction,x=0,y=0,xv=100,yv=100,size,color,count,duration,scale
+    }) {
+        if(typeof direction === "number") {
+            direction = directionLookup[direction];
+        }
+        return TypeBase(
+            size,color,count,duration,scale,
+        directionalStart(direction,x,y,xv,yv),driftBase);
     }
 
 });
