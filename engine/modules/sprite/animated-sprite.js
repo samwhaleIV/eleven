@@ -1,4 +1,4 @@
-import PlayerDirections from "../world2d/player/player-directions.js";
+import PlayerDirections from "../world2D/player/player-directions.js";
 
 const SPRITE_WIDTH = 16;
 const SPRITE_HEIGHT = 16;
@@ -21,6 +21,8 @@ const DIRECTION_LOOKUP = {
 const DEFAULT_DIRECTION = 2;
 
 function AnimatedSprite(texture,x,y) {
+
+    this.texture = texture; texture = null;
 
     if(!x) x = 0; if(!y) y = 0;
 
@@ -83,8 +85,7 @@ function AnimatedSprite(texture,x,y) {
         const textureY = getTextureY(time);
 
         context.drawImage(
-            texture,
-            textureX,textureY,SPRITE_WIDTH,SPRITE_HEIGHT,
+            this.texture,textureX,textureY,SPRITE_WIDTH,SPRITE_HEIGHT,
             x,y,width,height
         );
     };

@@ -1,4 +1,17 @@
+const requiredBase = 8;
+
+const testDimension = dimension => {
+    if(isNaN(dimension)) throw Error("Dimension is not a number!");
+    const value = dimension;
+    dimension *= requiredBase;
+    if(dimension !== Math.trunc(dimension)) {
+        throw Error(`Invalid dimension value: (${value} * ${requiredBase} !== Math.trunc(${value} * ${requiredBase}))`);
+    }
+};
+
 function InstallHitBox(target,width,height) {
+
+    testDimension(width), testDimension(height);
 
     let hitBoxWidth = width;
     let hitBoxHeight = height;

@@ -1,4 +1,4 @@
-const RoundingBase = 32;
+const RoundingBase = 16;
 
 const RoundLow = value => Math.floor(value * RoundingBase) / RoundingBase;
 const RoundHigh = value => Math.ceil(value * RoundingBase) / RoundingBase;

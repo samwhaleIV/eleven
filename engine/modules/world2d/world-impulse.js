@@ -36,8 +36,8 @@ const getLayerHandler = (source,data) => result => {
     if(data && data.layerHandler) {
         didHandle = data.layerHandler(result);
     }
-    if(!didHandle && this.tileHandler) {
-        source.tileHandler(result);
+    if(!didHandle && source.layerHandler) {
+        source.layerHandler(result);
     }
 };
 

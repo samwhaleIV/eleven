@@ -4,7 +4,7 @@ import PlayerInput from "./player-input.js";
 import CollisionTypes from "../../collision/collision-types.js";
 import {RoundLow,RoundHigh} from "../../collision/fpe-modulator.js";
 
-const MAX_CHANGE_LIMIT = 4 / 16; //Max position change per frame
+const MAX_CHANGE_LIMIT = 2 / 16; //Max position change per frame
 const DEFAULT_SPEED = 4; //Tiles per second
 
 const POLARITY_LOOKUP = [];

@@ -13,22 +13,22 @@ import SpriteLayer from "./modules/sprite/sprite-layer.js";
 import SpriteFollower from "./modules/sprite/sprite-follower.js";
 import DispatchRenderer from "./modules/grid2D/dispatch-renderer.js";
 
-import UVTCLighting from "./modules/world2d/uvtc-lighting.js";
-import UVTCReflection from "./modules/world2d/uvtc-reflection.js";
+import UVTCLighting from "./modules/world2D/uvtc-lighting.js";
+import UVTCReflection from "./modules/world2D/uvtc-reflection.js";
 
 import TileCollision from "./modules/collision/tile-collision.js";
 import CollisionLayer from "./modules/collision/collision-layer.js";
 
-import PlayerController from "./modules/world2d/player/player-controller.js";
+import PlayerController from "./modules/world2D/player/player-controller.js";
 import InstallHitBox from "./modules/sprite/hitbox.js";
 
 import AnimatedSprite from "./modules/sprite/animated-sprite.js";
-import WaterBackground from "./modules/world2d/water-background.js";
+import WaterBackground from "./modules/world2D/water-background.js";
 import TileSprite from "./modules/sprite/tile-sprite.js";
 
 import TextLayer from "./modules/text/text-layer.js";
 import SpeechBox from "./modules/text/speech-box.js";
-import WorldImpulse from "./modules/world2d/world-impulse.js";
+import WorldImpulse from "./modules/world2D/world-impulse.js";
 
 import MultiLayer from "./internal/multi-layer.js";
 import FrameTimeout from "./internal/frame-timeout.js";
