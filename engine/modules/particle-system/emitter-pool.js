@@ -54,8 +54,7 @@ function EmitterPool(data,count) {
         if(streaming) return;
         streaming = true;
         (async () => {
-            while(true) {
-                if(!streaming) return;
+            while(streaming) {
                 fire(fireRate);
                 const delay = fireRate * count + pauseTime;
                 await frameDelay(delay);
