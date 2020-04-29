@@ -10,7 +10,7 @@ function Camera(grid) {
 
     this.grid = grid; let x = DEFAULT_X, y = DEFAULT_Y;
 
-    const setDefaultPosition = () => x = DEFAULT_X, y = DEFAULT_Y;
+    const setDefaultPosition = () => x = DEFAULT_X; y = DEFAULT_Y;
 
     const centerX = (centerPoint=0.5) => {
         x = (grid.width - 1) * centerPoint;
@@ -21,10 +21,10 @@ function Camera(grid) {
         return this;
     };
 
-    this.centerX = centerX, this.centerY = centerY;
+    this.centerX = centerX; this.centerY = centerY;
 
     this.center = (centerPointX,centerPointY) => {
-        centerX(centerPointX), centerY(centerPointY);
+        centerX(centerPointX); centerY(centerPointY);
         return this;
     };
 
@@ -57,7 +57,7 @@ function Camera(grid) {
     };
 
     const setHorizontalPadding = value => {
-        if(value) enableVerticalPadding(); else disableHorizontalPadding();
+        if(value) enableHorizontalPadding(); else disableHorizontalPadding();
     };
     const setVerticalPadding = value => {
         if(value) enableVerticalPadding(); else disableVerticalPadding();
