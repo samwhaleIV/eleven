@@ -8,25 +8,9 @@ const DEFAULT_PADDING_SETTING = false;
 
 function Camera(grid) {
 
-    this.grid = grid;
+    this.grid = grid; let x = DEFAULT_X, y = DEFAULT_Y;
 
-    let x, y;
-    Object.defineProperties(this,{
-        x: {
-            get: () => x,
-            set: value => x = value,
-            enumerable: true
-        },
-        y: {
-            get: () => y,
-            set: value => y = value,
-            enumerable: true
-        },
-    });
-
-    const setDefaultPosition = () => {
-        x = DEFAULT_X; y = DEFAULT_Y;
-    };
+    const setDefaultPosition = () => x = DEFAULT_X, y = DEFAULT_Y;
 
     const centerX = (centerPoint=0.5) => {
         x = (grid.width - 1) * centerPoint;
@@ -37,54 +21,59 @@ function Camera(grid) {
         return this;
     };
 
-    this.centerX = centerX; this.centerY = centerY;
+    this.centerX = centerX, this.centerY = centerY;
 
     this.center = (centerPointX,centerPointY) => {
-        centerX(centerPointX); centerY(centerPointY);
+        centerX(centerPointX), centerY(centerPointY);
         return this;
     };
-    
-    let paddingEnabled = DEFAULT_PADDING_SETTING;
 
-    this.enablePadding = () => {
+    let paddingEnabled = DEFAULT_PADDING_SETTING,
+    horizontalPaddingEnabled = true, verticalPaddingEnabled = true;
+
+    this.enablePadding = () => paddingEnabled = true;
+    this.disablePadding = () => paddingEnabled = false;
+    this.togglePadding = () => paddingEnabled = !paddingEnabled;
+
+    const enableHorizontalPadding = () => {
+        horizontalPaddingEnabled = true;
+        if(paddingEnabled) return;
         paddingEnabled = true;
+        verticalPaddingEnabled = false;
     };
-    this.disablePadding = () => {
-        paddingEnabled = false;
+    const enableVerticalPadding = () => {
+        verticalPaddingEnabled = true;
+        if(paddingEnabled) return;
+        paddingEnabled = true;
+        horizontalPaddingEnabled = false;
     };
-    this.togglePadding = () => {
-        paddingEnabled = !paddingEnabled;
+    const disableHorizontalPadding = () => {
+        horizontalPaddingEnabled = false;
+        if(!verticalPaddingEnabled) paddingEnabled = false;
+    };
+    const disableVerticalPadding = () => {
+        verticalPaddingEnabled = false;
+        if(!horizontalPaddingEnabled) paddingEnabled = false;
     };
 
-    Object.defineProperty(this,"padding",{
-        get: () => paddingEnabled,
-        set: value => paddingEnabled = Boolean(value),
-        enumerable: true
-    });
+    const setHorizontalPadding = value => {
+        if(value) enableVerticalPadding(); else disableHorizontalPadding();
+    };
+    const setVerticalPadding = value => {
+        if(value) enableVerticalPadding(); else disableVerticalPadding();
+    };
 
-    setDefaultPosition();
+    this.enableHorizontalPadding = enableHorizontalPadding;
+    this.enableVerticalPadding = enableVerticalPadding;
+
+    this.disableHorizontalPadding = disableHorizontalPadding;
+    this.disableVerticalPadding = disableVerticalPadding;
 
     let scale = DEFAULT_SCALE;
-
-    Object.defineProperty(this,"scale",{
-        set: value => {
-            if(value == scale) return;
-            scale = value;
-            grid.resize();
-            return scale;
-        },
-        get: () => scale,
-        enumerable: true
-    });
-
     const updateLayers = new MultiLayer();
-
-    this.setScaleUnsafe = value => {
-        scale = value;
-    };
+    this.setScaleUnsafe = value => scale = value;
     
     const postProcessors = new MultiLayer();
-
     this.addPostProcessor = postProcessors.add;
     this.removePostProcessor = postProcessors.remove;
     this.clearPostProcessors = postProcessors.clear;
@@ -92,23 +81,20 @@ function Camera(grid) {
     let zooming = false; let moving = false;
     let zoomResolve = null, moveResolve = null;
 
-    const tryCompleteResolver = resolve => {
-        if(resolve === null) return; resolve();
-    };
-
     this.reset = () => {
         updateLayers.clear();
 
-        moving = false; zooming = false;
+        moving = false, zooming = false;
 
-        tryCompleteResolver(zoomResolve);
-        tryCompleteResolver(moveResolve);
-
-        zoomResolve = null; moveResolve = null;
-
+        if(zoomResolve) zoomResolve(), zoomResolve = null;
+        if(moveResolve) moveResolve(), moveResolve = null;
+        
         this.clearPostProcessors();
 
         paddingEnabled = DEFAULT_PADDING_SETTING;
+        horizontalPaddingEnabled = true;
+        verticalPaddingEnabled = true;
+
         setDefaultPosition();
         this.scale = DEFAULT_SCALE;
         return this;
@@ -153,11 +139,9 @@ function Camera(grid) {
 
             const startTime = performance.now();
 
-            const startX = x;
-            const startY = y;
+            const startX = x, startY = y;
 
-            const xDifference = newX - startX;
-            const yDifference = newY - startY;
+            const xDifference = newX - startX, yDifference = newY - startY;
 
             const ID = updateLayers.add(time => {
                 let delta = (time.now - startTime) / duration;
@@ -171,37 +155,37 @@ function Camera(grid) {
                     resolve();
                     return;
                 }
-                x = startX + xDifference * delta;
-                y = startY + yDifference * delta;
+                x = startX + xDifference * delta, y = startY + yDifference * delta;
             });
         });
     };
 
     const paddingProcessor = () => {
-        const {left,right,top,bottom} = grid.getArea();
-        const {width,height} = grid;
+        const area = grid.getArea();
 
-        const leftClip = left < 0;
-        const rightClip = right > width;
-        if(!(leftClip && rightClip)) {
-            if(leftClip) {
-                x -= left;
-            } else if(rightClip) {
-                x += width - right;
-                x = grid.roundToPixels(x);
+        if(horizontalPaddingEnabled) {
+            const {left,right} = area, {width} = grid;
+            const leftClip = left < 0, rightClip = right > width;
+            if(!(leftClip && rightClip)) {
+                if(leftClip) {
+                    x -= left;
+                } else if(rightClip) {
+                    x = grid.roundToPixels(x + width - right);
+                }
             }
         }
 
-        const topClip = top < 0;
-        const bottomClip = bottom > height;
-        if(!(topClip && bottomClip)) {
-            if(topClip) {
-                y -= top;
-            } else if(bottomClip) {
-                y += height - bottom;
-                y = grid.roundToPixels(y);
+        if(verticalPaddingEnabled) {
+            const {top,bottom} = area, {height} = grid;
+            const topClip = top < 0, bottomClip = bottom > height;
+            if(!(topClip && bottomClip)) {
+                if(topClip) {
+                    y -= top;
+                } else if(bottomClip) {
+                    y = grid.roundToPixels(y + height - bottom);
+                }
             }
-        }
+        };
     };
 
     this.update = time => {
@@ -209,6 +193,54 @@ function Camera(grid) {
         postProcessors.forEach(processor => processor(time));
         if(paddingEnabled) paddingProcessor();
     };
+
+    Object.defineProperties(this,{
+        padding: {
+            get: () => paddingEnabled,
+            set: value => {
+                paddingEnabled = Boolean(value);
+
+                if(!paddingEnabled || !(
+                    horizontalPaddingEnabled || verticalPaddingEnabled
+                )) return;
+
+                horizontalPaddingEnabled = true;
+                verticalPaddingEnabled = true;
+            },
+            enumerable: true
+        },
+        horizontalPadding: {
+            get: () => horizontalPaddingEnabled,
+            set: setHorizontalPadding,
+            enumerable: true
+        },
+        verticalPadding: {
+            get: () => verticalPaddingEnabled,
+            set: setVerticalPadding,
+            enumerable: true
+        },
+        scale: {
+            set: value => {
+                if(value === scale) return;
+                scale = value;
+                grid.resize();
+                return scale;
+            },
+            get: () => scale,
+            enumerable: true
+        },
+        x: {
+            get: () => x,
+            set: value => x = value,
+            enumerable: true
+        },
+        y: {
+            get: () => y,
+            set: value => y = value,
+            enumerable: true
+        }
+    });
+
     Object.freeze(this);
 }
 export default Camera;
