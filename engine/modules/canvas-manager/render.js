@@ -77,11 +77,11 @@ function Render(canvasManager,modules) {
     const tryUpdateSize = modules.resize.tryUpdateSize;
 
     let animationFrame = null;
+
+    const maxDelta = MAX_FRAMETIME_DELTA;
     const render = timestamp => {
-        if(paused) return;
         tryUpdateSize();
-        delta = timestamp - now;
-        if(delta > MAX_FRAMETIME_DELTA) delta = MAX_FRAMETIME_DELTA;
+        delta = Math.min(timestamp-now,maxDelta);
         now = timestamp;
         pollInput(readonlyTime);
         renderFrame(renderData);
