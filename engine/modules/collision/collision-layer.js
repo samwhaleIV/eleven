@@ -18,6 +18,6 @@ function CollisionLayer(grid,layer) {
     this.update = update;
     this.collides = collides;
 }
-CollisionLayer.prototype = Object.create(CollisionBase.prototype);
+CollisionLayer.prototype = CollisionBase.prototype;
 
 export default CollisionLayer;

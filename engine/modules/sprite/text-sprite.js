@@ -1,4 +1,4 @@
-import GlyphTable from "../text/glyph-table.js";
+import Constants from "../../internal/constants.js";
 
 const DEFAULT_LINE_SPACING = 1;
 const DEFAULT_SCALE = 3;
@@ -6,14 +6,14 @@ const DEFAULT_LETTER_SPACING = 1;
 const DEFAULT_WORD_SPACING = 2;
 const DEFAULT_BACKGROUND_PADDING = 1;
 
-function Line(text,letterSpacing,wordSpacing,scale) {
+function Line(glyphTable,text,letterSpacing,wordSpacing,scale) {
 
     text = text.split(" ");
 
     let width = 0;
     for(const word of text) {
         for(const character of word) {
-            width += GlyphTable.getWidth(character) + letterSpacing;
+            width += glyphTable.getWidth(character) + letterSpacing;
         }
         width = width - letterSpacing + wordSpacing;
     }
@@ -49,6 +49,7 @@ function TextSprite({
     wordSpacing = DEFAULT_WORD_SPACING,
     absolutePositioning = false
 }) {
+    const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
     if(!lines && text) {
         lines = text.split("\n");
     }
@@ -58,21 +59,23 @@ function TextSprite({
     const lineCount = lines.length;
 
     for(let i = 0;i<lines.length;i++) {
-        let line = new Line(lines[i],letterSpacing,wordSpacing,scale);
+        let line = new Line(
+            glyphTable,lines[i],letterSpacing,wordSpacing,scale
+        );
         lines[i] = line;
         if(line.width > width) {
             width = line.width;
         }
     }
 
-    const lineHeight = (GlyphTable.height + lineSpacing) * scale;
+    const lineHeight = (glyphTable.height + lineSpacing) * scale;
     const height = lineHeight * lineCount - (lineSpacing * scale);
 
     const buffer = new OffscreenCanvas(width,height);
     const context = buffer.getContext("2d",{alpha:true});
     context.imageSmoothingEnabled = false;
 
-    const renderer = GlyphTable.getRenderer(context,scale,color);
+    const renderer = glyphTable.getRenderer(context,scale,color);
 
     for(let i = 0;i<lines.length;i++) {
         lines[i].render(width,0,lineHeight*i,renderer);

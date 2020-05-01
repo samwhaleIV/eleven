@@ -1,5 +1,5 @@
-import GlyphTable from "./glyph-table.js";
 import ColorCodes from "./color-codes.js";
+import Constants from "../../internal/constants.js";
 
 const DEFAULT_SCALE = 4;
 const DEFAULT_TEXT_SPACING = 1;
@@ -46,19 +46,19 @@ const IS_ALPHABETICAL = character => {
 };
 
 function* TextGenerator(
-    words,renderCharacter,width,scale,
+    glyphTable,words,renderCharacter,width,scale,
     textSpacing,wordSpacing,rowSpacing,boxPadding
 ) {
     let y = boxPadding, x = boxPadding;
     const maxX = width - boxPadding;
-    const rowHeight = scale * GlyphTable.height + rowSpacing;
+    const rowHeight = scale * glyphTable.height + rowSpacing;
     const getStatus = (value,next) => {
         return {current:value,next};
     };
 
     const clipCharacter = LONG_WORD_CLIP_CHARACTER;
 
-    const getWidth = character => GlyphTable.getWidth(character) * scale + textSpacing;
+    const getWidth = character => glyphTable.getWidth(character) * scale + textSpacing;
     const hyphenWidth = getWidth(clipCharacter);
 
     const clipJustification = LONG_WORD_CLIP_JUSTIFICATION;
@@ -126,6 +126,8 @@ function TextLayer({
     rowSpacing = DEFAULT_ROW_SPACING,
     boxPadding = DEFAULT_BOX_PADDING
 }) {
+    const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
+
     if(typeof text === "string") text = MapNewLinesAbleString(text);
     if(typeof text[0] === "string") text = MapStringsList(text);
     FilterEllipsis(text);
@@ -141,10 +143,11 @@ function TextLayer({
 
     const bufferContext = buffer.getContext("2d",{alpha:true});
     bufferContext.imageSmoothingEnabled = false;
-    const renderCharacter = GlyphTable.getRenderer(bufferContext,scale);
+    const renderCharacter = glyphTable.getRenderer(bufferContext,scale);
 
     const generator = TextGenerator(
-        text,renderCharacter,width,scale,textSpacing,wordSpacing,rowSpacing,boxPadding
+        glyphTable,text,renderCharacter,width,scale,
+        textSpacing,wordSpacing,rowSpacing,boxPadding
     );
 
     const finish = () => {

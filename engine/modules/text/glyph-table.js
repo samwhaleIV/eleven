@@ -9,12 +9,12 @@ const PADDING_WIDTH = 1;
 function LoadTable() {
     const metadata = FontData.meta;
     const glyphs = new Object();
-    let glpyhX = 0;
+    let glyphX = 0;
     for(let i = 0;i<metadata.length;i+=2) {
         const character = metadata[i];
         const size = Number(metadata[i+1]);
-        glyphs[character] = [glpyhX,size];
-        glpyhX += size;
+        glyphs[character] = [glyphX,size];
+        glyphX += size;
     }
     glyphs[" "] = [-1,SPACE_WIDTH];
     glyphs[PADDING_CHARACTER] = [-1,PADDING_WIDTH];
@@ -74,28 +74,28 @@ function GlyphTable() {
 
         return (character,x,y,color,background) => {
             if(color) currentColor = color;
-            const [column, glpyhWidth] = table[character];
-            const renderWidth = glpyhWidth * scale;
+            const [column, glyphWidth] = table[character];
+            const renderWidth = glyphWidth * scale;
             if(column < 0) {
                 if(background) renderBackground(background,x,y,renderWidth,renderHeight);
                 return renderWidth;
             }
 
-            buffer.width = glpyhWidth;
+            buffer.width = glyphWidth;
 
             bufferContext.globalCompositeOperation = "source-over";
             bufferContext.drawImage(
-                bitmap,column,0,glpyhWidth,glyphHeight,0,0,glpyhWidth,glyphHeight
+                bitmap,column,0,glyphWidth,glyphHeight,0,0,glyphWidth,glyphHeight
             );
             bufferContext.globalCompositeOperation = "source-in";
             bufferContext.fillStyle = currentColor;
-            bufferContext.fillRect(0,0,glpyhWidth,glyphHeight);
+            bufferContext.fillRect(0,0,glyphWidth,glyphHeight);
 
             if(background) renderBackground(background,x,y,renderWidth,renderHeight);
 
             context.drawImage(
                 buffer,
-                0,0,glpyhWidth,glyphHeight,
+                0,0,glyphWidth,glyphHeight,
                 x,y,renderWidth,renderHeight
             );
 
@@ -103,5 +103,4 @@ function GlyphTable() {
         };
     };
 }
-export default new GlyphTable();
-export {GlyphTable};
+export default GlyphTable;

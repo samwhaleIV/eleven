@@ -44,7 +44,7 @@ import Faders from "./modules/fader/faders.js";
 
 import ParseGrid2DMap from "./modules/grid2D/tile-renderer/parse.js";
 
-import {GlyphTable} from "./modules/text/glyph-table.js";
+import GlyphTable from "./modules/text/glyph-table.js";
 
 globalThis.delay = duration => new Promise(resolve => setTimeout(resolve,duration));
 globalThis.frameDelay = FrameTimeout;
@@ -64,14 +64,17 @@ const NamespaceTable = (name,sourceTable,readOnly=true) => {
 const Eleven = Install([
     Singleton({
         module: CanvasManager,
+        makeGlobal: true,
         deferInstantiation: false
     }),
     Singleton({
         module: ResourceManager,
+        makeGlobal: true,
         deferInstantiation: false
     }),
     Singleton({
         module: AudioManager,
+        makeGlobal: true,
         deferInstantiation: false
     }),
     Singleton({

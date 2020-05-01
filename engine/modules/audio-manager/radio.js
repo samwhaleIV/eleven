@@ -154,6 +154,4 @@ Radio.prototype.play = function({
     return remoteControl;
 }
 
-Object.freeze(Radio.prototype); //Because you shouldn't be fucking with this ad hoc
-
 export default Radio;

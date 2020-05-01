@@ -2,6 +2,9 @@ const Constants = Object.freeze({
     EngineNamespace: "Eleven",
     CSSLoadedClass: "loaded",
     FrameSignature: Symbol("FrameSignature"),
+    
+    DesynchronizedCanvas: false,
+    TransparentCanvas: true,
 
     Resource: Object.freeze({
         defaultImageType: ".png",

@@ -55,6 +55,6 @@ function TileCollision(grid,tileRenderer,collisionLayer,collisionMaker) {
     this.reset = reset;
     this.collides = collides;
 }
-TileCollision.prototype = Object.create(CollisionBase.prototype);
+TileCollision.prototype = CollisionBase.prototype;
 
 export default TileCollision;

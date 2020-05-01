@@ -93,8 +93,6 @@ RemoteControl.prototype.addEndHandler = function(handler) {
     this[RCData].addEndHandler(handler);
     return this;
 }
-
 InstallPannerExtension(RemoteControl.prototype);
-Object.freeze(RemoteControl.prototype); //Don't fuck with this one either
 
 export default RemoteControl;

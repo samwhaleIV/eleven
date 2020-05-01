@@ -2,7 +2,7 @@ import PlayerDirections from "./player-directions.js";
 import PlayerInput from "./player-input.js";
 
 import CollisionTypes from "../../collision/collision-types.js";
-import {RoundLow,RoundHigh} from "../../collision/fpe-modulator.js";
+import {RoundNear} from "../../collision/fpe-modulator.js";
 
 const MAX_CHANGE_LIMIT = 2 / 16; //Max position change per frame
 const DEFAULT_SPEED = 4; //Tiles per second
@@ -120,10 +120,10 @@ function PlayerController(sprite,collisionLayer,tileCollision) {
 
         if(polarity < 0) {
             newValue += collisionResult[lengthProperty];
-            newValue = RoundHigh(newValue);
+            newValue = RoundNear(newValue);
         } else {
             newValue -= sprite[lengthProperty];
-            newValue = RoundLow(newValue);
+            newValue = RoundNear(newValue);
         }
 
         newValue -= hitBoxDifference * polarity;

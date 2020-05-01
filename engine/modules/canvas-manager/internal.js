@@ -1,8 +1,10 @@
 import Constants from "../../internal/constants.js";
 
 const LOADED_CLASS = Constants.CSSLoadedClass;
-const DESYNCHRONIZED_CANVAS = false;
-const TRANSPARENT_CANVAS = true;
+
+const DESYNCHRONIZED_CANVAS = Constants.DesynchronizedCanvas;
+const TRANSPARENT_CANVAS = Constants.TransparentCanvas;
+
 const DEFAULT_TARGET = document.body;
 const TARGET_NAME = "target";
 
