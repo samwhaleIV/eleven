@@ -147,9 +147,7 @@ function Render(canvasManager,modules) {
         },
         paused: {
             enumerable: true,
-            get: function() {
-                return paused;
-            },
+            get: () => paused,
             set: value => {
                 value = Boolean(value);
                 if(value) {

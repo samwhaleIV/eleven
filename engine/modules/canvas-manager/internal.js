@@ -42,10 +42,8 @@ function Internal(canvasManager,modules) {
 
     Object.defineProperty(canvasManager,TARGET_NAME,{
         enumerable: true,
-        get: function() {
-            return canvas.parentElement;
-        },
-        set: function(newParent) {
+        get: () => canvas.parentElement,
+        set: newParent => {
             if(!newParent) {
                 INVALID_PARENT_ELEMENT(newParent);
             }

@@ -36,9 +36,7 @@ function PointerStatus(canSendEvent,sendDown,sendUp) {
         }
     };
     Object.defineProperty(this,"isDown",{
-        get: function() {
-            return isDown
-        }
+        get: () => isDown, enumerable: true
     });
     Object.freeze(this);
 }
@@ -62,13 +60,13 @@ function Mouse(canvasManager,modules) {
     });
 
     const pointerData = Object.freeze(Object.defineProperties(new Object,{
-        x: {get: function() {return sendDataContainer.x},enumerable:true},
-        y: {get: function() {return sendDataContainer.y},enumerable:true},
-        shiftKey: {get: function() {return sendDataContainer.shiftKey},enumerable:true},
-        altKey: {get: function() {return sendDataContainer.altKey},enumerable:true},
-        ctrlKey: {get: function() {return sendDataContainer.ctrlKey},enumerable:true},
-        isDown: {get: function() {return pointerStatus.isDown},enumerable:true},
-        altIsDown: {get: function() {return altPointerStatus.isDown},enumerable:true}
+        x: {get: () => sendDataContainer.x,enumerable:true},
+        y: {get: () => sendDataContainer.y,enumerable:true},
+        shiftKey: {get: () => sendDataContainer.shiftKey,enumerable:true},
+        altKey: {get: () => sendDataContainer.altKey,enumerable:true},
+        ctrlKey: {get: () => sendDataContainer.ctrlKey,enumerable:true},
+        isDown: {get: () => pointerStatus.isDown,enumerable:true},
+        altIsDown: {get: () => altPointerStatus.isDown,enumerable:true}
     }));
 
     const updateLocationData = sendData => {
