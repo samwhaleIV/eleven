@@ -1,13 +1,6 @@
-const NO_PIXEL_ALIGNMENT = () => {
-    console.warn("The sprite follower target doesn't have the alignToPixels attribute!");
-};
-
 function SpriteFollower(camera,sprite,active=true) {
     if(!sprite) sprite = null;
     let target = sprite;
-    if(target && !target.alignToPixels) {
-        NO_PIXEL_ALIGNMENT();
-    }
 
     let enabled = false;
     let followX = true;
@@ -49,7 +42,6 @@ function SpriteFollower(camera,sprite,active=true) {
             set: value => {
                 if(!value) value = null;
                 target = value;
-                if(!target.alignToPixels) NO_PIXEL_ALIGNMENT();
             },
             enumerable: true
         },

@@ -181,7 +181,9 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
     const roundToPixelSpace = value => Math.round(value / pixelSize) / tileSize;
 
-    const getDimensionRenderData = (dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize) => {
+    const getRenderBounds = (
+        dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize
+    ) => {
         cameraValue += cameraOffset;
 
         let startTile = Math.floor(cameraValue);
@@ -223,12 +225,12 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         return {location,renderStride,startTile,endTile};   
     };
 
-    const getHorizontalRenderData = () => {
-        return getDimensionRenderData(width,camera.x,cameraXOffset,tileXOffset,horizontalTiles,gridWidth);
-    };
-    const getVerticalRenderData = () => {
-        return getDimensionRenderData(height,camera.y,cameraYOffset,tileYOffset,verticalTiles,gridHeight);
-    };
+    const getHorizontalRenderData = () => getRenderBounds(
+        width,camera.x,cameraXOffset,tileXOffset,horizontalTiles,gridWidth
+    );
+    const getVerticalRenderData = () => getRenderBounds(
+        height,camera.y,cameraYOffset,tileYOffset,verticalTiles,gridHeight
+    );
 
     const getTileLocation = (pixelX,pixelY) => {
         const renderX = horizontalRenderData.location;
@@ -330,6 +332,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             console.log(`${String(difX).padEnd(10," ")}     ${String(difY).padEnd(10," ")}       ${String(horizontalRenderData.location).padEnd(15," ")}         ${String(verticalRenderData.location).padEnd(15," ")}`);
         };
     })();
+
+    this.jitterDiagnostic = () => {
+        if(this.renderer.addRender) this.renderer.addRender(jitterDiagnostic,-1000);
+    };
 
     const render = (context,size,time) => {
         if(renderer.update) renderer.update(context,size,time);
