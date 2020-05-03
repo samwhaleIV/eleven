@@ -47,6 +47,7 @@ function Render(canvasManager,modules) {
     async function setFrame(frame,parameters) {
         internalFrame = await InstallFrame(frame,parameters);
         renderFrame = getDeepRenderer();
+        modules.resize.setDeferred();
     }
     function getFrame() {
         return internalFrame;
