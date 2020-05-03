@@ -6,10 +6,9 @@ function VolumeControl({
     muted = false
 }) {
     const node = audioContext.createGain();
-    const gainControl = node.gain;
     const setVolume = value => {
         const time = audioContext.currentTime;
-        gainControl.setValueAtTime(value,time);
+        node.gain.setValueAtTime(value,time);
     };
     this.node = node;
     this.mute = () => {
