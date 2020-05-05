@@ -90,10 +90,7 @@ function PlayerController(
 
     const handlePositionUpdate = (change,direction,targetProperty,lengthProperty) => {
         const polarity = POLARITY_LOOKUP[direction];
-
         sprite[targetProperty] += change * polarity;
-
-        if(this.triggerHandler) this.triggerHandler(sprite);
 
         const collisionResult = collides(sprite);
 
@@ -150,6 +147,8 @@ function PlayerController(
         } else {
             targetProperty = "y", lengthProperty = "height";
         }
+
+        if(this.triggerHandler) this.triggerHandler(sprite);
 
         handlePositionUpdate(
             change,direction,targetProperty,lengthProperty
