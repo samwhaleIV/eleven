@@ -31,7 +31,8 @@ const GRADIENT_MANIFEST = Object.freeze([
     getColoredStops(255,233,0,75),
     getColoredStops(124,55,255,75),
     getColoredStops(198,0,151,75),
-    getWhiteStops(10)
+    getWhiteStops(10),
+    getWhiteStops(0)
 ]);
 
 export default GRADIENT_MANIFEST;
