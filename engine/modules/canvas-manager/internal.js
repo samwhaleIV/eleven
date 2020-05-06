@@ -39,6 +39,7 @@ function Internal(canvasManager,modules) {
     };
 
     canvasManager.context = context;
+    canvasManager.canvas = canvas;
 
     Object.defineProperty(canvasManager,TARGET_NAME,{
         enumerable: true,

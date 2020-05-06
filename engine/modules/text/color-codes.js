@@ -3,6 +3,7 @@ const ColorCodes = {
     "b": "black",
     "r": "red",
     "g": "green",
+    "s": "#0094FF",
     "o": "orange",
     "p": "purple",
     "y": "yellow",
