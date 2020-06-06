@@ -24,6 +24,8 @@ const LEFT_Y_AXIS = 1;
 const RIGHT_X_AXIS = 2
 const RIGHT_Y_AXIS = 3;
 
+const PREVIEW_DEADZONE = 0.1;
+
 const getImpulseEvent = (impulse,{code,key,isRepeating}) => {
     return {
         impulse: impulse, code, key, repeat: isRepeating,
@@ -34,6 +36,8 @@ const getImpulseEvent = (impulse,{code,key,isRepeating}) => {
 const getInverseCode = code => {
     return INVERSE_CODES[code];
 };
+
+const nonZeroAxes = (xAxis,yAxis) => xAxis !== 0 || yAxis !== 0;
 
 function ButtonState(code) {
     this.code = code;
@@ -58,6 +62,12 @@ function AxisState(codes) {
     this.pressedTime = null;
     this.repeatTime = null;
     this.isRepeating = false;
+    this.x = 0; this.y = 0;
+    this.getPreview = () => {
+        const x = DeadzoneScale(PREVIEW_DEADZONE,this.x);
+        const y = DeadzoneScale(PREVIEW_DEADZONE,this.y);
+        return {x,y,active:nonZeroAxes(x,y)};
+    };
     Object.seal(this);
 }
 
@@ -166,6 +176,7 @@ function ManagedGamepad(settings) {
         };
         const leftAxisState = new AxisState(leftCodes);
         const rightAxisState = new AxisState(rightCodes);
+
         if(compositeLeftAxis) {
             leftAxisState.key = DIRECTION_KEY;
         }
@@ -174,6 +185,9 @@ function ManagedGamepad(settings) {
         }
         return {leftAxisState, rightAxisState};
     })(settings);
+
+    this.getLeftAxis = () => leftAxisState.getPreview();
+    this.getRightAxis = () => rightAxisState.getPreview();
 
     const sendKey = (down,buttonState) => {
         const target = down ? keyDown : keyUp;
@@ -217,13 +231,12 @@ function ManagedGamepad(settings) {
         }
     };
 
-    const nonZeroAxes = (xAxis,yAxis) => {
-        return xAxis !== 0 || yAxis !== 0;
-    };
-
     const processAxis = (axisState,xAxis,yAxis,timestamp) => {
+        axisState.x = xAxis; axisState.y = yAxis;
+
         xAxis = DeadzoneScale(axisDeadzone,xAxis);
         yAxis = DeadzoneScale(axisDeadzone,yAxis);
+
         let isPressed = nonZeroAxes(xAxis,yAxis);
         const newCode = EncodeAxes(xAxis,yAxis,axisState.codes);
         if(newCode !== null) {
