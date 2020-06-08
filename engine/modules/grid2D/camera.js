@@ -6,6 +6,10 @@ const DEFAULT_Y = 0;
 
 const DEFAULT_PADDING_SETTING = false;
 
+const BAD_MOVEMENT_OPERATION = () => {
+    throw Error("The first movement parameter is an object, but it lacks a camX or a camY value!");
+};
+
 function Camera(grid) {
 
     this.grid = grid; let x = DEFAULT_X, y = DEFAULT_Y;
@@ -132,6 +136,17 @@ function Camera(grid) {
 
     this.moveTo = (newX,newY,duration) => {
         if(moving) return;
+
+        if(typeof newX === "object") {
+            //if the first parameter is an object with camX and camY values set newX and newY and shift newY to duration
+            const {camX,camY} = newX;
+            if(camX !== undefined && camY !== undefined) {
+                duration = newY, newX = camX, newY = camY;
+            } else {
+                BAD_MOVEMENT_OPERATION();
+            }
+        }
+
         if(newX == x && newY == y) return;
         moving = true;
         return new Promise(resolve => {

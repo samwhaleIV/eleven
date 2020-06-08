@@ -26,12 +26,9 @@ function AnimatedSprite(texture,x,y) {
 
     if(!x) x = 0; if(!y) y = 0;
 
-    Object.defineProperty(this,"directionMatrix",{
-        value: DIRECTION_MATRIX,
-        enumerable: true
-    });
-
+    this.directionMatrix = DIRECTION_MATRIX;
     this.x = x, this.y = y;
+    this.xOffset = 0, this.yOffset = 0;
     this.width = 1, this.height = 1;
 
     let direction = DEFAULT_DIRECTION;
@@ -39,15 +36,26 @@ function AnimatedSprite(texture,x,y) {
     this.getPosition = () => [this.x,this.y];
     this.setPosition = (x,y) => (this.x = x, this.y = y);
 
-    Object.defineProperty(this,"direction",{
-        get: () => direction,
-        set: value => {
-            if(typeof value === "string") {
-                const lookupResult = DIRECTION_LOOKUP[value];
-                if(isNaN(lookupResult)) return;
-                value = lookupResult;
-            }
-            direction = value;
+    Object.defineProperties(this,{
+        camX: {
+            get: () => this.x + this.xOffset,
+            enumerable: true
+        },
+        camY: {
+            get: () => this.y + this.yOffset,
+            enumerable: true
+        },
+        direction: {
+            get: () => direction,
+            set: value => {
+                if(typeof value === "string") {
+                    const lookupResult = DIRECTION_LOOKUP[value];
+                    if(isNaN(lookupResult)) return;
+                    value = lookupResult;
+                }
+                direction = value;
+            },
+            enumerable: true
         }
     });
 

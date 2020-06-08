@@ -302,7 +302,7 @@ function ManagedGamepad(settings) {
                 const impulse = binds[rightAxisState.inverseCode];
                 downKeys[impulse] = getImpulseEvent(impulse,rightAxisState);
             }
-            inputGamepad(downKeys,time);
+            if(inputGamepad) inputGamepad(downKeys,time);
         }
     };
     this.poll = poll;

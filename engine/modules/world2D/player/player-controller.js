@@ -127,14 +127,13 @@ function PlayerController(
 
     };
 
-    const update = time => {
+    const update = ({deltaSecond}) => {
         colliding = false;
 
         if(locked || !inputActive) return;
 
         const {velocity, direction} = sprite;
 
-        const deltaSecond = time.delta / 1000;
         let change = velocity * deltaSecond;
         change = grid.roundToPixels(change);
 

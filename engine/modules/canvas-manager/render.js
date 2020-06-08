@@ -64,6 +64,10 @@ function Render(canvasManager,modules) {
         delta: {
             get: () => delta,
             enumerable: true
+        },
+        deltaSecond: {
+            get: () => delta / 1000,
+            enumerable: true
         }
     }));
 
