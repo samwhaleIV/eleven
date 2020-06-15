@@ -43,6 +43,7 @@ function TileRenderer(textureSize,data) {
         const y = Math.floor(idx / columns);
         return [x,y];
     };
+    this.getIdx = getIdx;
 
     let context, tileSize;
     this.configTileRender = data => {

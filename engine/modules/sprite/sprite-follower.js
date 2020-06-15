@@ -6,7 +6,7 @@ function SpriteFollower(camera,sprite,active=true) {
     let followX = true;
     let followY = true;
 
-    const canProcess = () => target && (followX || followY);
+    const canProcess = () => enabled && target && (followX || followY);
 
     const processor = () => {
         if(!canProcess()) return;

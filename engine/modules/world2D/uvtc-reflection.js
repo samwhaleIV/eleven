@@ -59,10 +59,11 @@ function GetScrollable(grid,waterColor,reflectionAlpha,tileOffsetDistance) {
         context.globalAlpha = this.reflectionAlpha;
         const tileSize = grid.tileSize;
         const reflectionDistance = tileSize * this.tileOffsetDistance;
+        context.imageSmoothingEnabled = true;
         context.drawImage(
             buffer,0,0,fullWidth,fullHeight,
             xOffset+reflectionDistance,yOffset+reflectionDistance,
-            fullWidth,fullHeight
+            fullWidth-reflectionDistance,fullHeight-reflectionDistance
         );
         context.restore();
         context.drawImage(

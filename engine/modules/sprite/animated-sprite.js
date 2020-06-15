@@ -1,15 +1,9 @@
 import PlayerDirections from "../world2D/player/player-directions.js";
 
-const SPRITE_WIDTH = 16;
-const SPRITE_HEIGHT = 16;
+const BASE_FRAME_SIZE = 16;
 
 const ANIMATION_ROW_COUNT = 4;
 const FRAME_TIME = 100;
-
-//Conforms to PlayerDirections
-const DIRECTION_MATRIX = Object.freeze([
-    SPRITE_WIDTH,SPRITE_WIDTH*2,0,SPRITE_WIDTH*3
-]);
 
 const DIRECTION_LOOKUP = {
     "up": PlayerDirections.Up,
@@ -20,16 +14,27 @@ const DIRECTION_LOOKUP = {
 
 const DEFAULT_DIRECTION = 2;
 
-function AnimatedSprite(texture,x,y) {
+function AnimatedSprite(texture,x,y,spriteScaleX,spriteScaleY) {
+    if(isNaN(spriteScaleX)) spriteScaleX = 1;
+    if(isNaN(spriteScaleY)) spriteScaleY = 1;
+
+    const frameWidth = BASE_FRAME_SIZE * spriteScaleX;
+    const frameHeight = BASE_FRAME_SIZE * spriteScaleY;
+
+    //Conforms to PlayerDirections
+    const directionMatrix = Object.freeze([
+        frameWidth,frameWidth*2,0,frameWidth*3
+    ]);
 
     this.texture = texture; texture = null;
 
-    if(!x) x = 0; if(!y) y = 0;
+    if(isNaN(x)) x = 0; if(isNaN(y)) y = 0;
 
-    this.directionMatrix = DIRECTION_MATRIX;
+    this.directionMatrix = directionMatrix;
     this.x = x, this.y = y;
     this.xOffset = 0, this.yOffset = 0;
-    this.width = 1, this.height = 1;
+    this.width = spriteScaleX;
+    this.height = spriteScaleY;
 
     let direction = DEFAULT_DIRECTION;
 
@@ -64,7 +69,7 @@ function AnimatedSprite(texture,x,y) {
     const getAnimationRow = time => {
         const t = time.now - animationStart;
         const row = Math.floor(t / FRAME_TIME);
-        return row % ANIMATION_ROW_COUNT * SPRITE_HEIGHT;
+        return row % ANIMATION_ROW_COUNT * frameHeight;
     };
 
     const getTextureY = time => {
@@ -77,7 +82,7 @@ function AnimatedSprite(texture,x,y) {
             if(animationStart !== 0) {
                 const row = getAnimationRow(time);
 
-                if((row / SPRITE_HEIGHT) % 2 === 0) animationStart = 0;
+                if((row / frameHeight) % 2 === 0) animationStart = 0;
 
                 return row;
             }
@@ -88,11 +93,11 @@ function AnimatedSprite(texture,x,y) {
     this.roundRenderPosition = true;
 
     this.render = (context,x,y,width,height,time) => {
-        const textureX = this.directionMatrix[direction];
+        const textureX = directionMatrix[direction];
         const textureY = getTextureY(time);
 
         context.drawImage(
-            this.texture,textureX,textureY,SPRITE_WIDTH,SPRITE_HEIGHT,
+            this.texture,textureX,textureY,frameWidth,frameHeight,
             x,y,width,height
         );
     };
