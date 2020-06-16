@@ -53,12 +53,15 @@ function AnimatedSprite(texture,x,y,spriteScaleX,spriteScaleY) {
         direction: {
             get: () => direction,
             set: value => {
-                if(typeof value === "string") {
-                    const lookupResult = DIRECTION_LOOKUP[value];
-                    if(isNaN(lookupResult)) return;
-                    value = lookupResult;
+                switch(typeof value) {
+                    case "number":
+                        direction = value;
+                        return;
+                    case "string":
+                        const lookupResult = DIRECTION_LOOKUP[value];
+                        if(!isNaN(lookupResult)) direction = lookupResult;
+                        return;
                 }
-                direction = value;
             },
             enumerable: true
         }

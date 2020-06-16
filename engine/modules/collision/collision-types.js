@@ -3,7 +3,8 @@ const CollisionTypes = Object.freeze({
     Default: 1,
     Trigger: 2,
     Avatar: 3,
-    Projectile: 4
+    Projectile: 4,
+    LivingTrigger: 5
 });
 
 export default CollisionTypes;

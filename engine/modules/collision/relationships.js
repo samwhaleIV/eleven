@@ -5,6 +5,7 @@ const Default = CollisionTypes.Default;
 const Trigger = CollisionTypes.Trigger;
 const Avatar = CollisionTypes.Avatar
 const Projectile = CollisionTypes.Projectile;
+const LivingTrigger = CollisionTypes.LivingTrigger;
 
 const getRelations = (...types) => {
     const relationship = {};
@@ -18,8 +19,9 @@ const Relationships = Object.freeze({
     [None]: noRelations(),
     [Trigger]: noRelations(),
     [Default]: getRelations(Default,Avatar),
-    [Avatar]: getRelations(Default,Avatar,Trigger),
+    [Avatar]: getRelations(Default,Avatar,Trigger,LivingTrigger),
     [Projectile]: getRelations(Avatar),
+    [LivingTrigger]: getRelations(Avatar)
 });
 
 export default Relationships;

@@ -13,6 +13,7 @@ POLARITY_LOOKUP[PlayerDirections.Left] = -1;
 POLARITY_LOOKUP[PlayerDirections.Right] = 1;
 
 const TRIGGER_TYPE = CollisionTypes.Trigger;
+const LIVING_TRIGGER_TYPE = CollisionTypes.LivingTrigger;
 
 function PlayerController(
     grid,sprite,collisionLayer,tileCollision
@@ -99,7 +100,8 @@ function PlayerController(
         let collidedWith = collisionResult;
         if(collidedWith.isHitBox) collidedWith = collidedWith.target;
 
-        if(collidedWith.collisionType === TRIGGER_TYPE) {
+        const {collisionType} = collidedWith;
+        if(collisionType === TRIGGER_TYPE || collisionType === LIVING_TRIGGER_TYPE) {
             if(collidedWith.trigger) collidedWith.trigger(sprite);
             return;
         }
