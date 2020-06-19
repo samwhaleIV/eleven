@@ -5,13 +5,14 @@ const RESOLUTION_SCALE = 2;
 function CollisionLayer(grid,layer) {
     CollisionBase.call(this,grid,RESOLUTION_SCALE);
 
+    const dropWatcher = ID => this.dropSpriteCache(ID);
+    layer.addDropWatcher(dropWatcher);
+
     const updateHandler = (sprite,ID) => {
-        if(sprite.collides) this.mapSprite(sprite,ID);
+        if(sprite.collides) this.mapSpriteCached(sprite,ID);
     };
 
-    const update = () => {
-        this.reset(); layer.forEach(updateHandler);
-    };
+    const update = () => layer.forEach(updateHandler);
 
     const collides = this.getCollisionTest(layer.get);
 

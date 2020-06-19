@@ -3,6 +3,7 @@ import Relationships from "./relationships.js";
 
 const DEFAULT_TYPE = CollisionTypes.Default;
 const PROJECTILE_TYPE = CollisionTypes.Projectile;
+const CACHE_POSITION_LENGTH = 4;
 
 const WARN_FLOATING_TILE_SIZE = (baseTileSize,resolutionScale) => {
     console.warn(`Tile size ${baseTileSize} cannot be even multiple of resolution scale ${resolutionScale}`);
@@ -56,6 +57,9 @@ function CollisionBase(grid,resolutionScale) {
 
     const resetBuffer = new Array();
     this.resetBuffer = resetBuffer;
+
+    const cacheTable = new Object();
+    this.cacheTable = cacheTable;
     
     this.tileSize = tileSize;
     this.width = width; this.height = height;
@@ -64,6 +68,27 @@ function CollisionBase(grid,resolutionScale) {
 
     this.reset();
 }
+
+CollisionBase.prototype.getCache = function(ID) {
+    const {cacheTable} = this;
+    let container = cacheTable[ID];
+    if(!container) {
+        container = new Array(CACHE_POSITION_LENGTH).fill(null);
+        cacheTable[ID] = container;
+    }
+    return container;
+}
+CollisionBase.prototype.dropSpriteCache = function(ID) {
+    const {cacheTable} = this;
+    const cache = cacheTable[ID];
+    if(!cache) return;
+    const {map} = this;
+    for(let i = CACHE_POSITION_LENGTH;i<cache.length;i++) {
+        map[cache[i]] = 0;
+    }
+    cacheTable.length = 0; delete cacheTable[ID];
+}
+
 CollisionBase.prototype.getCollisionTest = function(valueProcessor) {
     return sprite => {
         const hitList = this.checkSprite(sprite);
@@ -87,25 +112,44 @@ CollisionBase.prototype.getCollisionTest = function(valueProcessor) {
         return null;
     };
 }
-
 CollisionBase.prototype.reset = function() {
     const {map, resetBuffer} = this;
-
     for(let i = resetBuffer.length-1;i>-1;i--) {
         map[resetBuffer[i]] = 0;
     }
-
     resetBuffer.length = 0;
 }
-CollisionBase.prototype.write = function(startX,y,endX,endY,value) {
+CollisionBase.prototype.write = function(startX,y,endX,endY,ID) {
     const {map, mapSize, width, resetBuffer} = this;
     while(y<endY) {
         let x = startX;
         while(x<endX) {
             const index = x + y * width;
             if(index >= 0 && index < mapSize) {
-                map[index] = value;
-                resetBuffer.push(index);
+                map[index] = ID; resetBuffer.push(index);
+            }
+            x++;
+        }
+        y++;
+    }
+}
+CollisionBase.prototype.writeCached = function(startX,y,endX,endY,ID) {
+    const cache = this.getCache(ID);
+    if(startX === cache[0] && y === cache[1] && endX === cache[2] && endY === cache[3]) return;
+
+    const {map, mapSize, width} = this;
+
+    for(let i = CACHE_POSITION_LENGTH;i<cache.length;i++) {
+        map[cache[i]] = 0;
+    }
+    cache.length = 0; cache.push(startX,y,endX,endY);
+
+    while(y<endY) {
+        let x = startX;
+        while(x<endX) {
+            const index = x + y * width;
+            if(index >= 0 && index < mapSize) {
+                map[index] = ID; cache.push(index);
             }
             x++;
         }
@@ -148,9 +192,13 @@ CollisionBase.prototype.checkSprite = function(sprite) {
     const {x,y,endX,endY} = this.spriteResMap(sprite);
     return this.getHitList(x,y,endX,endY);
 }
-CollisionBase.prototype.mapSprite = function(sprite) {
+CollisionBase.prototype.mapSprite = function(sprite,ID) {
     const {x,y,endX,endY} = this.spriteResMap(sprite);
-    this.write(x,y,endX,endY,sprite.ID);
+    this.write(x,y,endX,endY,ID);
+}
+CollisionBase.prototype.mapSpriteCached = function(sprite,ID) {
+    const {x,y,endX,endY} = this.spriteResMap(sprite);
+    this.writeCached(x,y,endX,endY,ID);
 }
 
 export default CollisionBase;

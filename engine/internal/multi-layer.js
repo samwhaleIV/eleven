@@ -32,7 +32,7 @@ function MultiLayer() {
     };
     this.add = (layer,priority=DEFAULT_PRIORITY) => {
         validateMutation();
-        const ID = IDCounter; IDCounter++;
+        const ID = IDCounter; IDCounter += 1;
 
         layers[ID] = {layer,ID};
         priorityTable[ID] = priority;
@@ -52,9 +52,11 @@ function MultiLayer() {
         return layers[ID].layer;
     };
 
+    const dropWatcher = new DropWatcher(this);
     const dropID = ID => {
         delete layers[ID];
         delete priorityTable[ID];
+        dropWatcher.fire(ID);
     };
 
     this.remove = ID => {
@@ -89,4 +91,26 @@ function MultiLayer() {
         }
     };
 }
+
+function DropWatcher(target) {
+    const dropWatchers = new Object();
+    let IDCounter = 0;
+
+    target.addDropWatcher = handler => {
+        const ID = IDCounter; IDCounter += 1;
+        dropWatchers[ID] = handler;
+        return ID;
+    };
+
+    target.removeDropWatcher = ID => {
+        delete dropWatchers[ID];
+    };
+
+    const fireDropWatchers = ID => {
+        Object.values(dropWatchers).forEach(handler => handler(ID));
+    };
+
+    this.fire = fireDropWatchers;
+}
+
 export default MultiLayer;
