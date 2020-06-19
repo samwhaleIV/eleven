@@ -55,6 +55,7 @@ function TextSprite({
 
     letterSpacing = limitedPremutiply(letterSpacing,scale);
     wordSpacing = limitedPremutiply(wordSpacing,scale);
+    lineSpacing = limitedPremutiply(lineSpacing,scale);
 
     const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
     if(!lines && text) {
@@ -77,8 +78,8 @@ function TextSprite({
 
     backgroundPadding = Math.max(1,backgroundPadding * scale);
 
-    const lineHeight = (glyphTable.height + lineSpacing) * scale;
-    const height = lineHeight * lineCount - (lineSpacing * scale);
+    const lineHeight = glyphTable.height * scale + lineSpacing;
+    const height = lineHeight * lineCount - lineSpacing;
 
     const buffer = new OffscreenCanvas(width,height);
     const context = buffer.getContext("2d",{alpha:true});
@@ -91,13 +92,13 @@ function TextSprite({
     }
 
     if(absolutePositioning) {
-        let totalWidth = width + backgroundPadding * 2;
-        let totalHeight = height + backgroundPadding * 2;
+        if(width % 2 !== 0) width++;
+
+        const totalWidth = width + backgroundPadding * 2;
+        const totalHeight = height + backgroundPadding * 2;
 
         let xOffset = -totalWidth / 2;
         let yOffset = -totalHeight / 2;
-
-        if(totalWidth % 2 !== 0) xOffset += 0.5;
 
         const bufferXOffset = xOffset + backgroundPadding;
         const bufferYOffset = yOffset + backgroundPadding;
@@ -109,11 +110,13 @@ function TextSprite({
             if(backgroundColor) {
                 context.fillStyle = backgroundColor;
                 context.fillRect(
-                    x+xOffset,y+yOffset,
+                    Math.floor(x+xOffset),Math.floor(y+yOffset),
                     totalWidth,totalHeight
                 );
             }
-            context.drawImage(buffer,x+bufferXOffset,y+bufferYOffset);
+            context.drawImage(
+                buffer,Math.floor(x+bufferXOffset),Math.floor(y+bufferYOffset)
+            );
         };
     } else {
         Object.defineProperty(this,"target",{
@@ -170,6 +173,7 @@ function TextSprite({
             this.x = renderX - worldWidth / 2;
             this.y = renderY - worldHeight / 2;
         };
+        this.roundRenderPosition = true;
         this.render = (context,x,y,width,height) => {
             if(backgroundColor) {
                 context.fillStyle = backgroundColor;
