@@ -118,6 +118,8 @@ function* TextGenerator(
     }
 }
 
+const limitedPremutiply = (value,scale) => Math.max(1,value * scale);
+
 function TextLayer({
     text,width,height,autoComplete,
     scale = DEFAULT_SCALE,
@@ -132,8 +134,10 @@ function TextLayer({
     if(typeof text[0] === "string") text = MapStringsList(text);
     FilterEllipsis(text);
 
-    textSpacing *= scale; wordSpacing *= scale;
-    rowSpacing *= scale; boxPadding *= scale;
+    textSpacing = limitedPremutiply(textSpacing,scale);
+    wordSpacing = limitedPremutiply(wordSpacing,scale);
+    rowSpacing = limitedPremutiply(rowSpacing,scale);
+    boxPadding = limitedPremutiply(boxPadding,scale);
 
     const buffer = new OffscreenCanvas(width,height);
     Object.defineProperties(this,{

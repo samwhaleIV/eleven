@@ -6,24 +6,26 @@ const DEFAULT_LETTER_SPACING = 1;
 const DEFAULT_WORD_SPACING = 2;
 const DEFAULT_BACKGROUND_PADDING = 1;
 
-function Line(glyphTable,text,letterSpacing,wordSpacing,scale) {
+const limitedPremutiply = (value,scale) => Math.max(1,value * scale);
 
+function Line(glyphTable,text,letterSpacing,wordSpacing,scale) {
     text = text.split(" ");
+
+    const unmult_letterSpacing = letterSpacing / scale;
+    const unmult_wordSpacing = wordSpacing / scale;
 
     let width = 0;
     for(const word of text) {
         for(const character of word) {
-            width += glyphTable.getWidth(character) + letterSpacing;
+            width += glyphTable.getWidth(character) + unmult_letterSpacing;
         }
-        width = width - letterSpacing + wordSpacing;
+        width = width - unmult_letterSpacing + unmult_wordSpacing;
     }
-    width -= wordSpacing;
+    width -= unmult_wordSpacing;
 
     width *= scale;
 
     this.width = width;
-
-    letterSpacing *= scale; wordSpacing *= scale;
 
     this.render = (alignmentWidth,renderX,rowY,renderer) => {
         renderX += alignmentWidth / 2 - width / 2;
@@ -49,6 +51,11 @@ function TextSprite({
     wordSpacing = DEFAULT_WORD_SPACING,
     absolutePositioning = false
 }) {
+    scale = Math.max(1,scale);
+
+    letterSpacing = limitedPremutiply(letterSpacing,scale);
+    wordSpacing = limitedPremutiply(wordSpacing,scale);
+
     const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
     if(!lines && text) {
         lines = text.split("\n");
@@ -68,6 +75,8 @@ function TextSprite({
         }
     }
 
+    backgroundPadding = Math.max(1,backgroundPadding * scale);
+
     const lineHeight = (glyphTable.height + lineSpacing) * scale;
     const height = lineHeight * lineCount - (lineSpacing * scale);
 
@@ -81,17 +90,14 @@ function TextSprite({
         lines[i].render(width,0,lineHeight*i,renderer);
     }
 
-    backgroundPadding *= scale;
-
     if(absolutePositioning) {
         let totalWidth = width + backgroundPadding * 2;
         let totalHeight = height + backgroundPadding * 2;
 
-        if(totalWidth % 2 !== 0) totalWidth++;
-        if(totalHeight % 2 !== 0) totalHeight++;
+        let xOffset = -totalWidth / 2;
+        let yOffset = -totalHeight / 2;
 
-        const xOffset = -totalWidth / 2;
-        const yOffset = -totalHeight / 2;
+        if(totalWidth % 2 !== 0) xOffset += 0.5;
 
         const bufferXOffset = xOffset + backgroundPadding;
         const bufferYOffset = yOffset + backgroundPadding;
