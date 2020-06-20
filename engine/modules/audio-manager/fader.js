@@ -4,10 +4,9 @@ function FadeIn(gainNode,duration,callback) {
     const gainControl = gainNode.gain;
     const endValue = gainControl.value;
 
-    const now = audioContext.currentTime;
-    gainControl.setValueAtTime(0,now);
+    gainControl.value = 0;
 
-    const endTime = now + duration / 1000;
+    const endTime = audioContext.currentTime + duration / 1000;
     gainControl.linearRampToValueAtTime(endValue,endTime);
 
     if(callback) setTimeout(callback,duration);
@@ -23,4 +22,4 @@ function FadeOut(gainNode,duration,callback) {
 export default Object.freeze({
     FadeIn, FadeOut
 });
-export { FadeIn, FadeOut }
+export {FadeIn, FadeOut}

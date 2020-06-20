@@ -21,8 +21,7 @@ const MISSING_AUDIO_BUFFER = () => {
 
 const getGainNode = volume => {
     const node = audioContext.createGain();
-    const now = audioContext.currentTime;
-    node.gain.setValueAtTime(volume,now);
+    node.gain.value = volume;
     return node;
 };
 
@@ -71,8 +70,7 @@ function Radio({
 Radio.prototype.fadeOut = function(duration,callback,...parameters) {
     FadeOut(this.targetNode,duration,()=>{
         this.stopAll();
-        const now = audioContext.currentTime;
-        this.targetNode.gain.setValueAtTime(DEFAULT_VOLUME,now);
+        this.targetNode.gain.value = DEFAULT_VOLUME;
         Wrap(callback,parameters);
     });
     return this;

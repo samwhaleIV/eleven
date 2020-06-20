@@ -52,7 +52,7 @@ function RemoteControl(data) {
 }
 RemoteControl.prototype.setVolume = function(volume) {
     const gainNode = this[RCData].gainNode;
-    gainNode.gain.setValueAtTime(volume,audioContext.currentTime);
+    gainNode.gain.value = volume;
     return this;
 }
 RemoteControl.prototype.fadeOut = function(duration,callback,...parameters) {

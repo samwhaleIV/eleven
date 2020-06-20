@@ -7,8 +7,7 @@ function VolumeControl({
 }) {
     const node = audioContext.createGain();
     const setVolume = value => {
-        const time = audioContext.currentTime;
-        node.gain.setValueAtTime(value,time);
+        node.gain.value = value;
     };
     this.node = node;
     this.mute = () => {

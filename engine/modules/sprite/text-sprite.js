@@ -1,4 +1,5 @@
 import Constants from "../../internal/constants.js";
+import LimitedPremultiply from "../text/limited-premultiply.js";
 
 const DEFAULT_LINE_SPACING = 1;
 const DEFAULT_SCALE = 3;
@@ -6,24 +7,24 @@ const DEFAULT_LETTER_SPACING = 1;
 const DEFAULT_WORD_SPACING = 2;
 const DEFAULT_BACKGROUND_PADDING = 1;
 
-const limitedPremutiply = (value,scale) => Math.max(1,value * scale);
-
-function Line(glyphTable,text,letterSpacing,wordSpacing,scale) {
+function Line(
+    glyphTable,text,
+    letterSpacing,
+    wordSpacing,
+    letterSpacingBase,
+    wordSpacingBase,
+    scale
+) {
     text = text.split(" ");
-
-    const unmult_letterSpacing = letterSpacing / scale;
-    const unmult_wordSpacing = wordSpacing / scale;
 
     let width = 0;
     for(const word of text) {
         for(const character of word) {
-            width += glyphTable.getWidth(character) + unmult_letterSpacing;
+            width += glyphTable.getWidth(character) + letterSpacingBase;
         }
-        width = width - unmult_letterSpacing + unmult_wordSpacing;
+        width = width - letterSpacingBase + wordSpacingBase;
     }
-    width -= unmult_wordSpacing;
-
-    width *= scale;
+    width = (width - wordSpacingBase) * scale;
 
     this.width = width;
 
@@ -53,14 +54,15 @@ function TextSprite({
 }) {
     scale = Math.max(1,scale);
 
-    letterSpacing = limitedPremutiply(letterSpacing,scale);
-    wordSpacing = limitedPremutiply(wordSpacing,scale);
-    lineSpacing = limitedPremutiply(lineSpacing,scale);
+    letterSpacing = LimitedPremultiply(letterSpacing,scale);
+    wordSpacing = LimitedPremultiply(wordSpacing,scale);
+    lineSpacing = LimitedPremultiply(lineSpacing,scale);
+
+    const letterSpacingBase = letterSpacing / scale;
+    const wordSpacingBase = wordSpacing / scale;
 
     const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
-    if(!lines && text) {
-        lines = text.split("\n");
-    }
+    if(!lines && text) lines = text.split("\n");
     text = null;
 
     let width = 0;
@@ -68,7 +70,8 @@ function TextSprite({
 
     for(let i = 0;i<lines.length;i++) {
         let line = new Line(
-            glyphTable,lines[i],letterSpacing,wordSpacing,scale
+            glyphTable,lines[i],letterSpacing,wordSpacing,
+            letterSpacingBase,wordSpacingBase,scale
         );
         lines[i] = line;
         if(line.width > width) {
@@ -92,31 +95,27 @@ function TextSprite({
     }
 
     if(absolutePositioning) {
-        if(width % 2 !== 0) width++;
+        if(width % 2 !== 0) width += 1;
 
-        const totalWidth = width + backgroundPadding * 2;
-        const totalHeight = height + backgroundPadding * 2;
+        const doubleBackgroundPadding = backgroundPadding * 2;
 
-        let xOffset = -totalWidth / 2;
-        let yOffset = -totalHeight / 2;
+        const totalWidth = width + doubleBackgroundPadding;
+        const totalHeight = height + doubleBackgroundPadding;
 
-        const bufferXOffset = xOffset + backgroundPadding;
-        const bufferYOffset = yOffset + backgroundPadding;
+        const xOffset = -totalWidth / 2, yOffset = -totalHeight / 2;
 
         this.height = totalHeight;
         this.halfHeight = this.height / 2;
 
+        const renderBackground = (context,x,y) => {
+            context.fillStyle = backgroundColor;
+            context.fillRect(x,y,totalWidth,totalHeight);
+        };
+
         this.render = (context,x,y) => {
-            if(backgroundColor) {
-                context.fillStyle = backgroundColor;
-                context.fillRect(
-                    Math.floor(x+xOffset),Math.floor(y+yOffset),
-                    totalWidth,totalHeight
-                );
-            }
-            context.drawImage(
-                buffer,Math.floor(x+bufferXOffset),Math.floor(y+bufferYOffset)
-            );
+            x = Math.floor(x + xOffset), y = Math.floor(y + yOffset);
+            if(backgroundColor) renderBackground(context,x,y);
+            context.drawImage(buffer,x+backgroundPadding,y+backgroundPadding);
         };
     } else {
         Object.defineProperty(this,"target",{

@@ -1,10 +1,11 @@
 import ColorCodes from "./color-codes.js";
 import Constants from "../../internal/constants.js";
+import LimitedPremultiply from "./limited-premultiply.js";
 
 const DEFAULT_SCALE = 4;
 const DEFAULT_TEXT_SPACING = 1;
 const DEFAULT_WORD_SPACING = 2;
-const DEFAULT_ROW_SPACING = 1;
+const DEFAULT_LINE_SPACING = 1;
 const DEFAULT_BOX_PADDING = 4;
 
 const LONG_WORD_CLIP_JUSTIFICATION = 3 / 4;
@@ -47,18 +48,20 @@ const IS_ALPHABETICAL = character => {
 
 function* TextGenerator(
     glyphTable,words,renderCharacter,width,scale,
-    textSpacing,wordSpacing,rowSpacing,boxPadding
+    textSpacing,wordSpacing,lineSpacing,boxPadding
 ) {
     let y = boxPadding, x = boxPadding;
     const maxX = width - boxPadding;
-    const rowHeight = scale * glyphTable.height + rowSpacing;
+    const rowHeight = scale * glyphTable.height + lineSpacing;
     const getStatus = (value,next) => {
         return {current:value,next};
     };
 
     const clipCharacter = LONG_WORD_CLIP_CHARACTER;
 
-    const getWidth = character => glyphTable.getWidth(character) * scale + textSpacing;
+    const getWidth = character => {
+        return glyphTable.getWidth(character) * scale + textSpacing;
+    };
     const hyphenWidth = getWidth(clipCharacter);
 
     const clipJustification = LONG_WORD_CLIP_JUSTIFICATION;
@@ -92,9 +95,12 @@ function* TextGenerator(
             const width = getWidth(character);
             if(wordClip) {
                 const isAlphabetical = IS_ALPHABETICAL(character);
-                let max = maxX; if(isAlphabetical) max -= hyphenWidth;
+                let max = maxX;
+                if(isAlphabetical) max -= hyphenWidth;
                 if(x + xOffset + width > max) {
-                    if(isAlphabetical) renderCharacter(clipCharacter,x + xOffset,y,color);
+                    if(isAlphabetical) {
+                        renderCharacter(clipCharacter,x + xOffset,y,color);
+                    }
                     x = boxPadding;
                     xOffset = 0; y += rowHeight;
                 }
@@ -118,26 +124,26 @@ function* TextGenerator(
     }
 }
 
-const limitedPremutiply = (value,scale) => Math.max(1,value * scale);
-
 function TextLayer({
     text,width,height,autoComplete,
     scale = DEFAULT_SCALE,
     textSpacing = DEFAULT_TEXT_SPACING,
     wordSpacing = DEFAULT_WORD_SPACING,
-    rowSpacing = DEFAULT_ROW_SPACING,
+    lineSpacing = DEFAULT_LINE_SPACING,
     boxPadding = DEFAULT_BOX_PADDING
 }) {
+    scale = Math.max(1,scale);
+
+    textSpacing = LimitedPremultiply(textSpacing,scale);
+    wordSpacing = LimitedPremultiply(wordSpacing,scale);
+    lineSpacing = LimitedPremultiply(lineSpacing,scale);
+    boxPadding = LimitedPremultiply(boxPadding,scale);
+
     const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
 
     if(typeof text === "string") text = MapNewLinesAbleString(text);
     if(typeof text[0] === "string") text = MapStringsList(text);
     FilterEllipsis(text);
-
-    textSpacing = limitedPremutiply(textSpacing,scale);
-    wordSpacing = limitedPremutiply(wordSpacing,scale);
-    rowSpacing = limitedPremutiply(rowSpacing,scale);
-    boxPadding = limitedPremutiply(boxPadding,scale);
 
     const buffer = new OffscreenCanvas(width,height);
     Object.defineProperties(this,{
@@ -151,7 +157,7 @@ function TextLayer({
 
     const generator = TextGenerator(
         glyphTable,text,renderCharacter,width,scale,
-        textSpacing,wordSpacing,rowSpacing,boxPadding
+        textSpacing,wordSpacing,lineSpacing,boxPadding
     );
 
     const finish = () => {
@@ -163,6 +169,8 @@ function TextLayer({
 
     if(autoComplete) finish();
 
-    this.render = (context,x,y) => context.drawImage(buffer,0,0,width,height,x,y,width,height);
+    this.render = (context,x,y) => {
+        context.drawImage(buffer,0,0,width,height,x,y,width,height);
+    };
 }
 export default TextLayer;

@@ -22,6 +22,8 @@ function AudioManager() {
 
     InstallIntroHelper(this);
 
+    this.context = audioContext;
+
     const {soundNode, musicNode} = InstallVolumeControls({
         target: this,
         output: audioContext.destination,
@@ -117,6 +119,8 @@ function AudioManager() {
     this.playLooping = function(buffer,loopStart=0,isMusic=true) {
         return (isMusic ? this.playMusicLooping: this.playSoundLooping)({buffer,loopStart});
     };
+
+    this.soundRadio = soundRadio, this.musicRadio = musicRadio;
 
     TonePlayer(this,soundNode);
 

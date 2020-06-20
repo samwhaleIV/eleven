@@ -77,11 +77,11 @@ const GetLoader = resourceQueue => {
     let loadLock = false;
     return async (overwrite=false) => {
         if(loadLock) LOAD_CONCURRENCY_THREAT();
-        loadLock = true;
         if(!resourceQueue.length) return;
         const resourceLinks = resourceQueue.splice(0);
         const loadList = getLoadList(resourceLinks,overwrite);
         if(!loadList.length) return;
+        loadLock = true;
         const resources = await LoadResources(loadList);
         loadLock = false;
         return resources;
