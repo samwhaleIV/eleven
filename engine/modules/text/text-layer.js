@@ -3,7 +3,7 @@ import Constants from "../../internal/constants.js";
 import LimitedPremultiply from "./limited-premultiply.js";
 
 const DEFAULT_SCALE = 4;
-const DEFAULT_TEXT_SPACING = 1;
+const DEFAULT_LETTER_SPACING = 1;
 const DEFAULT_WORD_SPACING = 2;
 const DEFAULT_LINE_SPACING = 1;
 const DEFAULT_BOX_PADDING = 4;
@@ -48,7 +48,7 @@ const IS_ALPHABETICAL = character => {
 
 function* TextGenerator(
     glyphTable,words,renderCharacter,width,scale,
-    textSpacing,wordSpacing,lineSpacing,boxPadding
+    letterSpacing,wordSpacing,lineSpacing,boxPadding
 ) {
     let y = boxPadding, x = boxPadding;
     const maxX = width - boxPadding;
@@ -60,7 +60,7 @@ function* TextGenerator(
     const clipCharacter = LONG_WORD_CLIP_CHARACTER;
 
     const getWidth = character => {
-        return glyphTable.getWidth(character) * scale + textSpacing;
+        return glyphTable.getWidth(character) * scale + letterSpacing;
     };
     const hyphenWidth = getWidth(clipCharacter);
 
@@ -108,7 +108,7 @@ function* TextGenerator(
 
             renderCharacter(character,x + xOffset,y,color,backgroundColor?{
                 color: backgroundColor,
-                widthOffset: textSpacing, heightOffset: 2,
+                widthOffset: letterSpacing, heightOffset: 2,
                 xOffset: 0, yOffset: -1
             }:null);
 
@@ -127,17 +127,16 @@ function* TextGenerator(
 function TextLayer({
     text,width,height,autoComplete,
     scale = DEFAULT_SCALE,
-    textSpacing = DEFAULT_TEXT_SPACING,
+    letterSpacing = DEFAULT_LETTER_SPACING,
     wordSpacing = DEFAULT_WORD_SPACING,
     lineSpacing = DEFAULT_LINE_SPACING,
     boxPadding = DEFAULT_BOX_PADDING
 }) {
     scale = Math.max(1,scale);
 
-    textSpacing = LimitedPremultiply(textSpacing,scale);
+    letterSpacing = LimitedPremultiply(letterSpacing,scale);
     wordSpacing = LimitedPremultiply(wordSpacing,scale);
     lineSpacing = LimitedPremultiply(lineSpacing,scale);
-    boxPadding = LimitedPremultiply(boxPadding,scale);
 
     const glyphTable = globalThis[Constants.EngineNamespace].GlyphTable;
 
@@ -157,7 +156,7 @@ function TextLayer({
 
     const generator = TextGenerator(
         glyphTable,text,renderCharacter,width,scale,
-        textSpacing,wordSpacing,lineSpacing,boxPadding
+        letterSpacing,wordSpacing,lineSpacing,boxPadding
     );
 
     const finish = () => {
