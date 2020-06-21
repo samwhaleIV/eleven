@@ -9,7 +9,4 @@ const WrapBind = (callback,parameters) => {
     };
 };
 
-export default Object.freeze({
-    Wrap, WrapBind
-});
-export { Wrap, WrapBind }
+export {Wrap, WrapBind}

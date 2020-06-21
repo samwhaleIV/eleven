@@ -8,14 +8,15 @@ import TonePlayer from "./tone-player.js";
 const DEFAULT_SOUND_VOLUME = Constants.DefaultSoundVolume;
 const DEFAULT_MUSIC_VOLUME = Constants.DefaultMusicVolume;
 
+const ANTI_WEB_POLICY_RATE = 500;
+
 const AggressiveAntiWebAudioPolicyLoop = () => {
-    let interval = null;
-    interval = setInterval(()=>{
+    const interval = setInterval(()=>{
         if(audioContext.state === "running") {
             clearInterval(interval); return;
         }
         audioContext.resume();
-    },500);
+    },ANTI_WEB_POLICY_RATE);
 };
 
 function AudioManager() {
@@ -114,13 +115,11 @@ function AudioManager() {
         return musicRadio.stopAll();
     };
     this.play = function(buffer,isMusic) {
-        return (isMusic ? this.playMusic: this.playSound)({buffer});
+        return (isMusic ? this.playMusic : this.playSound)({buffer});
     };
     this.playLooping = function(buffer,loopStart=0,isMusic=true) {
-        return (isMusic ? this.playMusicLooping: this.playSoundLooping)({buffer,loopStart});
+        return (isMusic ? this.playMusicLooping : this.playSoundLooping)({buffer,loopStart});
     };
-
-    this.soundRadio = soundRadio, this.musicRadio = musicRadio;
 
     TonePlayer(this,soundNode);
 

@@ -91,8 +91,9 @@ function ResourceManager() {
             const setValue = validateSetValue(value,type);
             return SetEntry({type,lookupName:file},setValue);
         };
-        this[`remove${typeName}`] = file => {
-            return RemoveEntry(file,type);
+        this[`remove${typeName}`] = (...files) => {
+            if(files.length <= 1) return RemoveEntry(files,type);
+            return files.map(file => RemoveEntry(file,type));
         };
         this[`has${typeName}`] = file => {
             return EntryExists(file,type);

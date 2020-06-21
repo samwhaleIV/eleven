@@ -4,8 +4,7 @@ import RCData from "./rc-symbol.js";
 import RemoteControl from "./remote-control.js";
 
 import {FadeIn, FadeOut} from "./fader.js";
-import CallbackWrap from "../../internal/callback-wrap.js";
-const {Wrap, WrapBind} = CallbackWrap;
+import {Wrap} from "../../internal/callback-wrap.js";
 
 const DEFAULT_VOLUME = 1;
 const DEFAULT_PLAYBACK_RATE = 1;
@@ -30,17 +29,15 @@ const getSourceNode = data => {
     sourceNode.buffer = data.buffer;
     sourceNode.loop = data.loop;
     sourceNode.loopStart = data.loopStart;
-    const now = audioContext.currentTime;
-    sourceNode.detune.setValueAtTime(data.detune,now);
-    sourceNode.playbackRate.setValueAtTime(data.playbackRate,now);
+    sourceNode.detune.setValueAtTime(data.detune,0);
+    sourceNode.playbackRate.setValueAtTime(data.playbackRate,0);
     return sourceNode;
 };
 
 const getPanner = () => audioContext.createStereoPanner();
 
 function Radio({
-    targetNode = null,
-    singleSource = false
+    targetNode = null, singleSource = false
 }) {
     (masterNode=>{
         if(!masterNode) {
@@ -67,27 +64,27 @@ function Radio({
     Object.freeze(this);
 }
 
-Radio.prototype.fadeOut = function(duration,callback,...parameters) {
-    FadeOut(this.targetNode,duration,()=>{
-        this.stopAll();
-        this.targetNode.gain.value = DEFAULT_VOLUME;
+function fade(duration,callback,parameters,fadeIn) {
+    const {targetNode} = this;
+    (fadeIn?FadeIn:FadeOut)(targetNode,duration,()=>{
+        if(!fadeIn) this.stopAll();
+        targetNode.gain.value = DEFAULT_VOLUME;
         Wrap(callback,parameters);
     });
     return this;
 }
+
+Radio.prototype.fadeOut = function(duration,callback,...parameters) {
+    fade.call(this,duration,callback,parameters,false);
+}
 Radio.prototype.fadeIn = function(duration,callback,...parameters) {
-    FadeIn(this.targetNode,duration,WrapBind(callback,parameters));
-    return this;
+    fade.call(this,duration,callback,parameters,true);
 }
 Radio.prototype.fadeOutAsync = function(duration) {
-    return new Promise(resolve => {
-        this.fadeOut(duration,resolve);
-    });
+    return new Promise(resolve => this.fadeOut(duration,resolve));
 }
 Radio.prototype.fadeInAsync = function(duration) {
-    return new Promise(resolve => {
-        this.fadeIn(duration,resolve);
-    });
+    return new Promise(resolve => this.fadeIn(duration,resolve));
 }
 
 Radio.prototype.play = function({

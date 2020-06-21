@@ -1,4 +1,5 @@
 import audioContext from "../../internal/audio-context.js";
+import webAudioZero from "./web-audio-zero.js";
 
 const OSCILLATOR_VOLUME = 0.2;
 
@@ -24,7 +25,7 @@ function TonePlayer(target,soundNode) {
         const endTime = startTime + duration;
     
         oscillatorGain.gain.setValueAtTime(OSCILLATOR_VOLUME * volume,startTime);
-        oscillatorGain.gain.exponentialRampToValueAtTime(0.00000001,endTime);
+        oscillatorGain.gain.exponentialRampToValueAtTime(webAudioZero,endTime);
         oscillator.frequency.setValueAtTime(frequency,startTime);
         oscillator.start(startTime);
         oscillator.stop(endTime);

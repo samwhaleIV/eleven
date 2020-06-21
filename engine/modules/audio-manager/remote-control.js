@@ -1,9 +1,7 @@
 import RCData from "./rc-symbol.js";
 import {FadeIn, FadeOut} from "./fader.js";
-import CallbackWrap from "../../internal/callback-wrap.js";
+import {WrapBind} from "../../internal/callback-wrap.js";
 import InstallPannerExtension from "./panner-extension.js";
-import audioContext from "../../internal/audio-context.js";
-const {WrapBind} = CallbackWrap;
 
 function RemoteControl(data) {
     const endHandlers = new Object();
