@@ -17,6 +17,11 @@ const Fade = (gainNode,duration,callback,fadeIn) => {
     const [startValue,endValue] = fadeIn ?
     [0,gainControl.value] : [gainControl.value,0];
 
+    if(audioContext.state !== "running" && callback) {
+        gainControl.value = endValue; callback();
+        return;
+    }
+
     gainControl.value = startValue;
 
     const endTime = msToS(duration) + audioContext.currentTime;
