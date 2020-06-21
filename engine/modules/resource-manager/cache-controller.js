@@ -13,12 +13,18 @@ const DictionaryLookup = Object.freeze(Object.values(ResourceTypes).reduce((look
     return lookup;
 },new Object()));
 
-function EntryExists(name,type) {
+function EntryExistsUnsafe(name,type) {
     return name in DictionaryLookup[type];
+}
+function EntryExists(name,type) {
+    if(!EntryExistsUnsafe(name,type)) return false;
+    const entry = DictionaryLookup[type][name];
+    const entryIsFallback = entry === FAILED_RESOURCE;
+    return !entryIsFallback;
 }
 function SetEntry({type,lookupName},value) {
     const dictionary = DictionaryLookup[type];
-    if(EntryExists(lookupName,type)) {
+    if(EntryExistsUnsafe(lookupName,type)) {
         RemoveEntry(lookupName,type);
     }
     dictionary[lookupName] = value;
@@ -26,7 +32,7 @@ function SetEntry({type,lookupName},value) {
 }
 function GetEntry(name,type) {
     let entry = DictionaryLookup[type][name];
-    if(!EntryExists(name,type)) {
+    if(!EntryExistsUnsafe(name,type)) {
         if(USE_NULL_RETRIEVAL_WARNING) NULL_RETRIEVAL_WARNING(name,type);
         return null;
     }
@@ -36,7 +42,7 @@ function GetEntry(name,type) {
 }
 function RemoveEntry(name,type) {
     const dictionary = DictionaryLookup[type];
-    if(!EntryExists(name,type)) {
+    if(!EntryExistsUnsafe(name,type)) {
         return false;
     }
     const resource = dictionary[name];

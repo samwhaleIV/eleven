@@ -1,11 +1,10 @@
 import audioContext from "../../internal/audio-context.js";
-import webAudioZero from "./web-audio-zero.js";
 
 const msToS = ms => ms / 1000; //1000ms -> 1s
 
 const GAIN_CHECK_RATE = 1000 / 60; //~60 times per seconds
 
-const CHECK_ACCURACY = webAudioZero;
+const CHECK_ACCURACY = 0.01;
 
 const isAboutEqual = (value,target,accuracy) => {
     return value >= target - accuracy && value <= target + accuracy;
