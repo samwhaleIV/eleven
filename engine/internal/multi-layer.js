@@ -17,6 +17,7 @@ function MultiLayer() {
 
     let layersList = null;
     let layerCount = 0;
+    this.layers = [];
 
     let mutatationDisabled = false;
 
@@ -30,6 +31,7 @@ function MultiLayer() {
 
     const updateList = () => {
         layersList = Object.values(layers).sort(prioritySort);
+        this.layers = layersList.map(layer => layer[LAYER_INDEX]);
         layerCount = layersList.length;
     };
     this.add = (layer,priority=DEFAULT_PRIORITY) => {

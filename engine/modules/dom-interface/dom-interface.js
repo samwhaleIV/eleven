@@ -173,7 +173,9 @@ function DOMInterface() {
             }
             addLayer({layer, ID: menuID},...parameters);
         };
-        menuController.close = () => void removeLayer(menuID);
+        menuController.close = () => {
+            removeLayer(menuID);
+        };
 
         Object.defineProperty(menuController,"visible",{
             get: () => activeLayerID === menuID,

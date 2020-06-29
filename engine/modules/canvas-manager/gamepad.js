@@ -4,7 +4,8 @@ function Gamepad() {
         let i = 0;
         while(i < gamepads.length) {
             let gamepad = gamepads[i];
-            if(gamepad && gamepad.mapping === "standard") {
+            /* This is a hack, starts with S is a proxy for equal to "standard". */
+            if(gamepad && gamepad.mapping.startsWith("s",0)) {
                 return {
                     axes: gamepad.axes,
                     buttons: gamepad.buttons

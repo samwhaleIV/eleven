@@ -19,8 +19,7 @@ const MISSING_MAP_UVTC = () => {
 function UVTCMapPrelude(data) {
     const mapData = data.map;
     if(!mapData) MISSING_MAP_UVTC();
-    const fillEmpty = Boolean(data.fillEmpty);
-    const decodedMapData = DecodeUVTCMap(mapData,fillEmpty)
+    const decodedMapData = DecodeUVTCMap(mapData,data.fillEmpty)
     return ParseGrid2DMap(decodedMapData);
 }
 function ParseGrid2DMap(data={}) {

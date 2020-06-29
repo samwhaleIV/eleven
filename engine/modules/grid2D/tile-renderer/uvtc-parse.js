@@ -44,17 +44,32 @@ function DecodeStrideLayer(layer) {
 }
 
 function DecodeUVTCMap(map,fillEmpty) {
-    const {columns, rows, background, foreground, collision, lighting, interaction, superForeground} = map;
+
+    const {columns, rows} = map;
+
+    const {
+        background, foreground,
+        superForeground, collision,
+        interaction, lighting
+    } = map;
+
+    const layers = [
+        background, foreground,
+        superForeground, collision,
+        interaction, lighting
+    ];
+
+    if(typeof fillEmpty === "boolean") {
+        fillEmpty = new Array(layers.length).fill(fillEmpty);
+    }
+
     const layerSize = columns * rows;
     const renderData = new Array();
 
-    let emptyData = null;
-    if(fillEmpty) {
-        emptyData = new Array(layerSize); emptyData.fill(0);
-    }
+    const emptyData = new Array(layerSize); emptyData.fill(0);
 
-    [background,foreground,superForeground,collision,interaction,lighting].forEach(layer => {
-        let data = emptyData ? emptyData : null;
+    layers.forEach((layer,index) => {
+        let data = fillEmpty[index] ? emptyData : null;
 
         if(layer) {
             if(Array.isArray(layer)) {

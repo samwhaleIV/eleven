@@ -3,16 +3,27 @@ import LayerCache from "./lighting/layer-cache.js";
 
 const LIGHTING_LAYER_INDEX = 3;
 const LIGHTING_TILE_SCALE = 4;
+const MANUAL_EMPTY_CHECK = false;
 
 let lightCache = null;
 
 function UVTCLighting(grid,tileRenderer,tileLayer) {
     if(!tileLayer) tileLayer = LIGHTING_LAYER_INDEX;
+    this.hasLighting = false;
+
     if(tileRenderer.maxLayerCount <= tileLayer) {
-        this.hasLighting = false;
-        Object.freeze(this);
-        return;
+        Object.freeze(this); return;
+    } else if(MANUAL_EMPTY_CHECK) {
+        let hasTile = false;
+        for(const tile of tileRenderer.readLayer(tileLayer)) {
+            if(tile === 0) continue;
+            hasTile = true; break;
+        }
+        if(!hasTile) {
+            Object.freeze(this); return;
+        }
     }
+
     this.hasLighting = true;
     if(!lightCache) lightCache = new LightCache();
 

@@ -203,9 +203,22 @@ function Camera(grid) {
         };
     };
 
+    const renderUpdateLayers = time => {
+        const layers = updateLayers.layers;
+        for(let i = 0;i<layers.length;i++) {
+            layers[i](time);
+        }
+    };
+    const renderPostProcessors = time => {
+        const layers = postProcessors.layers;
+        for(let i = 0;i<layers.length;i++) {
+            layers[i](time);
+        }
+    };
+
     this.update = time => {
-        updateLayers.forEach(updater => updater(time));
-        postProcessors.forEach(processor => processor(time));
+        renderUpdateLayers(time);
+        renderPostProcessors(time);
         if(paddingEnabled) paddingProcessor();
     };
 

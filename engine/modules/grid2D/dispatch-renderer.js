@@ -5,16 +5,11 @@ const DISPATCHER_SET = ["Resize","Update","Background","Render","Finalize"];
 
 function Dispatcher() {
     MultiLayer.call(this);
-
-    const {size,context,time} = globalThis[
-        Constants.EngineNamespace
-    ].CanvasManager;
-
-    const handler = layer => {
-        layer(context,size,time);
-    };
-    this.target = () => {
-        this.forEach(handler);
+    this.target = (context,size,time) => {
+        const layers = this.layers;
+        for(let i = 0;i<layers.length;i++) {
+            layers[i](context,size,time);
+        }
     };
 }
 

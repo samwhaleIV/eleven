@@ -4,7 +4,8 @@ import CollisionLayer from "../collision/collision-layer.js";
 const HIT_BOX_COLOR = "rgba(180,0,0,0.5)";
 
 function TrackPriority(container,sprite,ID,zIndex) {
-    //This is where the third dimension (Z) is added to the 2D space
+    /* This is where the third dimension (Z) is added to the 2D space
+       (If you ever stop being lazy and actually use them) */
     const getZIndex = () => zIndex;
     const setZIndex = value => {
         zIndex = value; container.setPriority(ID,zIndex);
@@ -22,7 +23,7 @@ function SpriteLayer(grid) {
 
     const spriteContainer = new MultiLayer();
 
-    let tileSize = null, context = null, time = null;
+    let tileSize = null;
 
     const renderHitBox = sprite => {
         const hitBox = sprite.hitBox; if(!hitBox) return;
@@ -41,9 +42,7 @@ function SpriteLayer(grid) {
         context.fillRect(x,y,width,height);
     };
 
-    const renderHandler = sprite => {
-        if(!sprite.render) return;
-
+    const renderHandler = (sprite,context,tileSize,time) => {
         let {x, y, width, height, xOffset, yOffset} = sprite;
         if(xOffset) x += xOffset; if(yOffset) y += yOffset;
 
@@ -61,20 +60,23 @@ function SpriteLayer(grid) {
         sprite.render(context,x,y,width,height,time);
         if(sprite.showHitBox) renderHitBox(sprite);
     };
-    const updateHandler = sprite => {
-        if(!sprite.update) return;
-        sprite.update(time);
-    };
 
-    const update = (context,size,newTime) => {
-        time = newTime;
-        spriteContainer.forEach(updateHandler);
+    const update = (context,size,time) => {
+        const layers = spriteContainer.layers;
+        for(let i = 0;i<layers.length;i++) {
+            const sprite = layers[i];
+            if(!sprite.update) continue;
+            sprite.update(time);
+        }
     };
-    const render = (newContext,size,newTime) => {
-        context = newContext;
-        time = newTime;
-        tileSize = grid.tileSize;
-        spriteContainer.forEach(renderHandler);
+    const render = (context,size,time) => {
+        const tileSize = grid.tileSize;
+        const layers = spriteContainer.layers;
+        for(let i = 0;i<layers.length;i++) {
+            const sprite = layers[i];
+            if(!sprite.render) continue;
+            renderHandler(sprite,context,tileSize,time);
+        }
     };
 
     this.update = update;
