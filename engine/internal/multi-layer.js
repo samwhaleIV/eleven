@@ -6,6 +6,8 @@ const CANNOT_MUTATE_DURING_CLEAR = () => {
     throw Error("Cannot mutate multi-layer during deletion");
 };
 
+const LAYER_INDEX = 0, ID_INDEX = 1;
+
 function MultiLayer() {
 
     let IDCounter = START_ID_VALUE;
@@ -23,7 +25,7 @@ function MultiLayer() {
     };
 
     const prioritySort = (a,b) => {
-        return priorityTable[a.ID] - priorityTable[b.ID];
+        return priorityTable[a[ID_INDEX]] - priorityTable[b[ID_INDEX]];
     };
 
     const updateList = () => {
@@ -34,7 +36,7 @@ function MultiLayer() {
         validateMutation();
         const ID = IDCounter; IDCounter += 1;
 
-        layers[ID] = {layer,ID};
+        layers[ID] = [layer,ID];
         priorityTable[ID] = priority;
 
         updateList();
@@ -49,7 +51,7 @@ function MultiLayer() {
     };
     this.get = ID => {
         if(!(ID in layers)) return null;
-        return layers[ID].layer;
+        return layers[ID][LAYER_INDEX];
     };
 
     const dropWatcher = new DropWatcher(this);
@@ -71,13 +73,12 @@ function MultiLayer() {
 
         if(handler) {
             for(let i = layerCount-1;i>=0;i--) {
-                const {layer,ID} = layersList[i];
-
+                const [layer,ID] = layersList[i];
                 handler(layer,ID); dropID(ID);
             }
         } else {
             for(let i = layerCount-1;i>=0;i--) {
-                dropID(layersList[i].ID);
+                dropID(layersList[i][ID_INDEX]);
             }
         }
 
@@ -88,7 +89,7 @@ function MultiLayer() {
         const list = layersList, size = layerCount;
         let i = 0;
         while(i < size) {
-            const {layer,ID} = list[i]; handler(layer,ID);
+            const [layer,ID] = list[i]; handler(layer,ID);
             i++;
         }
     };
