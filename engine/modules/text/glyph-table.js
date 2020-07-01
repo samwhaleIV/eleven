@@ -1,7 +1,7 @@
 import FontData from "./font-data.js";
 
 const DEFAULT_COLOR = "black";
-const SPACE_WIDTH = 3;
+const SPACE_WIDTH = 2.5;
 
 const PADDING_CHARACTER = "|";
 const PADDING_WIDTH = 1;

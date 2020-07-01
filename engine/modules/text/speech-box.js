@@ -42,13 +42,11 @@ const getDuration = character => {
     return character in DELAYS ? DELAYS[character] : CHARACTER_DELAY;
 };
 
-const textTone = () => {
-    const engineNamespace = globalThis[ENGINE_NAMESPACE];
-    engineNamespace.AudioManager.playTone(587.3295,0.3);
-};
-
 function SpeechBox(textLayer,playSound) {
-    if(playSound === undefined) playSound = textTone;
+    if(playSound === undefined) {
+        const audioManager = globalThis[ENGINE_NAMESPACE].AudioManager;
+        playSound = () => audioManager.playTone(587.3295,0.3);
+    };
 
     let running = false;
     let finished = false;
@@ -60,7 +58,7 @@ function SpeechBox(textLayer,playSound) {
     this.start = async () => {
         if(finished || running) return;
         running = true;
-        let instance = 0;
+        let instance = 1;
         while(running) {
             const {done, value} = textLayer.next();
             if(!done) {
@@ -81,7 +79,6 @@ function SpeechBox(textLayer,playSound) {
                         await delay(duration);
                     }
                 }
-
             } else {
                 markFinished();
             }

@@ -60,6 +60,7 @@ function* TextGenerator(
     const clipCharacter = LONG_WORD_CLIP_CHARACTER;
 
     const getWidth = character => {
+        if(character === " ") return wordSpacing;
         return glyphTable.getWidth(character) * scale + letterSpacing;
     };
     const hyphenWidth = getWidth(clipCharacter);

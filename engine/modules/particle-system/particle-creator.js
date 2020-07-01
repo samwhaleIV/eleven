@@ -93,6 +93,16 @@ const driftBase = (p,i,d) => {
     p[i] += p[i+2] * d, p[i+1] += p[i+3] * d;
 };
 
+const getJitterDrift = (min,max) => {
+    const range = max - min;
+    const getJitter = () => {
+        return min + Math.random() * range;
+    };
+    return (p,i,d) => {
+        p[i] += p[i+2] * d * getJitter(), p[i+1] += p[i+3] * d * getJitter();
+    };
+};
+
 const nonlinearDrift_X = xt => {
     return (p,i,d,t) => {
         p[i] += p[i+2] * d * xt(t), p[i+1] += p[i+3] * d;
@@ -145,6 +155,16 @@ function TypeBase(size,color,count,duration,scale,start,drift) {
 }
 
 const types = Object.freeze({
+
+    Jitter: function JitterType({
+        x=0,y=0,xv=50,yv=50,size,color,count,duration,scale,
+        minJitter=0.5,maxJiter=1
+    }) {
+        return TypeBase(
+            size,color,count,duration,scale,
+        velocityStart(x,y,xv,yv),
+        getJitterDrift(minJitter,maxJiter));
+    },
 
     Base: function BaseType({
         x=0,y=0,xv=100,yv=100,size,color,count,duration,scale
