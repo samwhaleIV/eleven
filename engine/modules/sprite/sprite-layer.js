@@ -23,12 +23,10 @@ function SpriteLayer(grid) {
 
     const spriteContainer = new MultiLayer();
 
-    let tileSize = null;
-
-    const renderHitBox = sprite => {
+    const renderHitBox = (context,sprite,tileSize) => {
         const hitBox = sprite.hitBox; if(!hitBox) return;
 
-        let {x, y, width, height} = hitBox;
+        let {x,y,width,height} = hitBox;
 
         const screenLocation = grid.getLocation(x,y);
         x = screenLocation.x; y = screenLocation.y;
@@ -42,7 +40,7 @@ function SpriteLayer(grid) {
         context.fillRect(x,y,width,height);
     };
 
-    const renderHandler = (sprite,context,tileSize,time) => {
+    const renderHandler = (context,sprite,tileSize,time) => {
         let {x, y, width, height, xOffset, yOffset} = sprite;
         if(xOffset) x += xOffset; if(yOffset) y += yOffset;
 
@@ -58,7 +56,7 @@ function SpriteLayer(grid) {
         
         if(!grid.objectOnScreen(x,y,width,height)) return;
         sprite.render(context,x,y,width,height,time);
-        if(sprite.showHitBox) renderHitBox(sprite);
+        if(sprite.showHitBox) renderHitBox(context,sprite,tileSize);
     };
 
     const update = (context,size,time) => {
@@ -75,7 +73,7 @@ function SpriteLayer(grid) {
         for(let i = 0;i<layers.length;i++) {
             const sprite = layers[i];
             if(!sprite.render) continue;
-            renderHandler(sprite,context,tileSize,time);
+            renderHandler(context,sprite,tileSize,time);
         }
     };
 
