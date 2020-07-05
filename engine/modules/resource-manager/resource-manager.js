@@ -4,6 +4,7 @@ import ResourceDictionary from "./resource-dictionary.js";
 import CacheController from "./cache-controller.js";
 import GetLoader from "./loader.js";
 import LoadValidators from "./load-validators.js";
+import GetLookupName from "./lookup-name.js";
 
 const GetEntry = CacheController.get;
 const EntryExists = CacheController.has;
@@ -133,6 +134,9 @@ function ResourceManager() {
         dictionary.finalize();
         return dictionary;
     };
+
+    this.getLookupName = GetLookupName;
+
     Object.freeze(this);
 }
 

@@ -1,5 +1,6 @@
 import ResourceTypes from "./resource-types.js";
 import Constants from "../../internal/constants.js";
+import GetLookupName from "./lookup-name.js";
 const constants = Constants.Resource;
 
 const DEFAULT_IMAGE_TYPE = constants.defaultImageType;
@@ -76,14 +77,6 @@ function AddPathAppendages(resource) {
         if(resource.type in SuffixLookup) {
             resource.name = resource.name + SuffixLookup[resource.type];
         }
-    }
-}
-function GetLookupName(name) {
-    const splitName = name.split(".");
-    if(splitName.length === 1) {
-        return name;
-    } else {
-        return splitName.slice(0,-1).join(".");
     }
 }
 
