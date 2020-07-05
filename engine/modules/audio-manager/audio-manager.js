@@ -123,6 +123,8 @@ function AudioManager() {
 
     TonePlayer(this,soundNode);
 
+    this.musicRadio = musicRadio;
+
     Object.freeze(this);
 
     AggressiveAntiWebAudioPolicyLoop();

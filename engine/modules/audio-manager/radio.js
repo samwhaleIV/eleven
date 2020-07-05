@@ -20,7 +20,7 @@ const MISSING_AUDIO_BUFFER = () => {
 
 const getGainNode = volume => {
     const node = audioContext.createGain();
-    node.gain.value = volume;
+    node.gain.setValueAtTime(volume,audioContext.currentTime);
     return node;
 };
 
@@ -68,7 +68,8 @@ function fade(duration,callback,parameters,fadeIn) {
     const {targetNode} = this;
     (fadeIn?FadeIn:FadeOut)(targetNode,duration,()=>{
         if(!fadeIn) this.stopAll();
-        targetNode.gain.value = DEFAULT_VOLUME;
+        targetNode.gain.cancelScheduledValues(audioContext.currentTime);
+        targetNode.gain.setValueAtTime(DEFAULT_VOLUME,audioContext.currentTime+0.1);
         Wrap(callback,parameters);
     });
     return this;

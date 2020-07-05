@@ -14,7 +14,7 @@ const validatePanning = target => {
 function InstallPannerExtension(target) {
     target.setPan = function(value) {
         const panner = validatePanning(this);
-        panner.pan.value = value;
+        panner.pan.setValueAtTime(value,audioContext.currentTime);
         return this;
     };
 }
