@@ -9,7 +9,11 @@ function CollisionLayer(grid,layer) {
     layer.addDropWatcher(dropWatcher);
 
     const updateHandler = (sprite,ID) => {
-        if(sprite.collides) this.mapSpriteCached(sprite,ID);
+        if(sprite.collides) {
+            this.mapSpriteCached(sprite,ID);
+        } else {
+            this.dropSpriteCache(ID);
+        }
     };
 
     const update = () => layer.forEach(updateHandler);
