@@ -58,7 +58,7 @@ function SpeechBox(textLayer,playSound) {
     this.start = async () => {
         if(finished || running) return;
         running = true;
-        let instance = 1;
+        let instance = 0;
         while(running) {
             const {done, value} = textLayer.next();
             if(!done) {
