@@ -5,6 +5,7 @@ import CacheController from "./cache-controller.js";
 import GetLoader from "./loader.js";
 import LoadValidators from "./load-validators.js";
 import GetLookupName from "./lookup-name.js";
+import BitmapToURI from "./bitmap-to-uri.js";
 
 const GetEntry = CacheController.get;
 const EntryExists = CacheController.has;
@@ -136,6 +137,7 @@ function ResourceManager() {
     };
 
     this.getLookupName = GetLookupName;
+    this.bitmapToURI = BitmapToURI;
 
     Object.freeze(this);
 }
