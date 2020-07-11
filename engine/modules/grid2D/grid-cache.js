@@ -54,20 +54,22 @@ function GridCache(grid) {
     const updateCacheFull = () => updateCache(0,0,grid.width,grid.height);
     const hasCacheData = () => Boolean(this.data);
 
+    const setCacheData = () => {
+        const columns = grid.width;
+        const rows = grid.height;
+
+        const width = columns * baseTileSize;
+        const height = rows * baseTileSize;
+
+        const buffer = new OffscreenCanvas(width,height);
+        const bufferContext = buffer.getContext("2d",{alpha:true});
+
+        this.isValid = true;
+        this.data = {buffer,bufferContext,width,height,columns,rows};
+    };
+
     const insureCache = () => {
-        if(!hasCacheData()) {
-            const columns = grid.width;
-            const rows = grid.height;
-
-            const width = columns * baseTileSize;
-            const height = rows * baseTileSize;
-
-            const buffer = new OffscreenCanvas(width,height);
-            const bufferContext = buffer.getContext("2d",{alpha:true});
-
-            this.isValid = true;
-            this.data = {buffer,bufferContext,width,height,columns,rows};
-        }
+        if(!hasCacheData()) setCacheData();
     };
 
     const cache = () => {

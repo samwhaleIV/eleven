@@ -45,7 +45,7 @@ function ParseGrid2DMap(data={}) {
         if(!Array.isArray(renderData)) {
             BAD_RENDER_DATA();
         }
-    
+
         const hasColumnSpec = columns !== undefined;
         const hasRowSpec = rows !== undefined;
 
