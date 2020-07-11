@@ -275,7 +275,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         updateTileArea();
     };
 
-    const getArea = () => tileArea;
+    const getArea = () => {
+        updateRenderData();
+        return tileArea;
+    };
     this.updateRenderData = updateRenderData;
 
     const renderTiles = (context,time) => {
