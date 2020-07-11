@@ -53,13 +53,13 @@ function CompositeProcessor(transparent) {
 
     this.resize = refreshBuffer;
     this.composite = (context,buffer,xOffset,yOffset,mode) => {
-        context.save();
+        const startOperation = context.globalCompositeOperation;
         context.globalCompositeOperation = mode;
         context.drawImage(
             buffer,0,0,width,height,
             xOffset,yOffset,width,height
         );
-        context.restore();
+        context.globalCompositeOperation = startOperation;
     };
     this.render = context => {
         if(!enabled) return;

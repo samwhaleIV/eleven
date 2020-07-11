@@ -54,31 +54,18 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     let tileXOffset, tileYOffset;
     let cameraXOffset, cameraYOffset;
 
-    Object.defineProperties(this,{
-        renderer: {
-            get: () => renderer,
-            set: setRenderer,
-            enumerable: true
-        },
-        width: {
-            get: () => gridWidth,
-            set: value => gridWidth = value,
-            enumerable: true
-        },
-        height: {
-            get: () => gridHeight,
-            set: value => gridHeight = value,
-            enumerable: true
-        },
-        tileSize: {
-            get: () => tileSize,
-            enumerable: true
-        }
-    });
+    const [horizontalRenderData, verticalRenderData] = (()=>{
+        const data = {
+            location: 0, renderStride: 0,
+            startTile: 0, endTile: 0
+        };
+        const instantiate = () => {
+            return Object.seal(Object.assign({},data));
+        };
+        return [instantiate(),instantiate()];
+    })();
 
-    let horizontalRenderData = null, verticalRenderData = null;
-
-    let tileArea = null;
+    const tileArea = Object.seal({left:0,right:0,top:0,bottom:0,width:0,height:0});
     const cacheArea = Object.seal({x:0,y:0,width:0,height:0});
 
     const updateCacheArea = () => {
@@ -144,26 +131,22 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         if(renderer.resize) renderer.resize();
     };
 
-    const bottomCache = new GridCache(this);
-    const topCache = new GridCache(this);
+    const bottomCache = new GridCache(this), topCache = new GridCache(this);
 
-    const cacheProcessor = function(cache,...data) {
-        if(data.length) {
-            const [x,y,width,height] = data;
-            cache.cacheArea(x,y,width,height);
-        } else {
-            cache.cache();
-        }
+    const getCacheProcessor = (cache,forCache) => {
+        const [mutateArea,mutateAll] = forCache ?
+            [cache.cacheArea,cache.cache]:
+            [cache.decacheArea,cache.decache];
+        return (...data) => {
+            if(data.length > 0) {
+                const [x,y,width,height] = data;
+                mutateArea(x,y,width,height);
+            } else {
+                mutateAll();
+            }
+        };
     };
-    const decacheProcessor = function(cache,...data) {
-        if(data.length) {
-            const [x,y,width,height] = data;
-            cache.clearArea(x,y,width,height);
-        } else {
-            cache.decache();
-        }
-    };
-    
+
     const verifyConfigTileRender = () => {
         if(!renderer.configTileRender) NO_RENDER_CONFIG_METHOD();
         return true;
@@ -179,10 +162,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         );
     };
 
-    const roundToPixelSpace = value => Math.round(value / pixelSize) / tileSize;
+    const roundToPixels = value => Math.round(value / pixelSize) / tileSize;
 
-    const getRenderBounds = (
-        dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize
+    const setRenderBounds = (
+        container,dimensionSize,cameraValue,cameraOffset,renderOffset,tileLength,gridSize
     ) => {
         cameraValue += cameraOffset;
 
@@ -222,15 +205,11 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
             endTile = gridSize;
         }
 
-        return {location,renderStride,startTile,endTile};   
+        container.location = location;
+        container.renderStride = renderStride;
+        container.startTile = startTile;
+        container.endTile = endTile;
     };
-
-    const getHorizontalRenderData = () => getRenderBounds(
-        width,camera.x,cameraXOffset,tileXOffset,horizontalTiles,gridWidth
-    );
-    const getVerticalRenderData = () => getRenderBounds(
-        height,camera.y,cameraYOffset,tileYOffset,verticalTiles,gridHeight
-    );
 
     const getTileLocation = (pixelX,pixelY) => {
         const renderX = horizontalRenderData.location;
@@ -246,7 +225,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
 
         return {x,y};
     };
-    const getTileArea = () => {
+    const updateTileArea = () => {
         const {x,y} = getTileLocation(0,0);
 
         const right = x + width / tileSize;
@@ -255,7 +234,9 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         const xLength = right - x;
         const yLength = bottom - y;
 
-        return {left:x,right,top:y,bottom,width:xLength,height:yLength};
+        tileArea.left = x, tileArea.right = right;
+        tileArea.top = y, tileArea.bottom = bottom;
+        tileArea.width = xLength, tileArea.height = yLength;
     };
     const pointOnScreen = (x,y) => {
         const {left, right, top, bottom} = tileArea;
@@ -284,15 +265,17 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const updateRenderData = () => {
-        horizontalRenderData = getHorizontalRenderData();
-        verticalRenderData = getVerticalRenderData();
-        tileArea = getTileArea();
+        const {x,y} = camera;
+        setRenderBounds(horizontalRenderData,
+            width,x,cameraXOffset,tileXOffset,horizontalTiles,gridWidth
+        );
+        setRenderBounds(verticalRenderData,
+            height,y,cameraYOffset,tileYOffset,verticalTiles,gridHeight
+        );
+        updateTileArea();
     };
 
-    const getArea = () => {
-        updateRenderData();
-        return tileArea;
-    };
+    const getArea = () => tileArea;
     this.updateRenderData = updateRenderData;
 
     const renderTiles = (context,time) => {
@@ -322,21 +305,6 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         }
     };
 
-    const jitterDiagnostic = (()=>{
-        let lastX = 0, lastY = 0;
-        return () => {
-            const loc = getScreenLocation(0,0);
-            const difX = loc.x - lastX; lastX = loc.x;
-            const difY = loc.y - lastY; lastY = loc.y;
-
-            console.log(`${String(difX).padEnd(10," ")}     ${String(difY).padEnd(10," ")}       ${String(horizontalRenderData.location).padEnd(15," ")}         ${String(verticalRenderData.location).padEnd(15," ")}`);
-        };
-    })();
-
-    this.jitterDiagnostic = () => {
-        if(this.renderer.addRender) this.renderer.addRender(jitterDiagnostic,-1000);
-    };
-
     const render = (context,size,time) => {
         if(renderer.update) renderer.update(context,size,time);
 
@@ -361,40 +329,51 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
     };
 
     const bindToFrame = frame => {
-        frame.resize = resize;
-        frame.render = render;
+        frame.resize = resize, frame.render = render;
     };
 
     const alignToPixels = object => {
-        object.x = roundToPixelSpace(object.x);
-        object.y = roundToPixelSpace(object.y);
+        object.x = roundToPixels(object.x), object.y = roundToPixels(object.y);
     };
 
-    this.render = render;
-    this.resize = resize;
+    const cache = getCacheProcessor(bottomCache,true);
+    const decache = getCacheProcessor(bottomCache,false);
 
-    this.setSize = setSize;
-    this.getTileRenderer = getTileRenderer;
-    this.getPanZoom = getPanZoom;
-    this.getArea = getArea;
-    Object.defineProperty(this,"area",{
-        get: () => tileArea,
-        enumerable: true
+    const cacheTop = getCacheProcessor(topCache,true);
+    const decacheTop = getCacheProcessor(topCache,false);
+
+    Object.assign(this,{
+        render, resize, setSize, getTileRenderer, getPanZoom, getArea,
+        pointOnScreen, tileOnScreen, objectOnScreen, alignToPixels,
+        roundToPixels, getLocation: getScreenLocation, getTileLocation,
+        cache, decache, cacheTop, decacheTop, bindToFrame, 
     });
-    this.pointOnScreen = pointOnScreen;
-    this.tileOnScreen = tileOnScreen;
-    this.objectOnScreen = objectOnScreen;
-    this.alignToPixels = alignToPixels;
-    this.roundToPixels = roundToPixelSpace;
 
-    this.getLocation = getScreenLocation; //Inputs tile space, outputs pixel space
-    this.getTileLocation = getTileLocation; //Inputs pixel space, outputs tile space
-
-    this.cache = cacheProcessor.bind(this,bottomCache);
-    this.decache = decacheProcessor.bind(this,bottomCache);
-    this.cacheTop = cacheProcessor.bind(this,topCache);
-    this.decacheTop = decacheProcessor.bind(this,topCache);
-    this.bindToFrame = bindToFrame;
+    Object.defineProperties(this,{
+        renderer: {
+            get: () => renderer,
+            set: setRenderer,
+            enumerable: true
+        },
+        width: {
+            get: () => gridWidth,
+            set: value => gridWidth = value,
+            enumerable: true
+        },
+        height: {
+            get: () => gridHeight,
+            set: value => gridHeight = value,
+            enumerable: true
+        },
+        tileSize: {
+            get: () => tileSize,
+            enumerable: true
+        },
+        area: {
+            get: () => tileArea,
+            enumerable: true
+        }
+    });
 
     this.debug = () => setRenderer(DebugRenderer);
     Object.freeze(this);

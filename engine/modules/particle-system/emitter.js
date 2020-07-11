@@ -70,7 +70,7 @@ function Emitter({
             finished = true; sendCallback(); return;
         }
 
-        context.save();
+        const transform = context.getTransform();
 
         const particleScale = evalTable.scale(t);
 
@@ -97,7 +97,7 @@ function Emitter({
         } while(i < bufferArraySize);
 
         context.fill();
-        context.restore();
+        context.setTransform(transform);
     };
 
     this.fire = callback => {

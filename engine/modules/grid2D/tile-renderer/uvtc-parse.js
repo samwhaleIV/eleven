@@ -45,6 +45,8 @@ function DecodeStrideLayer(layer) {
 
 function DecodeUVTCMap(map,fillEmpty) {
 
+    if(typeof map === "string") map = JSON.parse(map);
+
     const {columns, rows} = map;
 
     const {
