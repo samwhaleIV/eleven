@@ -312,14 +312,13 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         if(renderer.update) renderer.update(context,size,time);
 
         camera.update(time);
-        updateRenderData();
+        updateRenderData(); updateCacheArea();
 
         if(renderer.background) renderer.background(context,size,time);
 
         const useBottomCache = bottomCache.isValid;
         const useTopCache = topCache.isValid;
 
-        if(useBottomCache || useTopCache) updateCacheArea();
         if(useBottomCache) drawCache(bottomCache,context);
 
         if(renderer.start) renderer.start(context,size,time);
@@ -349,7 +348,7 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         render, resize, setSize, getTileRenderer, getPanZoom, getArea,
         pointOnScreen, tileOnScreen, objectOnScreen, alignToPixels,
         roundToPixels, getLocation: getScreenLocation, getTileLocation,
-        cache, decache, cacheTop, decacheTop, bindToFrame, 
+        cache, decache, cacheTop, decacheTop, bindToFrame, drawCache
     });
 
     Object.defineProperties(this,{

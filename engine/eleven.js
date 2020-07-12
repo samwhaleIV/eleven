@@ -18,6 +18,7 @@ import UVTCReflection from "./modules/world2D/uvtc-reflection.js";
 
 import TileCollision from "./modules/collision/tile-collision.js";
 import CollisionLayer from "./modules/collision/collision-layer.js";
+import CollisionBase from "./modules/collision/collision-base.js";
 
 import PlayerController from "./modules/world2D/player/player-controller.js";
 import InstallHitBox from "./modules/sprite/hitbox.js";
@@ -96,6 +97,7 @@ const Eleven = Install([
     DispatchRenderer,
     CollisionLayer,
     TileCollision,
+    CollisionBase,
     PlayerController,
     InstallHitBox,
     AnimatedSprite,
