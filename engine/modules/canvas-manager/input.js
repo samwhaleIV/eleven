@@ -8,11 +8,6 @@ const INPUT = constants.input;
 const INPUT_GAMEPAD = constants.inputGamepad;
 const MODIFIER_CHANGED = constants.modifierChanged;
 
-function tryStopPropagation(event) {
-    if(event.stopPropagation) {
-        event.stopPropagation();
-    }
-}
 function tryPreventDefault(event) {
     if(event.preventDefault) {
         event.preventDefault();
@@ -78,7 +73,6 @@ function Input(canvasManager,modules) {
         if(canvasManager.paused) {
             return;
         }
-        tryStopPropagation(event);
         const isSystem = event.code in SYSTEM_KEYS;
         if(isSystem) {
             return;
@@ -102,11 +96,20 @@ function Input(canvasManager,modules) {
     const sendKeyDown = sendKey.bind(null,KEY_DOWN);
 
     this.installDOM = () => {
-        window.addEventListener("keydown",function(event){
+        const keyTarget = document.body;
+        const targetMatches = event => {
+            return event.target === keyTarget;
+        };
+    
+        keyTarget.addEventListener("keydown",function(event){
+            if(!targetMatches(event)) return;
+
             downKeys[event.code] = summariseKeyEvent(event);
             sendKeyDown(event);
         });
-        window.addEventListener("keyup",function(event){
+        keyTarget.addEventListener("keyup",function(event){
+            if(!targetMatches(event)) return;
+
             delete downKeys[event.code];
             sendKeyUp(event);
         });
