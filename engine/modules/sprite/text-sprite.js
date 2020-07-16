@@ -172,7 +172,7 @@ function TextSprite({
             this.x = renderX - worldWidth / 2;
             this.y = renderY - worldHeight / 2;
         };
-        this.roundRenderPosition = true;
+        this.roundRenderLocation = true;
         this.render = (context,x,y,width,height) => {
             if(backgroundColor) {
                 context.fillStyle = backgroundColor;

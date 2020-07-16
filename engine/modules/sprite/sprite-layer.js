@@ -47,7 +47,7 @@ function SpriteLayer(grid) {
         const screenLocation = grid.getLocation(x,y);
         x = screenLocation.x, y = screenLocation.y;
 
-        if(sprite.roundRenderPosition) {
+        if(sprite.roundRenderLocation) {
             x = roundPosition(x), y = roundPosition(y);
         }
 

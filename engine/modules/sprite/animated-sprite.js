@@ -93,7 +93,7 @@ function AnimatedSprite(texture,x,y,spriteScaleX,spriteScaleY) {
         }
     };
 
-    this.roundRenderPosition = true;
+    this.roundRenderLocation = true;
 
     this.render = (context,x,y,width,height,time) => {
         const textureX = directionMatrix[direction];
