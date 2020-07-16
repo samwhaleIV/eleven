@@ -20,7 +20,6 @@ function ProxyFrame() {
     this.opaque = false;
     this.render = () => {};
     INPUT_METHODS.forEach(method => this[method] = null);
-    Object.seal(this);
 }
 
 function DOMInterface() {

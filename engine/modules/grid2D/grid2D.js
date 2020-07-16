@@ -374,6 +374,10 @@ function Grid2D(baseTileSize=DEFAULT_TILE_SIZE) {
         area: {
             get: () => tileArea,
             enumerable: true
+        },
+        cacheArea: {
+            get: () => cacheArea,
+            enumerable: true
         }
     });
 
