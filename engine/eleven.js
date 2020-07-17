@@ -46,6 +46,7 @@ import Faders from "./modules/fader/faders.js";
 import ParseGrid2DMap from "./modules/grid2D/tile-renderer/parse.js";
 
 import GlyphTable from "./modules/text/glyph-table.js";
+import LightSprite from "./modules/sprite/light-sprite.js";
 
 globalThis.delay = duration => new Promise(resolve => setTimeout(resolve,duration));
 globalThis.frameDelay = FrameTimeout;
@@ -120,7 +121,8 @@ const Eleven = Install([
     }),
     Singleton({
         module: GlyphTable
-    })
+    }),
+    LightSprite
 ]);
 
 export default Eleven;
