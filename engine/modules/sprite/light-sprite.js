@@ -9,18 +9,22 @@ function LightSprite(x,y) {
         lightCache.cache(LIGHT_RESOLUTION);
     }
     this.x = x, this.y = y;
-    this.width = 1, this.height = 1;
+    this.width = 2, this.height = 2;
+    this.xOffset = -0.5, this.yOffset = -0.5;
     this.collides = false;
 
     let gradientID = null;
     const buffer = new OffscreenCanvas(
-        LIGHT_RESOLUTION,LIGHT_RESOLUTION
+        LIGHT_RESOLUTION*2,LIGHT_RESOLUTION*2
     );
     const context = buffer.getContext("2d",{alpha:true});
 
     const updateBuffer = () => {
         context.clearRect(0,0,buffer.width,buffer.height);
-        lightCache.render(context,0,0,gradientID);
+        const quarterSize = buffer.width / 4;
+        lightCache.render(
+            context,quarterSize,quarterSize,gradientID
+        );
     };
 
     Object.defineProperty(this,"gradientID",{
