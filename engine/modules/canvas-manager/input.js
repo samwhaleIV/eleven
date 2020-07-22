@@ -8,6 +8,10 @@ const INPUT = constants.input;
 const INPUT_GAMEPAD = constants.inputGamepad;
 const MODIFIER_CHANGED = constants.modifierChanged;
 
+const NON_PASSTHROUGH_ELEMENTS = {
+    "INPUT": true, "SELECT": true
+};
+
 function tryPreventDefault(event) {
     if(event.preventDefault) {
         event.preventDefault();
@@ -97,8 +101,12 @@ function Input(canvasManager,modules) {
 
     this.installDOM = () => {
         const keyTarget = document.body;
-        const targetMatches = event => {
-            return event.target === keyTarget;
+
+        const targetMatches = ({target}) => {
+            if(target.tagName in NON_PASSTHROUGH_ELEMENTS) {
+                return target === keyTarget;
+            }
+            return true;
         };
     
         keyTarget.addEventListener("keydown",function(event){
