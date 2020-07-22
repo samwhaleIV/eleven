@@ -8,10 +8,6 @@ const INPUT = constants.input;
 const INPUT_GAMEPAD = constants.inputGamepad;
 const MODIFIER_CHANGED = constants.modifierChanged;
 
-const NON_PASSTHROUGH_ELEMENTS = {
-    "INPUT": true, "SELECT": true
-};
-
 function tryPreventDefault(event) {
     if(event.preventDefault) {
         event.preventDefault();
@@ -25,6 +21,10 @@ function MakeAssociative(array) {
 
 const SYSTEM_KEYS = MakeAssociative([
     "F12","F11","F5"
+]);
+
+const NON_PASSTHROUGH_ELEMENTS = MakeAssociative([
+    "INPUT","SELECT"
 ]);
 
 const ALT_KEYS = ["AltLeft","AltRight"];

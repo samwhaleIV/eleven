@@ -89,7 +89,7 @@ Radio.prototype.fadeInAsync = function(duration) {
 }
 
 Radio.prototype.play = function({
-    buffer,loop,callback,usePanning,noStart,
+    buffer,loop,callback,usePanning,
     loopStart = DEFAULT_LOOP_START,
     volume = DEFAULT_VOLUME,
     playbackRate = DEFAULT_PLAYBACK_RATE,
@@ -97,7 +97,6 @@ Radio.prototype.play = function({
 }){
     loop = Boolean(loop);
     usePanning = Boolean(usePanning);
-    noStart = Boolean(noStart);
 
     if(!buffer) MISSING_AUDIO_BUFFER();
     if(!callback) callback = null;
@@ -145,7 +144,7 @@ Radio.prototype.play = function({
         radio:this,sourceNode,gainNode,cacheID,pannerNode
     });
 
-    if(!noStart) sourceNode.start(audioContext.currentTime);
+    sourceNode.start(audioContext.currentTime);
 
     return remoteControl;
 }

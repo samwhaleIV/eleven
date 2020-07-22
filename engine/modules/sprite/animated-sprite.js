@@ -41,7 +41,19 @@ function AnimatedSprite(texture,x,y,spriteScaleX,spriteScaleY) {
     this.getPosition = () => [this.x,this.y];
     this.setPosition = (x,y) => (this.x = x, this.y = y);
 
+    let textureXOffset = 0;
+    const subtextureStride = frameWidth * 4;
+
     Object.defineProperties(this,{
+        subtexture: {
+            get: () => Math.floor(textureXOffset / subtextureStride),
+            set: value => textureXOffset = value * subtextureStride,
+            enumerable: true
+        },
+        subtextureCount: {
+            get: () => Math.ceil(this.texture.width / subtextureStride),
+            enumerable: true
+        },
         camX: {
             get: () => this.x + this.xOffset,
             enumerable: true
@@ -96,7 +108,7 @@ function AnimatedSprite(texture,x,y,spriteScaleX,spriteScaleY) {
     this.roundRenderLocation = true;
 
     this.render = (context,x,y,width,height,time) => {
-        const textureX = directionMatrix[direction];
+        const textureX = directionMatrix[direction] + textureXOffset;
         const textureY = getTextureY(time);
 
         context.drawImage(

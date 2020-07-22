@@ -58,9 +58,9 @@ function AudioManager() {
     this.playSound = function({
         buffer,volume,playbackRate,detune,loop,usePanning
     }) {
-        const noStart = !target.canPlaySound();
+        if(!target.canPlaySound()) return null;
         return soundRadio.play({
-            buffer,loop,volume,playbackRate,detune,usePanning,noStart
+            buffer,loop,volume,playbackRate,detune,usePanning
         });
     };
 
@@ -75,9 +75,9 @@ function AudioManager() {
     this.playSoundLooping = function({
         buffer,volume,playbackRate,detune,usePanning
     }) {
-        const noStart = !target.canPlaySound();
+        if(!target.canPlaySound()) return null;
         return soundRadio.play({
-            buffer,loop:true,volume,playbackRate,detune,usePanning,noStart
+            buffer,loop:true,volume,playbackRate,detune,usePanning
         });
     };
     this.playMusicLooping = function({
